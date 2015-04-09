@@ -1,7 +1,16 @@
 sudo: false
 language: scala
+scala:
+- 2.11.1
 jdk:
   - oraclejdk8
 cache:
   directories:
     - '$HOME/.ivy2/cache'
+deploy:
+- provider: heroku
+   api_key:
+     secure: eSYw1flDzVAq0gpbEaIXJY6ZdgLQIA8FflZFpbVddut5fKPXTi+j7td7gNIf/wo1uPB6uCrhvG1cxLYhuz9N3E6M2m4x5qXIAbdsDZ4sY2paABdQGY0cwmTAkdmb5NSYKzPj4YfBYp7oodjVknwbgSI4+ri8hg36wNQklclfic4=
+   app: field-register
+   on:
+     repo: openregister/register
