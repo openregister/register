@@ -1,0 +1,17 @@
+@(title: String)(content: Html)
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}" />
+    <link rel="apple-touch-icon-precomposed" href="{{ url_for('static', filename='images/icon.png') }}" />
+
+    <title>@title</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/foundation/css/foundation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+@content
+</body>
+</html>

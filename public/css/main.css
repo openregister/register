@@ -1,0 +1,288 @@
+/* Typography */
+body, h1, h2,h3, h4, h5 .button, table, label {
+  /*font-family: 'Roboto Slab', serif;*/
+  font-family: 'nta', Arial, Helvetica;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight:bold;
+}
+
+a {
+  color:#005EA5;
+}
+
+p, dl, ul, label {
+  font-size:1.2rem;
+}
+
+.button {
+  background:#2372B5;
+  border-bottom:5px solid #255c8a;
+  font-family: 'nta', Arial, Helvetica!important;
+  font-weight:bold;
+  font-size: 1.35rem;
+  padding-bottom: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+.button:hover, .button:focus {
+  background-color:#2372B5;
+}
+
+/* header */
+.header {
+  margin-bottom: 10px;
+}
+
+p.total {
+  margin-bottom: 0px;
+}
+
+.search-panel {
+  margin-top: 35px;
+}
+
+#header-wrapper {
+  width: 100%;
+  background:#2372b5 !important;
+  padding-top: 5px;
+  margin-bottom: 35px;
+}
+
+.header,
+.top-bar {
+  background: inherit;
+  font-family:Helvetica, Arial, sans-serif;
+}
+
+.top-bar #header_crest {
+  height: 45px;
+  margin-right: 7px;
+}
+
+.top-bar.home h1 {
+  text-align:left;
+}
+
+.top-bar h1 {
+  font-size: 1.35rem;
+  font-family:Helvetica, Arial, sans-serif;
+  font-weight:normal;
+}
+
+
+.top-bar a {
+  text-decoration:none;
+  color:#fff;
+}
+
+/* intro */
+
+.intro p {
+  margin-top: 15px;
+  font-size: 1.1rem;
+}
+
+.intro h1 {
+  font-size: 1.3rem;
+}
+
+.subheader {
+  text-transform: uppercase;
+}
+
+.big-number {
+  font-size: 72px;
+  line-height: 86px;
+  font-weight: bold;
+}
+
+h2 {
+  border-top: solid 1px #ddd;
+  padding-top: 4px;
+}
+
+/* entries in registers*/
+.entry {
+  background:#eceded;
+  border:none;
+  border-radius: 0;
+  margin-top:1rem;
+  margin-bottom: 1rem;
+  font-family:monospace;
+}
+
+.entry dt {
+  font-weight: normal;
+  line-height: 1;
+  border-top: dotted 1px #DDDDDD;
+  padding-top: 1rem;
+  font-size: 1rem;
+}
+
+.entry dt a {
+  font-weight: normal;
+  color: #333333;
+}
+
+.entry dt a:hover,
+.entry dt a:focus {
+  color: #007BA0;
+}
+
+dl {
+  border-top: none;
+}
+
+dl dd {
+  color: #333333;
+  font-size: 1rem;
+  font-weight: normal;
+  line-height: 1.4;
+}
+
+/* table */
+#table-outer {
+  overflow-x: scroll;
+  max-height: 600px;
+  clear: both;
+  margin-bottom: 1rem;
+}
+
+table.entries {
+  width: 100%;
+  font-family:monospace;
+  border: none;
+  background: #ccc;
+}
+
+table.entries tbody {
+    overflow-y: scroll;
+}
+
+table.entries tr {
+  background: #eceded;
+}
+
+table.entries tr.even {
+  background: #eceded;
+}
+
+table.entries th,
+table.entries td {
+  text-align: left;
+  border: none;
+  vertical-align: top;
+  min-width: 180px;
+}
+
+/* fields */
+.hash {
+  word-wrap: break-word;
+}
+
+/* table sorting and filtering */
+.search {
+  padding-bottom: 10px;
+  visibility: hidden;
+}
+
+#search-input {
+  margin-left: 5px;
+  font-family:monospace;
+  height: 1.2rem;
+  border-radius: 0.3rem;
+}
+
+.sort {
+  padding: 1px 10px;
+  border-radius: 2px;
+  border: none;
+  background-color: #FAFAFA;
+  display: inline-block;
+  cursor: pointer;
+  font-size: 12px;
+  min-width: 50px;
+  display: none;
+}
+
+.sort:hover, .sort.asc, .sort.desc {
+  background-color: #ccc;
+}
+
+.sort:after {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  content: "";
+  position: relative;
+  top:-10px;
+  right:-5px;
+}
+
+.sort.asc:after {
+  border-top: 5px solid black;
+  top:4px;
+}
+
+.sort.desc:after {
+  border-bottom: 5px solid black;
+  top:0px;
+}
+
+/* representations */
+.representations {
+  margin-bottom: 0.5rem;
+}
+.representation {
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
+/* meta */
+.meta {
+  width: 100%;
+}
+.meta a[rel=prev] {
+  display: block;
+  float: left;
+  text-align: left;
+}
+
+.meta a[rel=next] {
+  display: block;
+  float: right;
+  text-align: right;
+}
+
+.meta .pageno {
+  padding-left: 10em;
+}
+
+#ogl-logo {
+  margin-top: 3px;
+}
+
+.open-government-licence {
+  margin-top: 35px;
+}
+
+.open-government-licence p {
+  font-size: 0.7rem;
+  margin-left: -10px;
+}
+
+/* responsive styles */
+@media only screen and (max-width: 40em) {
+  .intro p {
+    margin-bottom: 4px;
+  }
+  .big-number {
+    font-size: 36px;
+    line-height: 48px;
+  }
+}
