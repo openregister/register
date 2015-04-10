@@ -4,6 +4,8 @@ scala:
   - 2.11.1
 jdk:
   - oraclejdk8
+services:
+  - mongodb
 cache:
   directories:
     - '$HOME/.ivy2/cache'

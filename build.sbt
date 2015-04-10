@@ -15,6 +15,6 @@ initialize := {
 }
 
 libraryDependencies ++= Seq(
-  javaJdbc,
-  javaWs
+  javaWs,
+  "org.mongodb" % "mongo-java-driver" % "3.0.0"
 )
