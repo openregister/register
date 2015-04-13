@@ -16,4 +16,19 @@ public class EntryTest {
 
     }
 
+    @Test
+    public void testKeysAreSortedBeforeSaving() throws Exception {
+
+        assertThat(new Entry(Json.parse("{\"b\":\"value\",\"a\":\"another\"}")).getRaw())
+                .isEqualTo("{\"a\":\"another\",\"b\":\"value\"}");
+
+    }
+
+    @Test
+    public void testWhitespacesAreRemovedBeforeSaving() throws Exception {
+
+        assertThat(new Entry(Json.parse("{\"a\": \"value\", \n\"b\": \"another\"}")).getRaw())
+                .isEqualTo("{\"a\":\"value\",\"b\":\"another\"}");
+
+    }
 }
