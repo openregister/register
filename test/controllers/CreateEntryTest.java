@@ -49,8 +49,9 @@ public class CreateEntryTest extends ApplicationTests {
 
             Document document = MongodbStoreForTesting.collection(test_register).find().first();
 
-            assertThat(document.get("entry").toString())
-                    .isEqualTo(json);
+            assertThat(document.get("entry")).isNotNull();
+            assertThat(document.get("entry", Document.class).get("key1")).isEqualTo("value1");
+            assertThat(document.get("entry", Document.class).get("key2")).isEqualTo("value2");
         });
     }
 

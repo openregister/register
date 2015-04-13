@@ -10,16 +10,16 @@ import uk.gov.openregister.crypto.Digest;
 public class Entry {
 
     public Entry(JsonNode json) {
-        this.raw = sortAndConvertNodeToString(json);
-        this.hash = Digest.shasum(raw);
+        this.raw = json;
+        this.hash = Digest.shasum(this.toString());
 
     }
 
 
-    private String raw;
+    private JsonNode raw;
     private String hash;
 
-    public String getRaw() {
+    public JsonNode getRaw() {
         return raw;
     }
 
@@ -32,14 +32,15 @@ public class Entry {
         SORTED_MAPPER.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
     }
 
-    private String sortAndConvertNodeToString(final JsonNode node) {
-        final Object obj;
+    @Override
+    public String toString() {
         try {
-            obj = SORTED_MAPPER.treeToValue(node, Object.class);
+            Object obj = SORTED_MAPPER.treeToValue(raw, Object.class);
             return SORTED_MAPPER.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             Logger.warn("Unable to normalise json object, using original", e);
-            return node.toString();
+            return raw.toString();
         }
     }
+
 }

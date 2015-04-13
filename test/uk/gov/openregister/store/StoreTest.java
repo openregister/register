@@ -28,7 +28,10 @@ public class StoreTest {
         store.create(new Entry(Json.parse(json)));
 
         Document document = MongodbStoreForTesting.collection(COLLECTION).find().first();
-        assertThat(document.getString("entry")).isEqualTo(expected);
+        Document entry = document.get("entry", Document.class);
+        assertThat(entry).isNotNull();
+        assertThat(entry.get("key1")).isEqualTo("value1");
+        assertThat(entry.get("key2")).isEqualTo("value2");
     }
 
 

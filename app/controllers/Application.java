@@ -22,4 +22,8 @@ public class Application extends Controller {
         store.create(new Entry(request().body().asJson()));
         return status(202);
     }
+
+    public static Result findByKey(String key, String value) {
+        return null;
+    }
 }
