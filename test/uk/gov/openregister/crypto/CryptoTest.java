@@ -1,4 +1,4 @@
-package uk.gov.openregister;
+package uk.gov.openregister.crypto;
 
 import org.junit.Test;
 import uk.gov.openregister.crypto.Digest;

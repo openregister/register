@@ -1,4 +1,4 @@
-package uk.gov.openregister;
+package uk.gov.openregister.domain;
 
 import static org.fest.assertions.Assertions.assertThat;
 import org.junit.Test;
