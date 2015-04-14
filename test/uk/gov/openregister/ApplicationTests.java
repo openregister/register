@@ -30,6 +30,10 @@ public class ApplicationTests {
         return WS.url("http://localhost:" + PORT + "/" + key + "/" + value).get().get(TIMEOUT);
     }
 
+    public WSResponse getByHash(String hash) {
+        return WS.url("http://localhost:" + PORT + "/hash/" + hash).get().get(TIMEOUT);
+    }
+
     @Before
     public void setUp() throws Exception {
         collection().drop();

@@ -8,7 +8,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import play.libs.Json;
-import uk.gov.openregister.domain.RegisterRow;
+import uk.gov.openregister.domain.Record;
+
+import java.util.Optional;
 
 public class MongodbStore extends Store {
 
@@ -28,18 +30,32 @@ public class MongodbStore extends Store {
     }
 
     @Override
-    public RegisterRow findByKV(String key, String value) {
-        MongoCollection<Document> collection = db.getCollection(this.collection);
+    public Optional<Record> findByKV(String key, String value) {
         BasicDBObject whereQuery = new BasicDBObject();
         whereQuery.put("entry." + key, value);
+
+        return findOne(whereQuery);
+    }
+
+    @Override
+    public Optional<Record> findByHash(String hash) {
+        BasicDBObject whereQuery = new BasicDBObject();
+        whereQuery.put("hash", hash);
+
+        return findOne(whereQuery);
+    }
+
+    private Optional<Record> findOne(BasicDBObject whereQuery) {
+        MongoCollection<Document> collection = db.getCollection(this.collection);
         FindIterable<Document> documents = collection.find(whereQuery);
 
         // FIXME what if I get more than one result?
         // FIXME should I validate the hash?
         Document first = documents.first();
-        if(first != null) {
+
+        return Optional.ofNullable(first).map(document -> {
             Document node = first.get("entry", Document.class);
-            return new RegisterRow(Json.parse(node.toJson()));
-        } else return null;
+            return new Record(Json.parse(node.toJson()));
+        });
     }
 }

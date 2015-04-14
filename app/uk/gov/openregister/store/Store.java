@@ -1,6 +1,8 @@
 package uk.gov.openregister.store;
 
-import uk.gov.openregister.domain.RegisterRow;
+import uk.gov.openregister.domain.Record;
+
+import java.util.Optional;
 
 public abstract class Store {
 
@@ -14,9 +16,11 @@ public abstract class Store {
 
     public abstract void save(String s);
 
-    public abstract RegisterRow findByKV(String key, String value);
+    public abstract Optional<Record> findByKV(String key, String value);
 
-    public void create(RegisterRow row) {
+    public void create(Record row) {
         save(row.toString());
     }
+
+    public abstract Optional<Record> findByHash(String hash);
 }

@@ -11,7 +11,7 @@ public class EntryTest {
     @Test
     public void testHash() throws Exception {
 
-        assertThat(new RegisterRow(Json.parse("{\"foo\":\"Foo Value\"}"))
+        assertThat(new Record(Json.parse("{\"foo\":\"Foo Value\"}"))
                 .getHash()).isEqualTo("257b86bf0b88dbf40cacff2b649f763d585df662");
 
     }
@@ -19,7 +19,7 @@ public class EntryTest {
     @Test
     public void testKeysAreSortedBeforeSaving() throws Exception {
 
-        assertThat(new RegisterRow(Json.parse("{\"b\":\"value\",\"a\":\"another\"}")).normalise())
+        assertThat(new Record(Json.parse("{\"b\":\"value\",\"a\":\"another\"}")).normalise())
                 .isEqualTo("{\"a\":\"another\",\"b\":\"value\"}");
 
     }
@@ -27,7 +27,7 @@ public class EntryTest {
     @Test
     public void testWhitespacesAreRemovedBeforeSaving() throws Exception {
 
-        assertThat(new RegisterRow(Json.parse("{\"a\": \"value\", \n\"b\": \"another\"}")).normalise())
+        assertThat(new Record(Json.parse("{\"a\": \"value\", \n\"b\": \"another\"}")).normalise())
                 .isEqualTo("{\"a\":\"value\",\"b\":\"another\"}");
 
     }

@@ -7,9 +7,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import play.Logger;
 import uk.gov.openregister.crypto.Digest;
 
-public class RegisterRow {
+public class Record {
 
-    public RegisterRow(JsonNode json) {
+    public Record(JsonNode json) {
         this.entry = json;
         this.hash = Digest.shasum(normalise());
 
