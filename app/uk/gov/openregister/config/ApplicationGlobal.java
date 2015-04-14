@@ -8,9 +8,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 
-import static play.mvc.Results.badRequest;
-import static play.mvc.Results.internalServerError;
-import static play.mvc.Results.notFound;
+import static play.mvc.Results.*;
 
 public class ApplicationGlobal extends GlobalSettings {
     @Override

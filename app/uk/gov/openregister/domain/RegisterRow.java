@@ -7,24 +7,24 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import play.Logger;
 import uk.gov.openregister.crypto.Digest;
 
-public class Entry {
+public class RegisterRow {
 
-    public Entry(JsonNode json) {
-        this.raw = json;
-        this.hash = Digest.shasum(this.toString());
+    public RegisterRow(JsonNode json) {
+        this.entry = json;
+        this.hash = Digest.shasum(normalise());
 
     }
 
-
-    private JsonNode raw;
     private String hash;
-
-    public JsonNode getRaw() {
-        return raw;
-    }
+    private JsonNode entry;
 
     public String getHash() {
         return hash;
+    }
+
+    @SuppressWarnings("unused")
+    public JsonNode getEntry() {
+        return entry;
     }
 
     private static final ObjectMapper SORTED_MAPPER = new ObjectMapper();
@@ -32,15 +32,23 @@ public class Entry {
         SORTED_MAPPER.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
     }
 
-    @Override
-    public String toString() {
+    public String normalise() {
         try {
-            Object obj = SORTED_MAPPER.treeToValue(raw, Object.class);
+            Object obj = SORTED_MAPPER.treeToValue(entry, Object.class);
             return SORTED_MAPPER.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             Logger.warn("Unable to normalise json object, using original", e);
-            return raw.toString();
+            return entry.toString();
         }
     }
 
+    @Override
+    public String toString() {
+        try {
+            return SORTED_MAPPER.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            Logger.warn("Unable to serialise register row, using original", e);
+            return entry.toString();
+        }
+    }
 }

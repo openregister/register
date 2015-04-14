@@ -1,4 +1,4 @@
-package uk.gov.openregister;
+package uk.gov.openregister.store;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -18,10 +18,6 @@ public class MongodbStoreForTesting {
         map.put("store.uri", conf.toString());
         map.put("register.name", cn);
         return map;
-    }
-
-    public static void drop() {
-        new MongoClient(conf).getDatabase(conf.getDatabase()).drop();
     }
 
     public static MongoCollection<Document> collection(String cn) {

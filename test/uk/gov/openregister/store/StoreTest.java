@@ -4,9 +4,8 @@ import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 import play.libs.Json;
-import uk.gov.openregister.MongodbStoreForTesting;
 import uk.gov.openregister.conf.TestConfigurations;
-import uk.gov.openregister.domain.Entry;
+import uk.gov.openregister.domain.RegisterRow;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -16,7 +15,7 @@ public class StoreTest {
 
     @Before
     public void setUp() throws Exception {
-        MongodbStoreForTesting.drop();
+        MongodbStoreForTesting.collection(COLLECTION).drop();
     }
 
     @Test
@@ -25,7 +24,7 @@ public class StoreTest {
         String expected = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
 
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
-        store.create(new Entry(Json.parse(json)));
+        store.create(new RegisterRow(Json.parse(json)));
 
         Document document = MongodbStoreForTesting.collection(COLLECTION).find().first();
         Document entry = document.get("entry", Document.class);
@@ -41,11 +40,24 @@ public class StoreTest {
         String expected = "257b86bf0b88dbf40cacff2b649f763d585df662";
 
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
-        store.create(new Entry(Json.parse(json)));
+        store.create(new RegisterRow(Json.parse(json)));
 
         Document document = MongodbStoreForTesting.collection(COLLECTION).find().first();
         assertThat(document.get("hash")).isEqualTo(expected);
     }
 
 
-}
+    @Test
+    public void testFindByKV() {
+        String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
+
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
+        store.create(new RegisterRow(Json.parse(json)));
+
+                RegisterRow entry = store.findByKV("aKey", "aValue");
+                assertThat(entry.toString()).isEqualTo(expected);
+            }
+
+
+        }

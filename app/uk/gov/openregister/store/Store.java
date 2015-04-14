@@ -1,9 +1,6 @@
 package uk.gov.openregister.store;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import play.Play;
-import play.libs.Json;
-import uk.gov.openregister.domain.Entry;
+import uk.gov.openregister.domain.RegisterRow;
 
 public abstract class Store {
 
@@ -15,17 +12,11 @@ public abstract class Store {
     protected String databaseURI;
     protected String collection;
 
-    public abstract void save(ObjectNode s);
-    public abstract Entry findByHash(String hash);
+    public abstract void save(String s);
 
-    public void create(Entry entry) {
+    public abstract RegisterRow findByKV(String key, String value);
 
-        ObjectNode node = Json.newObject();
-
-        node.put("hash", entry.getHash());
-        node.put("entry", entry.getRaw());
-
-        save(node);
-
+    public void create(RegisterRow row) {
+        save(row.toString());
     }
 }

@@ -1,7 +1,6 @@
 package uk.gov.openregister.crypto;
 
 import org.junit.Test;
-import uk.gov.openregister.crypto.Digest;
 
 import static org.fest.assertions.Assertions.assertThat;
 
