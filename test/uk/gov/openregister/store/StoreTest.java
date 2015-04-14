@@ -21,9 +21,8 @@ public class StoreTest {
     }
 
     @Test
-    public void testCreateEntry() {
+    public void testCreateRecord() {
         String json = "{\"key1\": \"value1\",\"key2\": \"value2\"}";
-        String expected = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
 
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.create(new Record(Json.parse(json)));
@@ -57,8 +56,8 @@ public class StoreTest {
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.create(new Record(Json.parse(json)));
 
-        Optional<Record> entry = store.findByKV("aKey", "aValue");
-        assertThat(entry.get().toString()).isEqualTo(expected);
+        Optional<Record> record = store.findByKV("aKey", "aValue");
+        assertThat(record.get().toString()).isEqualTo(expected);
     }
 
     @Test
@@ -69,7 +68,7 @@ public class StoreTest {
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.create(new Record(Json.parse(json)));
 
-        Optional<Record> entry = store.findByHash("b90e76e02d99f33a1750e6c4d2623c30511fde25");
-        assertThat(entry.get().toString()).isEqualTo(expected);
+        Optional<Record> record = store.findByHash("b90e76e02d99f33a1750e6c4d2623c30511fde25");
+        assertThat(record.get().toString()).isEqualTo(expected);
     }
 }

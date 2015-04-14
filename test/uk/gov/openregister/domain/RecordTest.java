@@ -5,7 +5,7 @@ import play.libs.Json;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class EntryTest {
+public class RecordTest {
 
 
     @Test
