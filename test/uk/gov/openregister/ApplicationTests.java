@@ -5,11 +5,13 @@ import org.bson.Document;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import play.libs.Json;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 import play.test.Helpers;
 import play.test.TestServer;
 import uk.gov.openregister.config.ApplicationGlobal;
+import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.MongodbStoreForTesting;
 
 import static play.test.Helpers.testServer;
@@ -32,6 +34,10 @@ public class ApplicationTests {
 
     public WSResponse getByHash(String hash) {
         return WS.url("http://localhost:" + PORT + "/hash/" + hash).get().get(TIMEOUT);
+    }
+
+    public WSResponse search(String key, String value) {
+        return WS.url("http://localhost:" + PORT + "/search?" + key + "=" + value).get().get(TIMEOUT);
     }
 
     @Before

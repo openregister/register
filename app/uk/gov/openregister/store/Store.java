@@ -2,6 +2,8 @@ package uk.gov.openregister.store;
 
 import uk.gov.openregister.domain.Record;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public abstract class Store {
@@ -23,4 +25,6 @@ public abstract class Store {
     }
 
     public abstract Optional<Record> findByHash(String hash);
+
+    public abstract List<Record> search(Map<String, String> map);
 }

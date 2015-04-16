@@ -16,5 +16,6 @@ initialize := {
 
 libraryDependencies ++= Seq(
   javaWs,
-  "org.mongodb" % "mongo-java-driver" % "3.0.0"
+  "org.mongodb" % "mongo-java-driver" % "3.0.0",
+  "com.novocode" % "junit-interface" % "0.11" % "test"
 )

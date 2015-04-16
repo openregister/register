@@ -5,7 +5,8 @@
 GET         /                                           controllers.Application.index()
 
 POST        /create                                     controllers.Application.create()
-GET         /hash/:hash                                controllers.Application.findByHash(hash)
+GET         /search                                     controllers.Application.search()
+GET         /hash/:hash                                 controllers.Application.findByHash(hash)
 GET         /:key/:value                                controllers.Application.findByKey(key, value)
 
 # Map static resources from the /public folder to the /assets URL path
