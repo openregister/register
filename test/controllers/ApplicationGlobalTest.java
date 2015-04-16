@@ -1,4 +1,4 @@
-package uk.gov.openregister.conf;
+package controllers;
 
 import org.junit.Test;
 import play.libs.ws.WSResponse;

@@ -17,5 +17,6 @@ initialize := {
 libraryDependencies ++= Seq(
   javaWs,
   "org.mongodb" % "mongo-java-driver" % "3.0.0",
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-csv" % "2.5.2",
   "com.novocode" % "junit-interface" % "0.11" % "test"
 )
