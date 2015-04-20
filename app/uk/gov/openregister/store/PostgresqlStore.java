@@ -114,7 +114,7 @@ public class PostgresqlStore extends Store {
 
             if (!map.isEmpty()) {
                 List<String> where = map.keySet().stream()
-                        .map(k -> "entry->>'" + k + "' LIKE '%" + map.get(k) + "%'")
+                        .map(k -> "entry->>'" + k + "' ILIKE '%" + map.get(k) + "%'")
                         .collect(Collectors.toList());
                 sql += " WHERE " + StringUtils.join(where, "AND");
             }

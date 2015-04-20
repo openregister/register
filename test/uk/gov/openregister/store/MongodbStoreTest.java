@@ -106,4 +106,19 @@ public class MongodbStoreTest {
         List<Record> records = store.search(q);
         assertThat(records.get(0).toString()).isEqualTo(expected);
     }
+
+    @Test
+    public void testSearchCaseInsensitive() {
+        String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
+
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
+        store.save(new Record(Json.parse(json)));
+
+        HashMap<String, String> q = new HashMap<>();
+
+        q.put("aKey", "avalue");
+        List<Record> records = store.search(q);
+        assertThat(records.get(0).toString()).isEqualTo(expected);
+    }
 }
