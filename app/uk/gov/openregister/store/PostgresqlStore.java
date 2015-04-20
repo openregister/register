@@ -62,6 +62,8 @@ public class PostgresqlStore extends Store {
 
     @Override
     public void save(Record record) {
+        Connection c = null;
+        PreparedStatement st = null;
 
         try {
             PGobject pgo = new PGobject();
@@ -69,46 +71,64 @@ public class PostgresqlStore extends Store {
             pgo.setValue(record.getEntry().toString());
 
             String sql = insertQuery(tableName);
-            Connection connection = getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, record.getHash());
-            preparedStatement.setObject(2, pgo);
+            c = getConnection();
+            st = c.prepareStatement(sql);
+            st.setString(1, record.getHash());
+            st.setObject(2, pgo);
 
-            preparedStatement.execute();
-            preparedStatement.close();
-            connection.close();
+            st.execute();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            if(c != null) try {c.close();} catch (Exception e) {}
+            if(st != null) try {st.close();} catch (Exception e) {}
         }
     }
 
     @Override
     public Optional<Record> findByKV(String key, String value) {
+        Connection c = null;
+        Statement st = null;
         try {
-            Statement st = getConnection().createStatement();
+            c = getConnection();
+            st = c.createStatement();
             st.execute("SELECT * FROM " + tableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'");
             return toRecord(st);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            if(c != null) try {c.close();} catch (Exception e) {}
+            if(st != null) try {st.close();} catch (Exception e) {}
         }
     }
 
     @Override
     public Optional<Record> findByHash(String hash) {
+        Connection c = null;
+        PreparedStatement st = null;
+
         try {
-            PreparedStatement st = getConnection().prepareStatement("SELECT * FROM " + tableName + " WHERE hash = ?");
+            c = getConnection();
+            st = c.prepareStatement("SELECT * FROM " + tableName + " WHERE hash = ?");
             st.setString(1, hash);
             st.execute();
             return toRecord(st);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            if(c != null) try {c.close();} catch (Exception e) {}
+            if(st != null) try {st.close();} catch (Exception e) {}
         }
     }
 
     @Override
     public List<Record> search(Map<String, String> map) {
+
+        Connection c = null;
+        Statement st = null;
         try {
-            Statement st = getConnection().createStatement();
+            c = getConnection();
+            st = c.createStatement();
 
             String sql = "SELECT * FROM " + tableName;
 
@@ -125,6 +145,9 @@ public class PostgresqlStore extends Store {
             return getRecords(st);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            if(c != null) try {c.close();} catch (Exception e) {}
+            if(st != null) try {st.close();} catch (Exception e) {}
         }
 
 
@@ -152,7 +175,7 @@ public class PostgresqlStore extends Store {
         while (resultSet.next()) {
             result.add(toRecord(resultSet));
         }
-
+        resultSet.close();
         return result;
     }
 
