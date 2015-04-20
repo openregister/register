@@ -91,6 +91,24 @@ public class PostgresqlStoreTest {
         assertThat(records.get(0).toString()).isEqualTo(expected);
     }
 
+    @Test
+    public void testSearchEverywhere() {
+        String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"anotherValue\"}";
+        String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
+
+        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
+        store.save(new Record(Json.parse(json1)));
+        store.save(new Record(Json.parse(json2)));
+
+        HashMap<String, String> q = new HashMap<>();
+
+        q.put("aKey", "Val");
+        List<Record> records = store.search(q);
+        assertThat(records.size()).isEqualTo(1);
+        assertThat(records.get(0).toString()).isEqualTo(expected);
+    }
+
 
     @Test
     public void testSearchAll() {
