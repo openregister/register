@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class StoreTest {
+public class MongodbStoreTest {
 
     public static final String COLLECTION = "store_tests";
 
@@ -27,7 +27,7 @@ public class StoreTest {
         String json = "{\"key1\": \"value1\",\"key2\": \"value2\"}";
 
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
-        store.create(new Record(Json.parse(json)));
+        store.save(new Record(Json.parse(json)));
 
         Document document = MongodbStoreForTesting.collection(COLLECTION).find().first();
         Document entry = document.get("entry", Document.class);
@@ -43,7 +43,7 @@ public class StoreTest {
         String expected = "257b86bf0b88dbf40cacff2b649f763d585df662";
 
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
-        store.create(new Record(Json.parse(json)));
+        store.save(new Record(Json.parse(json)));
 
         Document document = MongodbStoreForTesting.collection(COLLECTION).find().first();
         assertThat(document.get("hash")).isEqualTo(expected);
@@ -56,7 +56,7 @@ public class StoreTest {
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
-        store.create(new Record(Json.parse(json)));
+        store.save(new Record(Json.parse(json)));
 
         Optional<Record> record = store.findByKV("aKey", "aValue");
         assertThat(record.get().toString()).isEqualTo(expected);
@@ -68,7 +68,7 @@ public class StoreTest {
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
-        store.create(new Record(Json.parse(json)));
+        store.save(new Record(Json.parse(json)));
 
         Optional<Record> record = store.findByHash("b90e76e02d99f33a1750e6c4d2623c30511fde25");
         assertThat(record.get().toString()).isEqualTo(expected);
@@ -81,7 +81,7 @@ public class StoreTest {
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
-        store.create(new Record(Json.parse(json)));
+        store.save(new Record(Json.parse(json)));
 
         HashMap<String, String> q = new HashMap<>();
 

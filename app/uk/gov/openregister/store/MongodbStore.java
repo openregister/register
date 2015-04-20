@@ -12,7 +12,6 @@ import org.bson.Document;
 import play.libs.Json;
 import uk.gov.openregister.domain.Record;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,16 +22,18 @@ public class MongodbStore extends Store {
     private static final int LIMIT = 100;
     private MongoClientURI conf = new MongoClientURI(databaseURI);
     private MongoDatabase db = new MongoClient(conf).getDatabase(conf.getDatabase());
+    private String collection;
 
     public MongodbStore(String databaseURI, String collection) {
-        super(databaseURI, collection);
+        super(databaseURI);
+        this.collection = collection;
     }
 
     @Override
-    public void save(String s) {
+    public void save(Record s) {
 
         MongoCollection<Document> collection = db.getCollection(this.collection);
-        collection.insertOne(Document.parse(s));
+        collection.insertOne(Document.parse(s.toString()));
     }
 
     @Override
