@@ -58,7 +58,7 @@ public class MongodbStore extends Store {
         BasicDBObject q = new BasicDBObject();
 
         for (String key : map.keySet()) {
-            q.put("entry." + key, java.util.regex.Pattern.compile("^" + map.get(key) + ".*"));
+            q.put("entry." + key, java.util.regex.Pattern.compile(".*" + map.get(key) + ".*"));
         }
 
         return find(q);
