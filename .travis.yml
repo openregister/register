@@ -11,6 +11,8 @@ addons:
 cache:
   directories:
     - '$HOME/.ivy2/cache'
+before_script:
+  - psql -c 'create database testopenregister;' -U postgres
 deploy:
   - provider: heroku
     api_key:
