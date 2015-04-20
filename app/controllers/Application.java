@@ -13,6 +13,7 @@ import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.MongodbStore;
+import uk.gov.openregister.store.PostgresqlStore;
 import uk.gov.openregister.store.Store;
 
 import java.net.URL;
@@ -26,12 +27,21 @@ public class Application extends Controller {
         return ok(views.html.index.render(ApplicationConf.getString("register.name")));
     }
 
-    private static final Store store = new MongodbStore(ApplicationConf.getString("store.uri"), ApplicationConf.getString("register.name"));
+    private static Store store;
+    static {
+
+        String uri = ApplicationConf.getString("store.uri");
+        String name = ApplicationConf.getString("register.name");
+
+        if (uri.startsWith("mongodb")) store = new MongodbStore(uri, name);
+        else if (uri.startsWith("postgres"))store = new PostgresqlStore(uri, name);
+        else throw new RuntimeException("Unable to find store for store.uri=" + uri);
+    }
 
     @BodyParser.Of(BodyParser.Json.class)
     public static Result create() {
 
-        store.create(new Record(request().body().asJson()));
+        store.save(new Record(request().body().asJson()));
         return status(202);
     }
 
@@ -91,7 +101,7 @@ public class Application extends Controller {
         int counter = 0;
         while (it.hasNext()) {
             JsonNode rowAsNode = it.next();
-            store.create(new Record(rowAsNode));
+            store.save(new Record(rowAsNode));
             counter++;
         }
         return counter;

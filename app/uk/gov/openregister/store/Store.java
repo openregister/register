@@ -8,21 +8,15 @@ import java.util.Optional;
 
 public abstract class Store {
 
-    public Store(String databaseURI, String collection) {
+    public Store(String databaseURI) {
         this.databaseURI = databaseURI;
-        this.collection = collection;
     }
 
     protected String databaseURI;
-    protected String collection;
 
-    public abstract void save(String s);
+    public abstract void save(Record s);
 
     public abstract Optional<Record> findByKV(String key, String value);
-
-    public void create(Record row) {
-        save(row.toString());
-    }
 
     public abstract Optional<Record> findByHash(String hash);
 
