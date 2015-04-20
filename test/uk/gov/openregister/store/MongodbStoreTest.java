@@ -98,7 +98,7 @@ public class MongodbStoreTest {
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
         Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
-        store.create(new Record(Json.parse(json)));
+        store.save(new Record(Json.parse(json)));
 
         HashMap<String, String> q = new HashMap<>();
 
