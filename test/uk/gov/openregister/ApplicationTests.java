@@ -26,18 +26,12 @@ public class ApplicationTests {
                 .setHeader("Content-Type", "application/json").post(json).get(TIMEOUT);
     }
 
-    public WSResponse postFormUrlEncoded(String path, String body) {
-        return WS.url("http://localhost:" + PORT + path)
-                .setHeader("Content-Type", "application/x-www-form-urlencoded").post(body).get(TIMEOUT);
+    public WSResponse getByKV(String key, String value, String representation) {
+        return get("/" + key + "/" + value + "?_representation=" + representation);
     }
 
-
-    public WSResponse getByKV(String key, String value) {
-        return get("/" + key + "/" + value);
-    }
-
-    public WSResponse getByHash(String hash) {
-        return get("/hash/" + hash);
+    public WSResponse getByHash(String hash, String representation) {
+        return get("/hash/" + hash + "?_representation=" + representation);
     }
 
     public WSResponse search(String key, String value, String representation) {

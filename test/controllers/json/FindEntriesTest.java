@@ -21,7 +21,7 @@ public class FindEntriesTest extends ApplicationTests {
         String json = "{\"hash\":\"759f1921d04fb297f825c3fede183516dbede0b3\",\"entry\":{\"key1\":\"valuex\",\"key2\":[\"entry1\",\"entry2\"]}}";
         collection().insertOne(Document.parse(json));
 
-        WSResponse response = getByKV("key1", "valuex");
+        WSResponse response = getByKV("key1", "valuex", "json");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getBody()).isEqualTo(json);
     }
@@ -32,7 +32,7 @@ public class FindEntriesTest extends ApplicationTests {
         String json = "{\"hash\":\"759f1921d04fb297f825c3fede183516dbede0b3\",\"entry\":{\"key1\":\"valuex\",\"key2\":[\"entry1\",\"entry2\"]}}";
         collection().insertOne(Document.parse(json));
 
-        WSResponse response = getByHash("759f1921d04fb297f825c3fede183516dbede0b3");
+        WSResponse response = getByHash("759f1921d04fb297f825c3fede183516dbede0b3", "json");
 
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getBody()).isEqualTo(json);

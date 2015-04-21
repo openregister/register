@@ -36,7 +36,16 @@ public class Representations {
     }
 
     public static Result toRecord(Http.Request request, List<String> keys, Optional<Record> recordO) {
-        return recordO.map(record -> ok(record.toString())).orElse(toJsonResponse(404, "Entry not found"));
+        Representation representation = representationFor(request);
+        switch (representation) {
+            case JSON:
+                return recordO.map(record -> ok(record.toString())).orElse(toJsonResponse(404, "Entry not found"));
+            case HTML:
+                return recordO.map(record -> ok(views.html.entry.render(ApplicationConf.getString("register.name"), keys, record)))
+                        .orElse(toJsonResponse(404, "Entry not found"));
+            default:
+                return toJsonResponse(400, "Unsupported representation '" + representation + "'");
+        }
     }
 
 

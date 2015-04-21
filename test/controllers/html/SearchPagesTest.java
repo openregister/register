@@ -15,7 +15,7 @@ import java.util.Arrays;
 import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.OK;
 
-public class SearchPageTest extends ApplicationTests {
+public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testGetSearchPage() throws Exception {
@@ -45,7 +45,7 @@ public class SearchPageTest extends ApplicationTests {
     }
 
     @Test
-    public void tesSubmitSearchQueryAndReturnsListOfEntries() throws Exception {
+    public void testSubmitSearchQueryAndReturnsListOfEntries() throws Exception {
         Document r1 = Document.parse(new Record(Json.parse("{\"key\":\"value1\",\"another\":\"1\"}")).toString());
         Document r2 = Document.parse(new Record(Json.parse("{\"key\":\"value2\",\"another\":\"2\"}")).toString());
         Document r3 = Document.parse(new Record(Json.parse("{\"key\":\"value1\",\"another\":\"3\"}")).toString());
@@ -74,5 +74,70 @@ public class SearchPageTest extends ApplicationTests {
         assertThat(td2.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/7eef71cc8b5f3be28b7920456ee78d2f79afa76f\">7eef71c</a>");
         assertThat(td2.get(1).text()).isEqualTo("value1");
         assertThat(td2.get(2).text()).isEqualTo("3");
+    }
+
+    @Test
+    public void testShowOneEntry() throws Exception {
+        Record record = new Record(Json.parse("{\"key\":\"value1\",\"another\":\"1\"}"));
+        Document r1 = Document.parse(record.toString());
+
+        collection().insertOne(r1);
+
+        WSResponse response = get("/hash/" + record.getHash());
+
+        assertThat(response.getStatus()).isEqualTo(OK);
+
+        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
+
+        Element dl = html.select("dl").first();
+        assertThat(dl).isNotNull();
+
+        Elements dt = dl.select("dt");
+        Elements dd = dl.select("dd");
+
+        assertThat(dt.get(0).text()).isEqualTo("hash");
+        assertThat(dd.get(0).text()).isEqualTo(record.getHash());
+
+        assertThat(dt.get(1).text()).isEqualTo("key");
+        assertThat(dd.get(1).text()).isEqualTo("value1");
+
+
+        assertThat(dt.get(2).text()).isEqualTo("another");
+        assertThat(dd.get(2).text()).isEqualTo("1");
+    }
+
+    @Test
+    public void testEntryShowsNameIfPresent() throws Exception {
+        Record record = new Record(Json.parse("{\"key\":\"value1\",\"name\":\"The Entry\",\"another\":\"1\"}"));
+        Document r1 = Document.parse(record.toString());
+
+        collection().insertOne(r1);
+
+        WSResponse response = get("/hash/" + record.getHash());
+
+        assertThat(response.getStatus()).isEqualTo(OK);
+
+        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
+
+        Element h1 = html.select("h2").first();
+        assertThat(h1).isNotNull();
+        assertThat(h1.text()).isEqualTo("The Entry");
+    }
+
+
+    @Test
+    public void testEntryDoesntShowsNameIfNotPresent() throws Exception {
+        Record record = new Record(Json.parse("{\"key\":\"value1\",\"another\":\"1\"}"));
+        Document r1 = Document.parse(record.toString());
+
+        collection().insertOne(r1);
+
+        WSResponse response = get("/hash/" + record.getHash());
+
+        assertThat(response.getStatus()).isEqualTo(OK);
+
+        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
+
+        assertThat(html.select("h2").isEmpty()).isTrue();
     }
 }
