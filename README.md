@@ -17,6 +17,8 @@ Create the test and production databases<br>
 `createdb openregister`<br>
 `createdb testopenregister`
 
+* Mongodb
+`http://docs.mongodb.org/manual/installation/`
 
 ## Test
 
