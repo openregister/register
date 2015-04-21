@@ -5,20 +5,20 @@ play application for hosting an open register
 
 ## Pre-requisites
 
-* Java 8
+* Java 8<br>
 http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
-* Simple Build Tool
+* Simple Build Tool<br>
 http://www.scala-sbt.org/release/tutorial/Setup.html
 
-* Postgres
+* Postgres<br>
 http://www.postgresql.org/download/<br>
 Create the test and production databases<br>
 `createdb openregister`<br>
 `createdb testopenregister`
 
-* Mongodb
-`http://docs.mongodb.org/manual/installation/`
+* Mongodb<br>
+http://docs.mongodb.org/manual/installation/    
 
 ## Test
 
