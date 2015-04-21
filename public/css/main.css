@@ -93,7 +93,7 @@ p.total {
 }
 
 .big-number {
-  font-size: 72px;
+  font-size: 45px;
   line-height: 86px;
   font-weight: bold;
 }
@@ -274,6 +274,15 @@ table.entries td {
 .open-government-licence p {
   font-size: 0.7rem;
   margin-left: -10px;
+}
+
+hr.divider {
+  border: solid #2372b5 !important;
+  border-width: 10px 0 0;
+}
+
+span.label-text {
+  font-size: 1.0rem;
 }
 
 /* responsive styles */
