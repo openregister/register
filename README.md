@@ -1,4 +1,3 @@
-# register
 play application for hosting an open register
 
 [![Build Status](https://travis-ci.org/openregister/register.svg)](https://travis-ci.org/openregister/register)
@@ -21,13 +20,13 @@ Create the test and production databases<br>
 
 ## Test
 
-To compile and run all tests:
+To compile and run all tests:<br>
 `sbt test`
 
 
 ## Run
 
-Start the application:
+Start the application:<br>
 `sbt run`<br>
 
 Access the application at<br>
