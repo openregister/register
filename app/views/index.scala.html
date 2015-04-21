@@ -1,6 +1,50 @@
-@(registerName: String)
+@(registerName: String, count: Long)
 
 @main(registerName + " register") {
 
-    <h1>Hello world</h1>
+@header(registerName)
+
+<div class="row intro">
+    <div class="small-12 medium-6 large-6 columns">
+        <h1>The @registerName.capitalize Register is the official register of @registerName entries throughout the UK.</h1>
+
+        <!--<p>Part of: <a href="#">[link to]</a> registry</p>-->
+    </div> <!-- ./columns -->
+
+    <div class="small-12 medium-3 large-3  columns metadata">
+        <p class="total">Total entries:</p>
+        <span class="big-number">@count</span>
+    </div> <!-- ./columns -->
+</div><!-- ./row -->
+
+<div class="row search-panel">
+    <div class="small-12 large-12 columns">
+        <div class="panel">
+            <div class="row">
+                <div id="" class="small-12 medium-6 large-6 columns">
+                    <h4>Search this register</h4>
+                    <p>For example 'GB'</p>
+                </div>
+            </div> <!-- ./row -->
+
+            <div class="row">
+                <div class="large-9 columns">
+                    <div class="row collapse">
+                        <FORM action="/search">
+                            <div class="small-10 columns">
+                                <input name="_query" type="text" placeholder="Enter search term">
+                            </div>
+                            <div class="small-2 columns">
+                                <input type="submit" value="Go" class="button postfix" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- ./panel -->
+    </div> <!-- ./columns -->
+</div> <!-- ./row -->
+
+@license()
+
 }

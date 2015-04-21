@@ -26,20 +26,30 @@ public class ApplicationTests {
                 .setHeader("Content-Type", "application/json").post(json).get(TIMEOUT);
     }
 
+    public WSResponse postFormUrlEncoded(String path, String body) {
+        return WS.url("http://localhost:" + PORT + path)
+                .setHeader("Content-Type", "application/x-www-form-urlencoded").post(body).get(TIMEOUT);
+    }
+
+
     public WSResponse getByKV(String key, String value) {
-        return WS.url("http://localhost:" + PORT + "/" + key + "/" + value).get().get(TIMEOUT);
+        return get("/" + key + "/" + value);
     }
 
     public WSResponse getByHash(String hash) {
-        return WS.url("http://localhost:" + PORT + "/hash/" + hash).get().get(TIMEOUT);
+        return get("/hash/" + hash);
     }
 
-    public WSResponse search(String key, String value) {
-        return WS.url("http://localhost:" + PORT + "/search?" + key + "=" + value).get().get(TIMEOUT);
+    public WSResponse search(String key, String value, String representation) {
+        return get("/search?_representation=" + representation + "&" + key + "=" + value);
     }
 
     public WSResponse load(String url) {
-        return WS.url("http://localhost:" + PORT + "/load?url=" + url).get().get(TIMEOUT);
+        return get("/load?url=" + url);
+    }
+
+    public WSResponse get(String path) {
+        return WS.url("http://localhost:" + PORT + path).get().get(TIMEOUT);
     }
 
     @Before

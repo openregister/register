@@ -1,6 +1,7 @@
 package uk.gov.openregister.store;
 
 import com.google.common.collect.Lists;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -12,9 +13,7 @@ import org.bson.Document;
 import play.libs.Json;
 import uk.gov.openregister.domain.Record;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class MongodbStore extends Store {
 
@@ -23,10 +22,17 @@ public class MongodbStore extends Store {
     private MongoClientURI conf = new MongoClientURI(databaseURI);
     private MongoDatabase db = new MongoClient(conf).getDatabase(conf.getDatabase());
     private String collection;
+    private List<String> keys = Collections.emptyList();
 
     public MongodbStore(String databaseURI, String collection) {
         super(databaseURI);
         this.collection = collection;
+    }
+
+    @Override
+    public List<String> keys() {
+        updateKeys();
+        return keys;
     }
 
     @Override
@@ -62,6 +68,38 @@ public class MongodbStore extends Store {
         }
 
         return find(q);
+    }
+
+    @Override
+    public List<Record> search(String query) {
+
+
+        updateKeys();
+
+        BasicDBList q = new BasicDBList();
+        for (String key : keys) {
+            q.add(new BasicDBObject("entry." + key, new BasicDBObject("$regex", ".*" + query + ".*").append("$options", "i")));
+        }
+
+        return find(new BasicDBObject("$or", q));
+    }
+
+    private void updateKeys() {
+        if(keys.isEmpty()) {
+            // TODO This is a hack, the list of keys should be provided. Registers register?
+            Document first = db.getCollection(this.collection).find().limit(1).first();
+            if (first != null) {
+
+                Document node = first.get("entry", Document.class);
+                this.keys = new ArrayList<>(node.keySet());
+            }
+        }
+    }
+
+    @Override
+    public long count() {
+        MongoCollection<Document> collection = db.getCollection(this.collection);
+        return collection.count();
     }
 
     private Optional<Record> findOne(BasicDBObject whereQuery) {

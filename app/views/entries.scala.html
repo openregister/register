@@ -1,0 +1,79 @@
+@(registerName: String, keys: List[String], records: List[uk.gov.openregister.domain.Record])
+
+@main(registerName + " register") {
+
+@header(registerName)
+
+<div class="row">
+
+    <div class="small-12 columns">
+
+        <div class="row intro">
+
+            <div class="medium-9 small-12 columns">
+                <h1>@registerName.capitalize Register</h1>
+                <p>A register of @registerName entries.</p>
+            </div>
+
+            <div class="medium-3 small-12 columns metadata">
+                <span class="big-number">@{ if(records.size < 100){ records.size } else { s"${records.size}+" }}</span>
+                <h4 class="subheader"><small>Total entries</small></h4>
+            </div>
+
+        </div>
+
+        @if(records.size > 0){
+        <h2>View entries</h2>
+
+        <div class="panel entry" id="entries">
+
+
+            <div id="table-outer">
+
+                <table id="entries-table" class="entries">
+
+                    <thead>
+                    <tr>
+                        <th>hash</th>
+                        @keys.map { key =>
+                        <th>@key</th>
+                        }
+                    </tr>
+                    </thead>
+
+                    <tbody class="list">
+
+                    @records.map { record =>
+                    <tr>
+                        <td class="hash"><a href="/hash/@record.getHash">@record.getHash.take(7)</a></td>
+                        @keys.map { key =>
+                        <td class="{{ key }}">@record.getEntry.get(key).textValue</td>
+                        }
+                    </tr>
+                    }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!--{% include "meta.html" %}-->
+
+        </div><!-- /.panel -->
+        } else {
+        <h3>No entries found</h3>
+        }
+
+
+        <!--<h2>Get the data</h2>-->
+
+        <!--{% include "representations.html" %}-->
+
+    </div> <!-- /.columns -->
+
+</div> <!-- ./row -->
+
+@license()
+
+}

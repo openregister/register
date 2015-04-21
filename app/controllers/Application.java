@@ -1,9 +1,7 @@
 package controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import play.libs.F;
@@ -24,54 +22,61 @@ import static controllers.JsonUtil.toJsonResponse;
 public class Application extends Controller {
 
     public static Result index() {
-        return ok(views.html.index.render(ApplicationConf.getString("register.name")));
+        long count = store.count();
+        return ok(views.html.index.render(ApplicationConf.getString("register.name"), count));
     }
 
     private static Store store;
+    private static List<String> keys;
+
     static {
 
         String uri = ApplicationConf.getString("store.uri");
         String name = ApplicationConf.getString("register.name");
 
         if (uri.startsWith("mongodb")) store = new MongodbStore(uri, name);
-        else if (uri.startsWith("postgres"))store = new PostgresqlStore(uri, name);
+        else if (uri.startsWith("postgres")) store = new PostgresqlStore(uri, name);
         else throw new RuntimeException("Unable to find store for store.uri=" + uri);
+
+        // TODO This is a temporary workaround. The list of keys for this register should come from the registers register
+        keys = store.keys();
     }
 
     @BodyParser.Of(BodyParser.Json.class)
     public static Result create() {
 
         store.save(new Record(request().body().asJson()));
-        return status(202);
+        return toJsonResponse(202, "Record saved successfully");
     }
 
-    public static Result findByKey(String key, String value) {
-        return store.findByKV(key, value)
-                .map(registerRow -> ok(registerRow.toString()))
-                .orElse(toJsonResponse(404, "Entry not found"));
+    public static F.Promise<Result> findByKey(String key, String value) {
+        if(keys.isEmpty()) keys = store.keys(); // TODO remove this line once the keys are loaded from th registers register
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
+        return recordF.map(record -> Representations.toRecord(request(), keys, record));
     }
 
-    public static Result findByHash(String hash) {
-        return store.findByHash(hash)
-                .map(registerRow -> ok(registerRow.toString()))
-                .orElse(toJsonResponse(404, "Entry not found"));
+    public static F.Promise<Result> findByHash(String hash) {
+        if(keys.isEmpty()) keys = store.keys(); // TODO remove this line once the keys are loaded from th registers register
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
+        return recordF.map(record -> Representations.toRecord(request(), keys, record));
     }
 
-    public static Result search() {
+    public static F.Promise<Result> search() {
+        if(keys.isEmpty()) keys = store.keys(); // TODO remove this line once the keys are loaded from th registers register
 
-        Set<Map.Entry<String, String[]>> entries = request().queryString().entrySet();
+        F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
+            if (request().queryString().containsKey("_query")) {
+                return store.search(request().queryString().get("_query")[0]);
+            } else {
+                HashMap<String, String> map = new HashMap<>();
+                request().queryString().entrySet().stream()
+                        .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
+                        .forEach(queryParameter -> map.put(queryParameter.getKey(), queryParameter.getValue()[0]));
+                return store.search(map);
+            }
+        });
 
-        HashMap<String, String> map = new HashMap<>();
-        for (Map.Entry<String, String[]> queryParameter : entries) {
-            map.put(queryParameter.getKey(), queryParameter.getValue()[0]);
-        }
-
-        List<Record> search = store.search(map);
-        try {
-            return ok(new ObjectMapper().writeValueAsString(search));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return recordsF.map(records -> Representations.toListOfRecords(request(), keys, records));
     }
 
     public static F.Promise<Result> load() {
@@ -86,7 +91,6 @@ public class Application extends Controller {
         }
 
     }
-
 
     // TODO bulk import?
     public static int readAndSaveToDb(URL url) throws Exception {

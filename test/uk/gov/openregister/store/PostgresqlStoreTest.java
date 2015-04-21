@@ -128,6 +128,25 @@ public class PostgresqlStoreTest {
     }
 
     @Test
+    public void testSearchWithMultipleValues() {
+        String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"anotherValue\"}";
+        String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
+
+        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
+        store.save(new Record(Json.parse(json1)));
+        store.save(new Record(Json.parse(json2)));
+
+        HashMap<String, String> q = new HashMap<>();
+
+        q.put("aKey", "aval");
+        q.put("anotherKey", "anotherValue");
+        List<Record> records = store.search(q);
+        assertThat(records.size()).isEqualTo(1);
+        assertThat(records.get(0).toString()).isEqualTo(expected);
+    }
+
+    @Test
     public void testSearchAll() {
         String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String json2 = "{\"aKey\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
@@ -140,5 +159,30 @@ public class PostgresqlStoreTest {
 
         List<Record> records = store.search(q);
         assertThat(records.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testSearchWithQuery() {
+        String json1 = "{\"aKey\":\"aValue1\",\"anotherKey\":\"anotherThing\"}";
+        String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"aValue1\"}";
+
+        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
+        store.save(new Record(Json.parse(json1)));
+        store.save(new Record(Json.parse(json2)));
+
+        List<Record> records = store.search("value");
+        assertThat(records.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testCount() {
+        String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String json2 = "{\"aKey\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
+
+        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
+        store.save(new Record(Json.parse(json1)));
+        store.save(new Record(Json.parse(json2)));
+
+        assertThat(store.count()).isEqualTo(2);
     }
 }

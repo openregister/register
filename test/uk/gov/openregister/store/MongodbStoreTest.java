@@ -121,4 +121,29 @@ public class MongodbStoreTest {
         List<Record> records = store.search(q);
         assertThat(records.get(0).toString()).isEqualTo(expected);
     }
+
+    @Test
+    public void testSearchWithQuery() {
+        String json1 = "{\"aKey\":\"aValue1\",\"anotherKey\":\"anotherThing\"}";
+        String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"aValue1\"}";
+
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
+        store.save(new Record(Json.parse(json1)));
+        store.save(new Record(Json.parse(json2)));
+
+        List<Record> records = store.search("value");
+        assertThat(records.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testCount() {
+        String json1 = "{\"aKey\":\"aValue1\",\"anotherKey\":\"anotherValue1\"}";
+        String json2 = "{\"aKey\":\"aValue2\",\"anotherKey\":\"anotherValue2\"}";
+
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
+        store.save(new Record(Json.parse(json1)));
+        store.save(new Record(Json.parse(json2)));
+
+        assertThat(store.count()).isEqualTo(2);
+    }
 }

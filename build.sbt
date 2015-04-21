@@ -19,6 +19,9 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
   "org.mongodb" % "mongo-java-driver" % "3.0.0",
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-csv" % "2.5.2",
+  "c3p0" % "c3p0" % "0.9.1.2",
+
+  // Test only dependencies
   "com.novocode" % "junit-interface" % "0.11" % "test",
-  "c3p0" % "c3p0" % "0.9.1.2"
+  "org.jsoup" % "jsoup" % "1.7.2" % "test"
 )
