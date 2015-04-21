@@ -17,7 +17,7 @@ import uk.gov.openregister.store.Store;
 import java.net.URL;
 import java.util.*;
 
-import static controllers.JsonUtil.toJsonResponse;
+import static controllers.Representations.toJsonResponse;
 
 public class Application extends Controller {
 

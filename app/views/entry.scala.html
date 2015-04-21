@@ -10,12 +10,12 @@
 
 
         @Option(record.getEntry.get("name")).map { name =>
-        <h2>@name.textValue</h2>
+        <h1 id="entry_name">@name.textValue</h1>
         }
 
         <p>An entry in the <a href="/">@registerName register</a>.</p>
 
-        <h3>View fields</h3>
+        <h2>View fields</h2>
 
         <div class="panel entry">
             <dl>

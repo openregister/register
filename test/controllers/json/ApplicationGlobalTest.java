@@ -1,4 +1,4 @@
-package controllers;
+package controllers.json;
 
 import org.junit.Test;
 import play.libs.ws.WSResponse;
@@ -10,14 +10,14 @@ public class ApplicationGlobalTest extends ApplicationTests {
 
     @Test
     public void test404ErrorResponse() throws Exception {
-        WSResponse response = postJson("/idonotexist", "{}");
+        WSResponse response = postJson("/idonotexist?_representation=json", "{}");
         assertThat(response.getStatus()).isEqualTo(404);
-        assertThat(response.getBody()).isEqualTo("{\"status\":404,\"message\":\"Action not found\"}");
+        assertThat(response.getBody()).isEqualTo("{\"status\":404,\"message\":\"Page not found\"}");
     }
 
     @Test
     public void test400ErrorResponse() throws Exception {
-        WSResponse response = postJson("/create", "{");
+        WSResponse response = postJson("/create?_representation=json", "{");
         assertThat(response.getStatus()).isEqualTo(400);
         assertThat(response.getBody()).isEqualTo("{\"status\":400,\"message\":\"Invalid Json\"}");
     }

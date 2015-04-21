@@ -119,7 +119,7 @@ public class SearchPagesTest extends ApplicationTests {
 
         org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
 
-        Element h1 = html.select("h2").first();
+        Element h1 = html.getElementById("entry_name");
         assertThat(h1).isNotNull();
         assertThat(h1.text()).isEqualTo("The Entry");
     }
@@ -138,6 +138,6 @@ public class SearchPagesTest extends ApplicationTests {
 
         org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
 
-        assertThat(html.select("h2").isEmpty()).isTrue();
+        assertThat(html.getElementById("entry_name")).isNull();
     }
 }
