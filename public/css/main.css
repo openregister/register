@@ -285,6 +285,10 @@ span.label-text {
   font-size: 1.0rem;
 }
 
+.search-panel {
+  margin-top: 20px;
+}
+
 /* responsive styles */
 @media only screen and (max-width: 40em) {
   .intro p {

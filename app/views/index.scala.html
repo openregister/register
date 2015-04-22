@@ -7,7 +7,7 @@
 
 <div class="row">
     <div class="small-12 large-8 columns">
-        <h4>The official register of @play.Play.application().configuration().getString("register.title")</h4>
+        <h4>@play.Play.application().configuration().getString("register.title")</h4>
     </div> <!-- ./columns -->
 
     <div class="small-12 large-3 columns">
@@ -22,11 +22,17 @@
 <div class="row">
    <div class="small-12 large-8 columns">
         <p><span class="label-text">Last updated:</span><br/>15 April 2015</p>
-        <p><span class="label-text">Part of:</span><br/>@play.Play.application().configuration().getString("register.description")registry</p>
+        <p><span class="label-text">Part of:</span><br/>@play.Play.application().configuration().getString("register.registry")</p>
     </div> <!-- ./columns -->
 </div><!-- ./row -->
 
 <div class="row">
+   <div class="small-12 large-8 columns">
+        <h5>@play.Play.application().configuration().getString("register.description")</h5>
+    </div> <!-- ./columns -->
+</div><!-- ./row -->
+
+<div class="row search-panel">
     <div class="small-12 large-8 columns">
         <h4>Search this register</h4>
         <p>@play.Play.application().configuration().getString("register.searchtext")</p>
