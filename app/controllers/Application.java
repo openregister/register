@@ -27,7 +27,6 @@ public class Application extends Controller {
     }
 
     private static Store store;
-    private static List<String> keys;
 
     static {
 
@@ -38,8 +37,6 @@ public class Application extends Controller {
         else if (uri.startsWith("postgres")) store = new PostgresqlStore(uri, name);
         else throw new RuntimeException("Unable to find store for store.uri=" + uri);
 
-        // TODO This is a temporary workaround. The list of keys for this register should come from the registers register
-        keys = store.keys();
     }
 
     @BodyParser.Of(BodyParser.Json.class)
@@ -50,19 +47,16 @@ public class Application extends Controller {
     }
 
     public static F.Promise<Result> findByKey(String key, String value) {
-        if(keys.isEmpty()) keys = store.keys(); // TODO remove this line once the keys are loaded from th registers register
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
-        return recordF.map(record -> Representations.toRecord(request(), keys, record));
+        return recordF.map(record -> Representations.toRecord(request(), store.keys(), record));
     }
 
     public static F.Promise<Result> findByHash(String hash) {
-        if(keys.isEmpty()) keys = store.keys(); // TODO remove this line once the keys are loaded from th registers register
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
-        return recordF.map(record -> Representations.toRecord(request(), keys, record));
+        return recordF.map(record -> Representations.toRecord(request(), store.keys(), record));
     }
 
     public static F.Promise<Result> search() {
-        if(keys.isEmpty()) keys = store.keys(); // TODO remove this line once the keys are loaded from th registers register
 
         F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {
@@ -76,7 +70,7 @@ public class Application extends Controller {
             }
         });
 
-        return recordsF.map(records -> Representations.toListOfRecords(request(), keys, records));
+        return recordsF.map(records -> Representations.toListOfRecords(request(), store.keys(), records));
     }
 
     public static F.Promise<Result> load() {

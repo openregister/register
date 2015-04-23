@@ -17,13 +17,20 @@ import java.util.stream.Collectors;
 public class PostgresqlStore extends Store {
 
     private String tableName;
-    private List<String> keys = Collections.emptyList();
     private Database database;
 
     @Override
     public List<String> keys() {
-        updateKeys();
-        return keys;
+        // TODO This is a hack, the list of keys should be provided. Registers register?
+
+        Optional<Record> recordOptional = database.<Optional<Record>>select("SELECT * FROM " + tableName + " LIMIT 1")
+                .andThen(this::toOptionalRecord);
+
+        if (recordOptional.isPresent()) {
+            return Lists.newArrayList(recordOptional.get().getEntry().fieldNames());
+        }
+
+        return Collections.emptyList();
     }
 
     public PostgresqlStore(String databaseURI, String tableName) {
@@ -82,12 +89,10 @@ public class PostgresqlStore extends Store {
     @Override
     public List<Record> search(String query) {
 
-        updateKeys();
-
         String sql = "SELECT * FROM " + tableName;
 
-        if (!keys.isEmpty()) {
-            List<String> where = keys.stream()
+        if (!keys().isEmpty()) {
+            List<String> where = keys().stream()
                     .map(k -> "entry->>'" + k + "' ILIKE '%" + query + "%'")
                     .collect(Collectors.toList());
             sql += " WHERE " + StringUtils.join(where, " OR ");
@@ -104,25 +109,12 @@ public class PostgresqlStore extends Store {
                 .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
     }
 
-    private void updateKeys() {
-        if(keys.isEmpty()) {
-            // TODO This is a hack, the list of keys should be provided. Registers register?
-
-            Optional<Record> recordOptional = database.<Optional<Record>>select("SELECT * FROM " + tableName + " LIMIT 1")
-                    .andThen(this::toOptionalRecord);
-
-            if (recordOptional.isPresent()) {
-                keys = Lists.newArrayList(recordOptional.get().getEntry().fieldNames());
-            }
-        }
-    }
-
     private Optional<Record> toOptionalRecord(ResultSet resultSet) throws IOException, SQLException {
-            if (resultSet != null && resultSet.next()) {
-                return Optional.of(toRecord(resultSet));
-            } else {
-                return Optional.empty();
-            }
+        if (resultSet != null && resultSet.next()) {
+            return Optional.of(toRecord(resultSet));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private Record toRecord(ResultSet resultSet) throws SQLException, IOException {
