@@ -6,6 +6,7 @@ import org.junit.Test;
 import play.libs.Json;
 import uk.gov.openregister.conf.TestConfigurations;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.store.mongodb.MongodbStore;
 
 import java.util.HashMap;
 import java.util.List;

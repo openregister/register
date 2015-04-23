@@ -1,4 +1,4 @@
-package uk.gov.openregister.store;
+package uk.gov.openregister.store.mongodb;
 
 import com.google.common.collect.Lists;
 import com.mongodb.BasicDBList;
@@ -12,6 +12,7 @@ import com.mongodb.client.MongoIterable;
 import org.bson.Document;
 import play.libs.Json;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.store.Store;
 
 import java.util.*;
 

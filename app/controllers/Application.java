@@ -10,8 +10,8 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
-import uk.gov.openregister.store.MongodbStore;
-import uk.gov.openregister.store.PostgresqlStore;
+import uk.gov.openregister.store.mongodb.MongodbStore;
+import uk.gov.openregister.store.postgresql.PostgresqlStore;
 import uk.gov.openregister.store.Store;
 
 import java.net.URL;
