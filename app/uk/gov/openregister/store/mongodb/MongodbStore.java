@@ -80,8 +80,13 @@ public class MongodbStore extends Store {
     public List<Record> search(String query) {
 
         BasicDBList q = new BasicDBList();
+
         for (String key : keys()) {
             q.add(new BasicDBObject("entry." + key, new BasicDBObject("$regex", ".*" + query + ".*").append("$options", "i")));
+        }
+
+        if(q.isEmpty()){
+            return new ArrayList<>();
         }
 
         return find(new BasicDBObject("$or", q));

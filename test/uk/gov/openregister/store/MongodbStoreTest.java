@@ -137,6 +137,14 @@ public class MongodbStoreTest {
     }
 
     @Test
+    public void testEmptyRecordWhenNoEntryInDB(){
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
+
+        List<Record> records = store.search("value");
+        assertThat(records.size()).isEqualTo(0);
+    }
+
+    @Test
     public void testCount() {
         String json1 = "{\"aKey\":\"aValue1\",\"anotherKey\":\"anotherValue1\"}";
         String json2 = "{\"aKey\":\"aValue2\",\"anotherKey\":\"anotherValue2\"}";
