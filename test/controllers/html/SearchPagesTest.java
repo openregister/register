@@ -80,13 +80,14 @@ public class SearchPagesTest extends ApplicationTests {
     }
 
     @Test
-    public void testShowOneEntry() throws Exception {
-        Record record = new Record(Json.parse("{\"key\":\"value1\",\"another\":\"1\"}"));
-        Document r1 = Document.parse(record.toString());
+    public void testRenderFieldWithoutKeyValueAndAFieldWithValueIsAList() throws Exception {
+        Record record1 = new Record(Json.parse("{\"key\":\"value1\",\"another\":\"1\",\"listFields\":[\"A\",\"B\"]}"));
+        Record record2 = new Record(Json.parse("{\"key\":\"value1\",\"another\":\"1\",\"listFields\":[\"A\",\"B\"], \"key1\":\"someValue\"}"));
 
-        collection().insertOne(r1);
+        collection().insertOne(Document.parse(record2.toString()));
+        collection().insertOne(Document.parse(record1.toString()));
 
-        WSResponse response = get("/hash/" + record.getHash());
+        WSResponse response = get("/hash/" + record1.getHash());
 
         assertThat(response.getStatus()).isEqualTo(OK);
 
@@ -99,7 +100,7 @@ public class SearchPagesTest extends ApplicationTests {
         Elements dd = dl.select("dd");
 
         assertThat(dt.get(0).text()).isEqualTo("hash");
-        assertThat(dd.get(0).text()).isEqualTo(record.getHash());
+        assertThat(dd.get(0).text()).isEqualTo(record1.getHash());
 
         assertThat(dt.get(1).text()).isEqualTo("key");
         assertThat(dd.get(1).text()).isEqualTo("value1");
@@ -107,6 +108,12 @@ public class SearchPagesTest extends ApplicationTests {
 
         assertThat(dt.get(2).text()).isEqualTo("another");
         assertThat(dd.get(2).text()).isEqualTo("1");
+
+        assertThat(dt.get(3).text()).isEqualTo("listFields");
+        assertThat(dd.get(3).text()).isEqualTo("['A', 'B']");
+
+        assertThat(dt.get(4).text()).isEqualTo("key1");
+        assertThat(dd.get(4).text()).isEqualTo("");
     }
 
     @Test
