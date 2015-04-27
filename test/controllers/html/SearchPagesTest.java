@@ -49,9 +49,9 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testSubmitSearchQueryAndReturnsListOfEntries() throws Exception {
-        Document r1 = Document.parse(new Record(Json.parse("{\"school\":\"value1\",\"name\":\"1\"}")).toString());
-        Document r2 = Document.parse(new Record(Json.parse("{\"school\":\"value2\",\"name\":\"2\"}")).toString());
-        Document r3 = Document.parse(new Record(Json.parse("{\"school\":\"value1\",\"name\":\"3\"}")).toString());
+        Document r1 = Document.parse(new Record(Json.parse("{\"key\":\"value1\",\"another\":\"1\"}")).toString());
+        Document r2 = Document.parse(new Record(Json.parse("{\"key\":\"value2\",\"another\":\"2\"}")).toString());
+        Document r3 = Document.parse(new Record(Json.parse("{\"key\":\"value1\",\"another\":\"3\"}")).toString());
 
         collection().insertMany(Arrays.asList(r1, r2, r3));
 
@@ -65,24 +65,26 @@ public class SearchPagesTest extends ApplicationTests {
         Elements tr = table.select("tr");
         Elements th = tr.first().select("th");
         assertThat(th.get(0).text()).isEqualTo("hash");
-        assertThat(th.get(1).text()).isEqualTo("school");
-        assertThat(th.get(2).text()).isEqualTo("name");
+        assertThat(th.get(1).text()).isEqualTo("key");
+        assertThat(th.get(2).text()).isEqualTo("another");
 
         Elements td1 = tr.get(1).select("td");
-        assertThat(td1.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/8ebe760e38452fb4c65abab123e886e93bec12df\">8ebe760</a>");
+        assertThat(td1.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/9c2d20f19cc9e3f19e555f4d4d2794b9314883fe\">9c2d20f</a>");
         assertThat(td1.get(1).text()).isEqualTo("value1");
         assertThat(td1.get(2).text()).isEqualTo("1");
 
         Elements td2 = tr.get(2).select("td");
-        assertThat(td2.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/15712959d68dbd113e440a6f3b9c2fe1568e76b6\">1571295</a>");
+        assertThat(td2.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/7eef71cc8b5f3be28b7920456ee78d2f79afa76f\">7eef71c</a>");
         assertThat(td2.get(1).text()).isEqualTo("value1");
         assertThat(td2.get(2).text()).isEqualTo("3");
     }
 
     @Test
     public void testRenderFieldWithoutKeyValueAndAFieldWithValueIsAList() throws Exception {
-        Record record1 = new Record(Json.parse("{\"school\":\"value1\",\"name\":\"someName\",\"startDate\":[\"A\",\"B\"]}"));
+        Record record1 = new Record(Json.parse("{\"key\":\"value1\",\"another\":\"1\",\"listFields\":[\"A\",\"B\"]}"));
+        Record record2 = new Record(Json.parse("{\"key\":\"value1\",\"another\":\"1\",\"listFields\":[\"A\",\"B\"], \"key1\":\"someValue\"}"));
 
+        collection().insertOne(Document.parse(record2.toString()));
         collection().insertOne(Document.parse(record1.toString()));
 
         WSResponse response = get("/hash/" + record1.getHash());
@@ -100,16 +102,17 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(dt.get(0).text()).isEqualTo("hash");
         assertThat(dd.get(0).text()).isEqualTo(record1.getHash());
 
-        assertThat(dt.get(1).text()).isEqualTo("school");
+        assertThat(dt.get(1).text()).isEqualTo("key");
         assertThat(dd.get(1).text()).isEqualTo("value1");
 
-        assertThat(dt.get(2).text()).isEqualTo("name");
-        assertThat(dd.get(2).text()).isEqualTo("someName");
 
-        assertThat(dt.get(3).text()).isEqualTo("startDate");
+        assertThat(dt.get(2).text()).isEqualTo("another");
+        assertThat(dd.get(2).text()).isEqualTo("1");
+
+        assertThat(dt.get(3).text()).isEqualTo("listFields");
         assertThat(dd.get(3).text()).isEqualTo("['A', 'B']");
 
-        assertThat(dt.get(4).text()).isEqualTo("endDate");
+        assertThat(dt.get(4).text()).isEqualTo("key1");
         assertThat(dd.get(4).text()).isEqualTo("");
     }
 

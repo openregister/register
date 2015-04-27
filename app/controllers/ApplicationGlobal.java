@@ -1,4 +1,4 @@
-package controllers.conf;
+package controllers;
 
 import play.GlobalSettings;
 import play.libs.F;
@@ -28,4 +28,5 @@ public class ApplicationGlobal extends GlobalSettings {
                 toResponse(requestHeader, 400, s)
         );
     }
+
 }

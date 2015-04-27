@@ -8,7 +8,6 @@ import uk.gov.openregister.conf.TestConfigurations;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.mongodb.MongodbStore;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -18,21 +17,20 @@ import static org.fest.assertions.Assertions.assertThat;
 public class MongodbStoreTest {
 
     public static final String COLLECTION = "store_tests";
-    private Store store;
 
     @Before
     public void setUp() throws Exception {
-        TestSettings.collection(COLLECTION).drop();
-        store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION, Arrays.asList("aKey", "anotherKey"));
+        MongodbStoreForTesting.collection(COLLECTION).drop();
     }
 
     @Test
     public void testCreateRecord() {
         String json = "{\"key1\": \"value1\",\"key2\": \"value2\"}";
 
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.save(new Record(Json.parse(json)));
 
-        Document document = TestSettings.collection(COLLECTION).find().first();
+        Document document = MongodbStoreForTesting.collection(COLLECTION).find().first();
         Document entry = document.get("entry", Document.class);
         assertThat(entry).isNotNull();
         assertThat(entry.get("key1")).isEqualTo("value1");
@@ -45,9 +43,10 @@ public class MongodbStoreTest {
         String json = "{\"foo\":\"Foo Value\"}";
         String expected = "257b86bf0b88dbf40cacff2b649f763d585df662";
 
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.save(new Record(Json.parse(json)));
 
-        Document document = TestSettings.collection(COLLECTION).find().first();
+        Document document = MongodbStoreForTesting.collection(COLLECTION).find().first();
         assertThat(document.get("hash")).isEqualTo(expected);
     }
 
@@ -57,6 +56,7 @@ public class MongodbStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.save(new Record(Json.parse(json)));
 
         Optional<Record> record = store.findByKV("aKey", "aValue");
@@ -68,6 +68,7 @@ public class MongodbStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.save(new Record(Json.parse(json)));
 
         Optional<Record> record = store.findByHash("b90e76e02d99f33a1750e6c4d2623c30511fde25");
@@ -80,6 +81,7 @@ public class MongodbStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.save(new Record(Json.parse(json)));
 
         HashMap<String, String> q = new HashMap<>();
@@ -96,6 +98,7 @@ public class MongodbStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.save(new Record(Json.parse(json)));
 
         HashMap<String, String> q = new HashMap<>();
@@ -110,6 +113,7 @@ public class MongodbStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.save(new Record(Json.parse(json)));
 
         HashMap<String, String> q = new HashMap<>();
@@ -124,6 +128,7 @@ public class MongodbStoreTest {
         String json1 = "{\"aKey\":\"aValue1\",\"anotherKey\":\"anotherThing\"}";
         String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"aValue1\"}";
 
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.save(new Record(Json.parse(json1)));
         store.save(new Record(Json.parse(json2)));
 
@@ -133,6 +138,7 @@ public class MongodbStoreTest {
 
     @Test
     public void testEmptyRecordWhenNoEntryInDB(){
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
 
         List<Record> records = store.search("value");
         assertThat(records.size()).isEqualTo(0);
@@ -143,6 +149,7 @@ public class MongodbStoreTest {
         String json1 = "{\"aKey\":\"aValue1\",\"anotherKey\":\"anotherValue1\"}";
         String json2 = "{\"aKey\":\"aValue2\",\"anotherKey\":\"anotherValue2\"}";
 
+        Store store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION);
         store.save(new Record(Json.parse(json1)));
         store.save(new Record(Json.parse(json2)));
 

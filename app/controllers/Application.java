@@ -4,21 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import controllers.conf.Register;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
-import uk.gov.openregister.store.Store;
 import uk.gov.openregister.store.mongodb.MongodbStore;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
+import uk.gov.openregister.store.Store;
 
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static controllers.Representations.toJsonResponse;
 
@@ -32,11 +29,12 @@ public class Application extends Controller {
     private static Store store;
 
     static {
+
         String uri = ApplicationConf.getString("store.uri");
         String name = ApplicationConf.getString("register.name");
 
-        if (uri.startsWith("mongodb")) store = new MongodbStore(uri, name, Register.schema.keys());
-        else if (uri.startsWith("postgres")) store = new PostgresqlStore(uri, name, Register.schema.keys());
+        if (uri.startsWith("mongodb")) store = new MongodbStore(uri, name);
+        else if (uri.startsWith("postgres")) store = new PostgresqlStore(uri, name);
         else throw new RuntimeException("Unable to find store for store.uri=" + uri);
 
     }
@@ -50,12 +48,12 @@ public class Application extends Controller {
 
     public static F.Promise<Result> findByKey(String key, String value) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
-        return recordF.map(record -> Representations.toRecord(request(), Register.schema.keys(), record));
+        return recordF.map(record -> Representations.toRecord(request(), store.keys(), record));
     }
 
     public static F.Promise<Result> findByHash(String hash) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
-        return recordF.map(record -> Representations.toRecord(request(), Register.schema.keys(), record));
+        return recordF.map(record -> Representations.toRecord(request(), store.keys(), record));
     }
 
     public static F.Promise<Result> search() {
@@ -72,7 +70,7 @@ public class Application extends Controller {
             }
         });
 
-        return recordsF.map(records -> Representations.toListOfRecords(request(), Register.schema.keys(), records));
+        return recordsF.map(records -> Representations.toListOfRecords(request(), store.keys(), records));
     }
 
     public static F.Promise<Result> load() {

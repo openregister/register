@@ -2,6 +2,7 @@ package uk.gov.openregister.store.postgresql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.postgresql.util.PGobject;
 import uk.gov.openregister.domain.Record;
@@ -10,22 +11,31 @@ import uk.gov.openregister.store.Store;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PostgresqlStore extends Store {
 
     private String tableName;
-    private final List<String> keys;
     private Database database;
 
-    public PostgresqlStore(String databaseURI, String tableName, List<String> keys) {
+    @Override
+    public List<String> keys() {
+        // TODO This is a hack, the list of keys should be provided. Registers register?
+
+        Optional<Record> recordOptional = database.<Optional<Record>>select("SELECT * FROM " + tableName + " LIMIT 1")
+                .andThen(this::toOptionalRecord);
+
+        if (recordOptional.isPresent()) {
+            return Lists.newArrayList(recordOptional.get().getEntry().fieldNames());
+        }
+
+        return Collections.emptyList();
+    }
+
+    public PostgresqlStore(String databaseURI, String tableName) {
         super(databaseURI);
         this.tableName = tableName;
-        this.keys = keys;
         database = new Database(databaseURI);
 
         createTable(tableName);
@@ -81,8 +91,8 @@ public class PostgresqlStore extends Store {
 
         String sql = "SELECT * FROM " + tableName;
 
-        if (!keys.isEmpty()) {
-            List<String> where = keys.stream()
+        if (!keys().isEmpty()) {
+            List<String> where = keys().stream()
                     .map(k -> "entry->>'" + k + "' ILIKE '%" + query + "%'")
                     .collect(Collectors.toList());
             sql += " WHERE " + StringUtils.join(where, " OR ");
