@@ -9,14 +9,15 @@ import uk.gov.openregister.conf.TestConfigurations;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MongodbStoreForTesting {
+public class TestSettings {
 
     public static MongoClientURI conf = new MongoClientURI(TestConfigurations.MONGO_URI);
 
-    public static Map<String, String> settings(String cn) {
+    public static Map<String, String> forRegister(String cn) {
         HashMap<String, String> map = new HashMap<>();
         map.put("store.uri", conf.toString());
         map.put("register.name", cn);
+        map.put("registers.service.url", "http://localhost:8888");
         return map;
     }
 

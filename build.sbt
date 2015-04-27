@@ -23,5 +23,6 @@ libraryDependencies ++= Seq(
 
   // Test only dependencies
   "com.novocode" % "junit-interface" % "0.11" % "test",
-  "org.jsoup" % "jsoup" % "1.7.2" % "test"
+  "org.jsoup" % "jsoup" % "1.7.2" % "test",
+  "by.stub" % "stubby4j" % "3.1.3"  % "test"
 )
