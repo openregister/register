@@ -1,6 +1,5 @@
-package controllers.conf;
+package controllers;
 
-import play.Application;
 import play.GlobalSettings;
 import play.libs.F;
 import play.mvc.Http;
@@ -30,8 +29,4 @@ public class ApplicationGlobal extends GlobalSettings {
         );
     }
 
-    @Override
-    public void onStart(Application application) {
-        Register.init();
-    }
 }

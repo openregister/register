@@ -23,12 +23,22 @@ public class MongodbStore extends Store {
     private MongoClientURI conf = new MongoClientURI(databaseURI);
     private MongoDatabase db = new MongoClient(conf).getDatabase(conf.getDatabase());
     private String collection;
-    private final List<String> keys;
 
-    public MongodbStore(String databaseURI, String collection, List<String> keys) {
+    public MongodbStore(String databaseURI, String collection) {
         super(databaseURI);
         this.collection = collection;
-        this.keys = keys;
+    }
+
+    @Override
+    public List<String> keys() {
+        // TODO This is a hack, the list of keys should be provided. Registers register?
+        Document first = db.getCollection(this.collection).find().limit(1).first();
+        if (first != null) {
+
+            Document node = first.get("entry", Document.class);
+            return new ArrayList<>(node.keySet());
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -71,7 +81,7 @@ public class MongodbStore extends Store {
 
         BasicDBList q = new BasicDBList();
 
-        for (String key : keys) {
+        for (String key : keys()) {
             q.add(new BasicDBObject("entry." + key, new BasicDBObject("$regex", ".*" + query + ".*").append("$options", "i")));
         }
 

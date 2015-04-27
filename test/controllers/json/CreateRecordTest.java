@@ -6,7 +6,8 @@ import play.libs.ws.WSResponse;
 import uk.gov.openregister.ApplicationTests;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static play.test.Helpers.*;
+import static play.test.Helpers.ACCEPTED;
+import static play.test.Helpers.BAD_REQUEST;
 
 public class CreateRecordTest extends ApplicationTests {
 
