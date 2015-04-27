@@ -1,11 +1,9 @@
 package controllers.json;
 
 import org.bson.Document;
-import org.junit.Before;
 import org.junit.Test;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.ApplicationTests;
-import uk.gov.openregister.store.MongodbStoreForTesting;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.*;
