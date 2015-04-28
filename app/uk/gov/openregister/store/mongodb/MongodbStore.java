@@ -51,7 +51,7 @@ public class MongodbStore extends Store {
     @Override
     public Optional<Record> findByKV(String key, String value) {
         BasicDBObject whereQuery = new BasicDBObject();
-        whereQuery.put("entry." + key, value);
+        whereQuery.put("entry." + key, new BasicDBObject("$regex", "^" + value + "$").append("$options", "i"));
 
         return findOne(whereQuery);
     }
@@ -85,7 +85,7 @@ public class MongodbStore extends Store {
             q.add(new BasicDBObject("entry." + key, new BasicDBObject("$regex", ".*" + query + ".*").append("$options", "i")));
         }
 
-        if(q.isEmpty()){
+        if (q.isEmpty()) {
             return new ArrayList<>();
         }
 
