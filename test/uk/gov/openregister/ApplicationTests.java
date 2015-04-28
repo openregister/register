@@ -1,16 +1,22 @@
 package uk.gov.openregister;
 
 import com.mongodb.client.MongoCollection;
+import controllers.conf.ApplicationGlobal;
 import org.bson.Document;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
+import play.test.FakeApplication;
 import play.test.Helpers;
 import play.test.TestServer;
-import controllers.ApplicationGlobal;
-import uk.gov.openregister.store.MongodbStoreForTesting;
+import services.RegisterService;
+import uk.gov.openregister.store.TestSettings;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 import static play.test.Helpers.testServer;
 
@@ -52,19 +58,34 @@ public class ApplicationTests {
     }
 
     protected MongoCollection<Document> collection() {
-        return MongodbStoreForTesting.collection(REGISTER);
+        return TestSettings.collection(REGISTER);
     }
 
     @BeforeClass
-    public static void startApp() {
-        server = testServer(PORT, Helpers.fakeApplication(MongodbStoreForTesting.settings(REGISTER),
-                new ApplicationGlobal()));
+    public static void startApp() throws Exception {
+        RegisterService.start();
+        server = testServer(PORT, fakeApplication());
         Helpers.start(server);
     }
 
     @AfterClass
-    public static void stopApp() {
+    public static void stopApp() throws Exception {
         Helpers.stop(server);
+        RegisterService.stop();
+    }
+
+    private static FakeApplication fakeApplication() throws URISyntaxException {
+        String applicationRoot = new File(ApplicationGlobal.class.getResource("/").toURI())
+                .getAbsolutePath()
+                .replaceAll("/target/scala.*", "");
+
+        return new FakeApplication(
+                new File(applicationRoot),
+                Helpers.class.getClassLoader(),
+                TestSettings.forRegister(REGISTER),
+                new ArrayList<>(),
+                new ApplicationGlobal()
+        );
     }
 
 }

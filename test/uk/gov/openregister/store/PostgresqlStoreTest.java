@@ -1,6 +1,7 @@
 package uk.gov.openregister.store;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import controllers.conf.Register;
 import org.junit.Before;
 import org.junit.Test;
 import play.libs.Json;
@@ -8,26 +9,32 @@ import uk.gov.openregister.conf.TestConfigurations;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class PostgresqlStoreTest {
 
     public static final String TABLE_NAME = "store_tests";
+    private Store store;
 
     @Before
     public void setUp() throws Exception {
+        Register schema = mock(Register.class);
+        when(schema.keys()).thenReturn(Arrays.asList("aKey", "anotherKey"));
         PostgresqlStoreForTesting.dropTable(TABLE_NAME);
+        store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME, schema.keys());
     }
 
     @Test
     public void testCreateRecord() throws Exception {
         String json = "{\"key1\": \"value1\",\"key2\": \"value2\"}";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json)));
 
         JsonNode entry = PostgresqlStoreForTesting.findFirstEntry(TABLE_NAME);
@@ -35,13 +42,11 @@ public class PostgresqlStoreTest {
         assertThat(entry.get("key2").textValue()).isEqualTo("value2");
     }
 
-
     @Test
     public void testOnCreationAnHashIsCreated() throws Exception {
         String json = "{\"foo\":\"Foo Value\"}";
         String expected = "257b86bf0b88dbf40cacff2b649f763d585df662";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json)));
 
         String hash = PostgresqlStoreForTesting.findFirstHash(TABLE_NAME);
@@ -54,7 +59,6 @@ public class PostgresqlStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json)));
 
         Optional<Record> record = store.findByKV("aKey", "aValue");
@@ -66,7 +70,6 @@ public class PostgresqlStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json)));
 
         Optional<Record> record = store.findByHash("b90e76e02d99f33a1750e6c4d2623c30511fde25");
@@ -80,7 +83,6 @@ public class PostgresqlStoreTest {
         String json2 = "{\"aKey\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json1)));
         store.save(new Record(Json.parse(json2)));
 
@@ -98,7 +100,6 @@ public class PostgresqlStoreTest {
         String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json1)));
         store.save(new Record(Json.parse(json2)));
 
@@ -116,7 +117,6 @@ public class PostgresqlStoreTest {
         String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json1)));
         store.save(new Record(Json.parse(json2)));
 
@@ -134,7 +134,6 @@ public class PostgresqlStoreTest {
         String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json1)));
         store.save(new Record(Json.parse(json2)));
 
@@ -152,7 +151,6 @@ public class PostgresqlStoreTest {
         String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String json2 = "{\"aKey\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json1)));
         store.save(new Record(Json.parse(json2)));
 
@@ -167,7 +165,6 @@ public class PostgresqlStoreTest {
         String json1 = "{\"aKey\":\"aValue1\",\"anotherKey\":\"anotherThing\"}";
         String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"aValue1\"}";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json1)));
         store.save(new Record(Json.parse(json2)));
 
@@ -180,7 +177,6 @@ public class PostgresqlStoreTest {
         String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String json2 = "{\"aKey\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
 
-        Store store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME);
         store.save(new Record(Json.parse(json1)));
         store.save(new Record(Json.parse(json2)));
 

@@ -14,7 +14,11 @@ import play.libs.Json;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.Store;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MongodbStore extends Store {
 
@@ -23,22 +27,12 @@ public class MongodbStore extends Store {
     private MongoClientURI conf = new MongoClientURI(databaseURI);
     private MongoDatabase db = new MongoClient(conf).getDatabase(conf.getDatabase());
     private String collection;
+    private List<String> keys;
 
-    public MongodbStore(String databaseURI, String collection) {
+    public MongodbStore(String databaseURI, String collection, List<String> keys) {
         super(databaseURI);
         this.collection = collection;
-    }
-
-    @Override
-    public List<String> keys() {
-        // TODO This is a hack, the list of keys should be provided. Registers register?
-        Document first = db.getCollection(this.collection).find().limit(1).first();
-        if (first != null) {
-
-            Document node = first.get("entry", Document.class);
-            return new ArrayList<>(node.keySet());
-        }
-        return Collections.emptyList();
+        this.keys = keys;
     }
 
     @Override
@@ -80,11 +74,9 @@ public class MongodbStore extends Store {
     @Override
     public List<Record> search(String query) {
 
-        BasicDBList q = new BasicDBList();
-
-        for (String key : keys()) {
-            q.add(new BasicDBObject("entry." + key, new BasicDBObject("$regex", ".*" + query + ".*").append("$options", "i")));
-        }
+        BasicDBList q = keys.stream()
+                .map(key -> new BasicDBObject("entry." + key, new BasicDBObject("$regex", ".*" + query + ".*").append("$options", "i")))
+                .collect(Collectors.toCollection(BasicDBList::new));
 
         if (q.isEmpty()) {
             return new ArrayList<>();
