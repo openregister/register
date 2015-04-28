@@ -10,6 +10,7 @@ import uk.gov.openregister.store.mongodb.MongodbStore;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -29,24 +30,29 @@ public class Register {
 
     public void init() {
         String name = ApplicationConf.getString("register.name");
-        String registersServiceUri = ApplicationConf.getString("registers.service.url");
 
-        F.Promise<WSResponse> promise = WS.client().url(registersServiceUri + "/register/" + name + "?_representation=json").execute();
-        F.Promise<List<String>> listPromise = promise.map(r -> {
-                    List<String> resultKeys = new ArrayList<>();
+        if ("register".equalsIgnoreCase(name)) {
+            keys = Arrays.asList(ApplicationConf.getString("registers.service.fields").split(","));
+        } else {
 
-                    //TODO: If response is non 200, what do we want?
-                    if (r.getStatus() == 200) {
-                        Iterator<JsonNode> elements = r.asJson().get("entry").get("fields").elements();
-                        while (elements.hasNext()) {
-                            resultKeys.add(elements.next().textValue());
+            String registersServiceUri = ApplicationConf.getString("registers.service.url");
+
+            F.Promise<WSResponse> promise = WS.client().url(registersServiceUri + "/register/" + name + "?_representation=json").execute();
+            F.Promise<List<String>> listPromise = promise.map(r -> {
+                        List<String> resultKeys = new ArrayList<>();
+
+                        //TODO: If response is non 200, what do we want?
+                        if (r.getStatus() == 200) {
+                            Iterator<JsonNode> elements = r.asJson().get("entry").get("fields").elements();
+                            while (elements.hasNext()) {
+                                resultKeys.add(elements.next().textValue());
+                            }
                         }
+                        return resultKeys;
                     }
-                    return resultKeys;
-                }
-        );
-        keys = listPromise.get(10000);
-
+            );
+            keys = listPromise.get(10000);
+        }
 
         String uri = ApplicationConf.getString("store.uri");
 
