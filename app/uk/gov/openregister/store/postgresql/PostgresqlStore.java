@@ -2,7 +2,6 @@ package uk.gov.openregister.store.postgresql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controllers.conf.Register;
 import org.apache.commons.lang3.StringUtils;
 import org.postgresql.util.PGobject;
 import uk.gov.openregister.domain.Record;
@@ -20,13 +19,13 @@ import java.util.stream.Collectors;
 public class PostgresqlStore extends Store {
 
     private String tableName;
-    private final Register schema;
+    private List<String> keys;
     private Database database;
 
-    public PostgresqlStore(String databaseURI, String tableName, Register schema) {
+    public PostgresqlStore(String databaseURI, String tableName, List<String> keys) {
         super(databaseURI);
         this.tableName = tableName;
-        this.schema = schema;
+        this.keys = keys;
         database = new Database(databaseURI);
 
         createTable(tableName);
@@ -82,8 +81,8 @@ public class PostgresqlStore extends Store {
 
         String sql = "SELECT * FROM " + tableName;
 
-        if (!schema.keys().isEmpty()) {
-            List<String> where = schema.keys().stream()
+        if (!keys.isEmpty()) {
+            List<String> where = keys.stream()
                     .map(k -> "entry->>'" + k + "' ILIKE '%" + query + "%'")
                     .collect(Collectors.toList());
             sql += " WHERE " + StringUtils.join(where, " OR ");

@@ -28,7 +28,7 @@ public class MongodbStoreTest {
         TestSettings.collection(COLLECTION).drop();
         Register schema = mock(Register.class);
         when(schema.keys()).thenReturn(Arrays.asList("aKey", "anotherKey"));
-        store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION, schema);
+        store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION, schema.keys());
     }
 
     @Test

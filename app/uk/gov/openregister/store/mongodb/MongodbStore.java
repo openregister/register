@@ -9,7 +9,6 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
-import controllers.conf.Register;
 import org.bson.Document;
 import play.libs.Json;
 import uk.gov.openregister.domain.Record;
@@ -19,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MongodbStore extends Store {
 
@@ -27,12 +27,12 @@ public class MongodbStore extends Store {
     private MongoClientURI conf = new MongoClientURI(databaseURI);
     private MongoDatabase db = new MongoClient(conf).getDatabase(conf.getDatabase());
     private String collection;
-    private final Register schema;
+    private List<String> keys;
 
-    public MongodbStore(String databaseURI, String collection, Register schema) {
+    public MongodbStore(String databaseURI, String collection, List<String> keys) {
         super(databaseURI);
         this.collection = collection;
-        this.schema = schema;
+        this.keys = keys;
     }
 
     @Override
@@ -73,11 +73,9 @@ public class MongodbStore extends Store {
     @Override
     public List<Record> search(String query) {
 
-        BasicDBList q = new BasicDBList();
-
-        for (String key : schema.keys()) {
-            q.add(new BasicDBObject("entry." + key, new BasicDBObject("$regex", ".*" + query + ".*").append("$options", "i")));
-        }
+        BasicDBList q = keys.stream()
+                .map(key -> new BasicDBObject("entry." + key, new BasicDBObject("$regex", ".*" + query + ".*").append("$options", "i")))
+                .collect(Collectors.toCollection(BasicDBList::new));
 
         if (q.isEmpty()) {
             return new ArrayList<>();

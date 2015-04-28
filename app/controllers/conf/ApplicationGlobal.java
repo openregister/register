@@ -1,5 +1,6 @@
 package controllers.conf;
 
+import play.Application;
 import play.GlobalSettings;
 import play.libs.F;
 import play.mvc.Http;
@@ -27,5 +28,10 @@ public class ApplicationGlobal extends GlobalSettings {
         return F.Promise.pure(
                 toResponse(requestHeader, 400, s)
         );
+    }
+
+    @Override
+    public void onStart(Application application) {
+        Register.instance.init();
     }
 }

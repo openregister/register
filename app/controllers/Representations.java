@@ -3,6 +3,7 @@ package controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import controllers.conf.Register;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -38,27 +39,26 @@ public class Representations {
         }
     }
 
-    public static Result toListOfRecords(Http.Request request, List<String> keys, List<Record> records) throws JsonProcessingException {
+    public static Result toListOfRecords(Http.Request request, List<Record> records) throws JsonProcessingException {
 
         Representation representation = representationFor(request.queryString());
         switch (representation) {
             case JSON:
                 return ok(new ObjectMapper().writeValueAsString(records));
             case HTML:
-                return ok(views.html.entries.render(ApplicationConf.getString("register.name"), keys, records));
+                return ok(views.html.entries.render(ApplicationConf.getString("register.name"), Register.instance.keys(), records));
             default:
                 return toJsonResponse(400, "Unsupported representation '" + representation + "'");
         }
-
     }
 
-    public static Result toRecord(Http.Request request, List<String> keys, Optional<Record> recordO) {
+    public static Result toRecord(Http.Request request, Optional<Record> recordO) {
         Representation representation = representationFor(request.queryString());
         switch (representation) {
             case JSON:
                 return recordO.map(record -> ok(record.toString())).orElse(toJsonResponse(404, "Entry not found"));
             case HTML:
-                return recordO.map(record -> ok(views.html.entry.render(ApplicationConf.getString("register.name"), keys, record)))
+                return recordO.map(record -> ok(views.html.entry.render(ApplicationConf.getString("register.name"), Register.instance.keys(), record)))
                         .orElse(toHtmlResponse(404, "Entry not found"));
             default:
                 return toJsonResponse(400, "Unsupported representation '" + representation + "'");

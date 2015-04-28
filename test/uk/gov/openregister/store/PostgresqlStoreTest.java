@@ -28,7 +28,7 @@ public class PostgresqlStoreTest {
         Register schema = mock(Register.class);
         when(schema.keys()).thenReturn(Arrays.asList("aKey", "anotherKey"));
         PostgresqlStoreForTesting.dropTable(TABLE_NAME);
-        store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME, schema);
+        store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME, schema.keys());
     }
 
     @Test

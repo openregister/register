@@ -5,6 +5,9 @@ import play.libs.F;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.config.ApplicationConf;
+import uk.gov.openregister.store.Store;
+import uk.gov.openregister.store.mongodb.MongodbStore;
+import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,24 +15,19 @@ import java.util.List;
 
 public class Register {
 
-    public static final Register schema = new Register();
-
-    private Register() {
-    }
-
+    public static final Register instance = new Register();
     private List<String> keys = new ArrayList<>();
-
+    private Store store;
 
     public List<String> keys() {
-        if (keys.isEmpty()) {
-            keys = fetchKeysFromService();
-            return keys;
-        }
         return keys;
     }
 
-    //TODO: should not be called twice, can synchronized it, need more discussion before I do it
-    private List<String> fetchKeysFromService() {
+    public Store store() {
+        return store;
+    }
+
+    public void init() {
         String name = ApplicationConf.getString("register.name");
         String registersServiceUri = ApplicationConf.getString("registers.service.url");
 
@@ -47,6 +45,13 @@ public class Register {
                     return resultKeys;
                 }
         );
-        return listPromise.get(10000);
+        keys = listPromise.get(10000);
+
+
+        String uri = ApplicationConf.getString("store.uri");
+
+        if (uri.startsWith("mongodb")) store = new MongodbStore(uri, name, Register.instance.keys);
+        else if (uri.startsWith("postgres")) store = new PostgresqlStore(uri, name, Register.instance.keys);
+        else throw new RuntimeException("Unable to find store for store.uri=" + uri);
     }
 }
