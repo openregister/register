@@ -9,12 +9,16 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
+import controllers.conf.Register;
 import org.bson.Document;
 import play.libs.Json;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.Store;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class MongodbStore extends Store {
 
@@ -23,22 +27,12 @@ public class MongodbStore extends Store {
     private MongoClientURI conf = new MongoClientURI(databaseURI);
     private MongoDatabase db = new MongoClient(conf).getDatabase(conf.getDatabase());
     private String collection;
+    private final Register schema;
 
-    public MongodbStore(String databaseURI, String collection) {
+    public MongodbStore(String databaseURI, String collection, Register schema) {
         super(databaseURI);
         this.collection = collection;
-    }
-
-    @Override
-    public List<String> keys() {
-        // TODO This is a hack, the list of keys should be provided. Registers register?
-        Document first = db.getCollection(this.collection).find().limit(1).first();
-        if (first != null) {
-
-            Document node = first.get("entry", Document.class);
-            return new ArrayList<>(node.keySet());
-        }
-        return Collections.emptyList();
+        this.schema = schema;
     }
 
     @Override
@@ -81,7 +75,7 @@ public class MongodbStore extends Store {
 
         BasicDBList q = new BasicDBList();
 
-        for (String key : keys()) {
+        for (String key : schema.keys()) {
             q.add(new BasicDBObject("entry." + key, new BasicDBObject("$regex", ".*" + query + ".*").append("$options", "i")));
         }
 

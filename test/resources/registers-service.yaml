@@ -1,0 +1,24 @@
+- request:
+    method: GET
+    url: /register/test_register
+    query:
+        _representation: json
+
+  response:
+    status: 200
+    headers:
+      content-type: application/json
+    body: >
+      {"hash":"ad183e6ed25737ce4c71bbd652513ba8952c982d","entry":{"register":"School","fields":["school","name","startDate","endDate","gender","religiousCharacter","minAge","maxAge","headTeacher","website","address"]}}
+
+- request:
+    url: ^.*$
+    method: GET
+
+  response:
+    status: 404
+    headers:
+      content-type: text/plain
+    x-foo: bar
+    body: >
+      No page configured at this url yet
