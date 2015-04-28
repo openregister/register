@@ -113,6 +113,26 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(dd.get(4).text()).isEqualTo("");
     }
 
+
+    @Test
+    public void testRenderFieldAsListInEntries() throws Exception {
+        Record record1 = new Record(Json.parse("{\"school\":\"value1\",\"name\":\"someName\",\"startDate\":[\"A\",\"B\"]}"));
+
+        collection().insertOne(Document.parse(record1.toString()));
+
+        WSResponse response = search("school", "value1", "html");
+
+        assertThat(response.getStatus()).isEqualTo(OK);
+
+        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
+
+        Element startDate = html.getElementsByClass("startDate").first();
+        assertThat(startDate).isNotNull();
+
+        assertThat(startDate.text()).isEqualTo("['A', 'B']");
+
+    }
+
     @Test
     public void testEntryShowsNameIfPresent() throws Exception {
         Record record = new Record(Json.parse("{\"key\":\"value1\",\"name\":\"The Entry\",\"another\":\"1\"}"));

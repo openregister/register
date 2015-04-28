@@ -1,0 +1,2 @@
+@(node: com.fasterxml.jackson.databind.JsonNode)
+@{if(node == null) {""} else if(node.isArray){ "[" + node.elements.map("'" + _.textValue + "'").mkString(", ") + "]" } else { node.textValue }}

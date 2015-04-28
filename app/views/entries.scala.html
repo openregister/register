@@ -47,7 +47,7 @@
                     <tr>
                         <td class="hash"><a href="/hash/@record.getHash">@record.getHash.take(7)</a></td>
                         @keys.map { key =>
-                        <td class="{{ key }}">@{val node = record.getEntry.get(key); if(node == null) "" else node.textValue}</td>
+                        <td class="@key">@entryValue(record.getEntry.get(key))</td>
                         }
                     </tr>
                     }

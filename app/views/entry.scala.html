@@ -23,7 +23,7 @@
                 <dd class="hash">@record.getHash</dd>
                 @keys.map { key =>
                 <dt class="@key">@key</dt>
-                <dd class="@key">@{val node = record.getEntry.get(key); if(node == null) {""} else if(node.isArray){ "[" + node.elements.map("'" + _.textValue + "'").mkString(", ") + "]" } else { node.textValue }}</dd>
+                <dd class="@key">@entryValue(record.getEntry.get(key))</dd>
                 }
             </dl>
         </div> <!-- /.entry -->
