@@ -17,18 +17,18 @@ deploy:
   - provider: heroku
     api_key:
       secure: t7ehgv2w2FSPlptKKtDAfmqVRfhdwB07/lZl2RWWBrsf40KYIoITpj0FwzG7UMjHW27whR/j/rnx0qftjX9L8BD3VmdNBIMUAT5iI5N145GrB5pW/ipFQYmYtPNheEtfLbFrwazaYL4Nllyo5uro3DWrWtXxj1K7wBNRhHVbmtE=
-    app: register
+    app: register-openregister
     on:
       repo: openregister/register
   - provider: heroku
     api_key:
       secure: t7ehgv2w2FSPlptKKtDAfmqVRfhdwB07/lZl2RWWBrsf40KYIoITpj0FwzG7UMjHW27whR/j/rnx0qftjX9L8BD3VmdNBIMUAT5iI5N145GrB5pW/ipFQYmYtPNheEtfLbFrwazaYL4Nllyo5uro3DWrWtXxj1K7wBNRhHVbmtE=
-    app: school
+    app: school-openregister
     on:
       repo: openregister/register
   - provider: heroku
     api_key:
       secure: t7ehgv2w2FSPlptKKtDAfmqVRfhdwB07/lZl2RWWBrsf40KYIoITpj0FwzG7UMjHW27whR/j/rnx0qftjX9L8BD3VmdNBIMUAT5iI5N145GrB5pW/ipFQYmYtPNheEtfLbFrwazaYL4Nllyo5uro3DWrWtXxj1K7wBNRhHVbmtE=
-    app: address
+    app: address-openregister
     on:
       repo: openregister/register
