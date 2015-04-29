@@ -289,6 +289,18 @@ span.label-text {
   margin-top: 20px;
 }
 
+code {
+  font-weight: inherit !important;
+  color: #4070a0 !important
+}
+
+pre.panel {
+  overflow: auto;
+}
+
+.docs ul {
+  list-style: none;
+}
 /* responsive styles */
 @media only screen and (max-width: 40em) {
   .intro p {

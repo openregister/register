@@ -85,6 +85,23 @@ public class Application extends Controller {
 
     }
 
+    public static Result docs() {
+        return ok(views.html.docsIndex.render(ApplicationConf.getString("register.name")));
+    }
+
+    public static Result docsApi(String api) {
+        switch(api) {
+            case "create":
+                 return ok(views.html.docsCreate.render(ApplicationConf.getString("register.name")));
+            case "search":
+                 return ok(views.html.docsSearch.render(ApplicationConf.getString("register.name")));
+            case "get":
+                 return ok(views.html.docsGet.render(ApplicationConf.getString("register.name")));
+            default:
+                return redirect("/docs");
+        }
+    }
+
     private static Result createEntryFromHtml() {
         Record record = createRecordFromParams(request().body().asFormUrlEncoded());
         Register.instance.store().save(record);
