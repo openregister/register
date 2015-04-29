@@ -1,16 +1,11 @@
-package controllers.json;
+package functionaltests.json;
 
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import functionaltests.ApplicationTests;
 import org.bson.Document;
 import org.junit.Test;
 import play.libs.ws.WSResponse;
-import uk.gov.openregister.ApplicationTests;
-
-import java.io.IOException;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static play.test.Helpers.ACCEPTED;
 import static play.test.Helpers.BAD_REQUEST;
 
@@ -62,18 +57,5 @@ public class CreateRecordTest extends ApplicationTests {
         assertThat(document.get("entry")).isNotNull();
         assertThat(document.get("entry", Document.class).get("key1")).isEqualTo("value1");
         assertThat(document.get("entry", Document.class).get("key2")).isEqualTo("value2");
-    }
-
-    @Test
-    public void addANewEntryInTheRegister() throws IOException {
-        HtmlPage page = webClient.getPage(BASE_URL + "/create");
-        HtmlForm htmlForm = page.getForms().get(0);
-
-        htmlForm.getInputByName("name").setValueAttribute("Some name");
-        htmlForm.getInputByName("key1").setValueAttribute("value1");
-        htmlForm.getInputByName("key2").setValueAttribute("value2");
-
-        HtmlPage resultPage = htmlForm.getInputByName("submit").click();
-        assertTrue(resultPage.getUrl().toString().startsWith(BASE_URL + "/hash/"));
     }
 }

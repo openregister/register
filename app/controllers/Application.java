@@ -30,7 +30,7 @@ public class Application extends Controller {
         long count = Register.instance.store().count();
         return ok(views.html.index.render(ApplicationConf.getString("register.name"), count));
     }
-    
+
     public static Result renderNewEntryForm() {
         return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys()));
     }
@@ -133,7 +133,10 @@ public class Application extends Controller {
         try {
             Map<String, Object> jsonMap = new HashMap<>();
             //TODO: this will break when we have multiple values for a key, data parsing will be based on datatype
-            formParameters.forEach((k, v) -> {if(!"submit".equalsIgnoreCase(k)) jsonMap.put(k, v[0]);});
+            formParameters.keySet().stream()
+                    .filter(key -> Register.instance.keys().contains(key))
+                    .forEach(key -> jsonMap.put(key, formParameters.get(key)[0]));
+
             String json = new ObjectMapper().writeValueAsString(jsonMap);
 
             return new Record(json);

@@ -1,4 +1,4 @@
-package services;
+package functionaltests;
 
 import by.stub.client.StubbyClient;
 

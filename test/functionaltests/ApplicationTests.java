@@ -1,4 +1,4 @@
-package uk.gov.openregister;
+package functionaltests;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.mongodb.client.MongoCollection;
@@ -12,7 +12,6 @@ import play.libs.ws.WSResponse;
 import play.test.FakeApplication;
 import play.test.Helpers;
 import play.test.TestServer;
-import services.RegisterService;
 import uk.gov.openregister.store.TestSettings;
 
 import java.io.File;

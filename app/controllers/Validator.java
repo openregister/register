@@ -14,7 +14,6 @@ public class Validator {
         this.keys = keys;
     }
 
-
     public ValidationResult validate(Record record) {
 
         Optional<String> invalidKeys = checkForInvalidKeys(record);

@@ -1,4 +1,4 @@
-package controllers.json;
+package functionaltests.json;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
@@ -6,7 +6,7 @@ import org.bson.Document;
 import org.junit.Test;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
-import uk.gov.openregister.ApplicationTests;
+import functionaltests.ApplicationTests;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class ImportRecordsTest extends ApplicationTests {
     @Test
     public void testBadRequestIfUrlIsNotSet() throws Exception {
 
-        WSResponse response = WS.url("http://localhost:" + PORT + "/load").get().get(TIMEOUT);
+        WSResponse response = WS.url(BASE_URL + "/load").get().get(TIMEOUT);
 
         assertThat(response.getStatus()).isEqualTo(400);
         assertThat(response.getBody()).isEqualTo("{\"status\":400,\"message\":\"'url' parameter is not defined\"}");

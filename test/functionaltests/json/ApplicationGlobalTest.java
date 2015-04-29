@@ -1,8 +1,8 @@
-package controllers.json;
+package functionaltests.json;
 
 import org.junit.Test;
 import play.libs.ws.WSResponse;
-import uk.gov.openregister.ApplicationTests;
+import functionaltests.ApplicationTests;
 
 import static org.fest.assertions.Assertions.assertThat;
 
