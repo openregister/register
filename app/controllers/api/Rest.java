@@ -29,7 +29,8 @@ public class Rest extends Controller {
         // Validation
         ValidationResult validationResult = new Validator(Register.instance.keys()).validate(r);
         if (!validationResult.isValid()) {
-            return toJsonResponse(400, Joiner.on(". ").join(validationResult.getMessages()));
+            // TODO, incomplete, needs better error messages
+            return toJsonResponse(400, "The following keys are not allowed in the record: " + Joiner.on(", ").join(validationResult.getInvalidKeys()));
         }
         Register.instance.store().save(r);
         return toJsonResponse(202, "Record saved successfully");
