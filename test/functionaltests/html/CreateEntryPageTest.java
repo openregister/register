@@ -17,10 +17,9 @@ public class CreateEntryPageTest extends ApplicationTests {
         HtmlPage page = webClient.getPage(BASE_URL + "/create");
         HtmlForm htmlForm = page.getForms().get(0);
 
-        htmlForm.getInputByName("school").setValueAttribute("Some school");
         htmlForm.getInputByName("name").setValueAttribute("Some name");
-        htmlForm.getInputByName("startDate").setValueAttribute("Some startdate");
-        htmlForm.getInputByName("website").setValueAttribute("website");
+        htmlForm.getInputByName("key1").setValueAttribute("Some key1");
+        htmlForm.getInputByName("key2").setValueAttribute("some key2");
 
         HtmlPage resultPage = htmlForm.getInputByName("submit").click();
 
