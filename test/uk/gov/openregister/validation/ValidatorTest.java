@@ -1,4 +1,4 @@
-package controllers;
+package uk.gov.openregister.validation;
 
 import org.junit.Test;
 import play.libs.Json;

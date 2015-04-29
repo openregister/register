@@ -1,4 +1,4 @@
-package functionaltests;
+package functional;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.mongodb.client.MongoCollection;

@@ -6,7 +6,7 @@ import play.libs.F;
 import play.mvc.Http;
 import play.mvc.Result;
 
-import static controllers.Representations.toResponse;
+import static controllers.api.Representations.toResponse;
 
 public class ApplicationGlobal extends GlobalSettings {
     @Override

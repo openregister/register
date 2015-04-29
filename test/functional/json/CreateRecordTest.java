@@ -1,6 +1,6 @@
-package functionaltests.json;
+package functional.json;
 
-import functionaltests.ApplicationTests;
+import functional.ApplicationTests;
 import org.bson.Document;
 import org.junit.Test;
 import play.libs.ws.WSResponse;

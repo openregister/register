@@ -1,4 +1,4 @@
-package functionaltests.json;
+package functional.json;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
@@ -6,7 +6,7 @@ import org.bson.Document;
 import org.junit.Test;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
-import functionaltests.ApplicationTests;
+import functional.ApplicationTests;
 
 import java.io.File;
 import java.util.ArrayList;

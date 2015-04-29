@@ -1,8 +1,8 @@
-package functionaltests.html;
+package functional.html;
 
 import org.junit.Test;
 import play.libs.ws.WSResponse;
-import functionaltests.ApplicationTests;
+import functional.ApplicationTests;
 
 import static org.fest.assertions.Assertions.assertThat;
 

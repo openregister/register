@@ -1,4 +1,4 @@
-package functionaltests.html;
+package functional.html;
 
 import org.bson.Document;
 import org.jsoup.Jsoup;
@@ -7,7 +7,7 @@ import org.jsoup.select.Elements;
 import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WSResponse;
-import functionaltests.ApplicationTests;
+import functional.ApplicationTests;
 import uk.gov.openregister.domain.Record;
 
 import java.util.Arrays;

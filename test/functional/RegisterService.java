@@ -1,4 +1,4 @@
-package functionaltests;
+package functional;
 
 import by.stub.client.StubbyClient;
 

@@ -1,8 +1,8 @@
-package functionaltests.html;
+package functional.html;
 
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import functionaltests.ApplicationTests;
+import functional.ApplicationTests;
 import org.junit.Test;
 
 import java.io.IOException;

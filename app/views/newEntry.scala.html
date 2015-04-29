@@ -5,7 +5,7 @@
 @header(registerName)
 
 <div class="row">
-    <form action="/create" method="post">
+    <form action="/create-urlencoded" method="post">
         @keys.map{ key =>
         <p class="@key">@key
         <input name="@key" type="text" placeholder="Enter text">
