@@ -31,15 +31,33 @@ public class Application extends Controller {
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public static Result create() {
         Record record = createRecordFromParams(request().body().asFormUrlEncoded());
-        
+
         // Validation
         ValidationResult validationResult = new Validator(Register.instance.keys()).validate(record);
         if (!validationResult.isValid()) {
             return toHtmlResponse(400, Joiner.on(". ").join(validationResult.getMessages()));
         }
-        
+
         Register.instance.store().save(record);
         return redirect("/hash/" + record.getHash());
+    }
+
+
+    public static Result docs() {
+        return ok(views.html.docsIndex.render(ApplicationConf.getString("register.name")));
+    }
+
+    public static Result docsApi(String api) {
+        switch(api) {
+            case "create":
+                 return ok(views.html.docsCreate.render(ApplicationConf.getString("register.name")));
+            case "search":
+                 return ok(views.html.docsSearch.render(ApplicationConf.getString("register.name")));
+            case "get":
+                 return ok(views.html.docsGet.render(ApplicationConf.getString("register.name")));
+            default:
+                return redirect("/docs");
+        }
     }
 
     private static Record createRecordFromParams(Map<String, String[]> formParameters) {
@@ -57,5 +75,5 @@ public class Application extends Controller {
             throw new RuntimeException("TODO: json parsing exception, we need to address this when TODO above is done");
         }
     }
-
 }
+
