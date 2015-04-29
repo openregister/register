@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.google.common.base.Joiner;
 import controllers.conf.Register;
 import play.libs.F;
 import play.mvc.Controller;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static controllers.Representations.toHtmlResponse;
 import static controllers.Representations.toJsonResponse;
 
 public class Application extends Controller {
@@ -28,8 +30,7 @@ public class Application extends Controller {
         long count = Register.instance.store().count();
         return ok(views.html.index.render(ApplicationConf.getString("register.name"), count));
     }
-
-
+    
     public static Result renderNewEntryForm() {
         return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys()));
     }
@@ -87,12 +88,25 @@ public class Application extends Controller {
 
     private static Result createEntryFromHtml() {
         Record record = createRecordFromParams(request().body().asFormUrlEncoded());
+        
+        // Validation
+        ValidationResult validationResult = new Validator(Register.instance.keys()).validate(record);
+        if (!validationResult.isValid()) {
+            return toHtmlResponse(400, Joiner.on(". ").join(validationResult.getMessages()));
+        }
+        
         Register.instance.store().save(record);
         return redirect("/hash/" + record.getHash());
     }
 
     private static Result createEntryFromJson() {
-        Register.instance.store().save(new Record(request().body().asJson()));
+        Record r = new Record(request().body().asJson());
+        // Validation
+        ValidationResult validationResult = new Validator(Register.instance.keys()).validate(r);
+        if (!validationResult.isValid()) {
+            return toJsonResponse(400, Joiner.on(". ").join(validationResult.getMessages()));
+        }
+        Register.instance.store().save(r);
         return toJsonResponse(202, "Record saved successfully");
     }
 
@@ -119,7 +133,7 @@ public class Application extends Controller {
         try {
             Map<String, Object> jsonMap = new HashMap<>();
             //TODO: this will break when we have multiple values for a key, data parsing will be based on datatype
-            formParameters.forEach((k, v) -> jsonMap.put(k, v[0]));
+            formParameters.forEach((k, v) -> {if(!"submit".equalsIgnoreCase(k)) jsonMap.put(k, v[0]);});
             String json = new ObjectMapper().writeValueAsString(jsonMap);
 
             return new Record(json);
