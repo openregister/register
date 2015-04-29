@@ -8,6 +8,8 @@ import static org.fest.assertions.Assertions.assertThat;
 
 public class ApplicationGlobalTest extends ApplicationTests {
 
+
+
     @Test
     public void test404ErrorResponse() throws Exception {
         WSResponse response = postJson("/idonotexist", "{}");

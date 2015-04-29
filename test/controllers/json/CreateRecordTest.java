@@ -18,7 +18,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void testCreateARecordReturns202() {
-        String json = "{\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
     }
@@ -31,8 +31,28 @@ public class CreateRecordTest extends ApplicationTests {
     }
 
     @Test
+    public void testCreateARecordWithInvalidKeysReturns400() {
+        String json = "{\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        WSResponse response = postJson("/create", json);
+
+        assertThat(response.getBody())
+                .isEqualTo("{\"status\":400,\"message\":\"The following keys are allowed in the record: invalidKey\"}");
+
+    }
+
+    @Test
+    public void testCreateARecordWithInvalidAndMissingKeysReturns400() {
+        String json = "{\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key2\": \"value2\"}";
+        WSResponse response = postJson("/create", json);
+
+        assertThat(response.getBody())
+                .isEqualTo("{\"status\":400,\"message\":\"The following keys are allowed in the record: invalidKey. The following keys are mandatory but not found in record: key1\"}");
+
+    }
+
+    @Test
     public void testCreateARecordStoresItToTheDatabase() {
-        String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
+        String json = "{\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
 
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
@@ -49,10 +69,9 @@ public class CreateRecordTest extends ApplicationTests {
         HtmlPage page = webClient.getPage(BASE_URL + "/create");
         HtmlForm htmlForm = page.getForms().get(0);
 
-        htmlForm.getInputByName("school").setValueAttribute("Some school");
         htmlForm.getInputByName("name").setValueAttribute("Some name");
-        htmlForm.getInputByName("startDate").setValueAttribute("Some startdate");
-        htmlForm.getInputByName("website").setValueAttribute("website");
+        htmlForm.getInputByName("key1").setValueAttribute("value1");
+        htmlForm.getInputByName("key2").setValueAttribute("value2");
 
         HtmlPage resultPage = htmlForm.getInputByName("submit").click();
         assertTrue(resultPage.getUrl().toString().startsWith(BASE_URL + "/hash/"));

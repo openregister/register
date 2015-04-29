@@ -9,7 +9,7 @@
     headers:
       content-type: application/json
     body: >
-      {"hash":"ad183e6ed25737ce4c71bbd652513ba8952c982d","entry":{"register":"School","fields":["school","name","startDate","website"]}}
+      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"register":"test_register","fields":["name","key1","key2"]}}
 
 - request:
     url: ^.*$
