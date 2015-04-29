@@ -2,7 +2,6 @@ package controllers.json;
 
 import org.bson.Document;
 import org.junit.Test;
-import play.libs.Json;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.ApplicationTests;
 import uk.gov.openregister.domain.Record;
@@ -41,9 +40,9 @@ public class FindEntriesTest extends ApplicationTests {
 
     @Test
     public void testSearch() throws Exception {
-        Document r1 = Document.parse(new Record(Json.parse("{\"key\":\"value1\"}")).toString());
-        Document r2 = Document.parse(new Record(Json.parse("{\"key\":\"value2\"}")).toString());
-        Document r3 = Document.parse(new Record(Json.parse("{\"key\":\"value1\",\"another\":\"value\"}")).toString());
+        Document r1 = Document.parse(new Record("{\"key\":\"value1\"}").toString());
+        Document r2 = Document.parse(new Record("{\"key\":\"value2\"}").toString());
+        Document r3 = Document.parse(new Record("{\"key\":\"value1\",\"another\":\"value\"}").toString());
 
         collection().insertMany(Arrays.asList(r1, r2, r3));
 

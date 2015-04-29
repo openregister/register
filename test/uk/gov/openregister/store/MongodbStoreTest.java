@@ -4,7 +4,6 @@ import controllers.conf.Register;
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
-import play.libs.Json;
 import uk.gov.openregister.conf.TestConfigurations;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.mongodb.MongodbStore;
@@ -35,7 +34,7 @@ public class MongodbStoreTest {
     public void testCreateRecord() {
         String json = "{\"key1\": \"value1\",\"key2\": \"value2\"}";
 
-        store.save(new Record(Json.parse(json)));
+        store.save(new Record(json));
 
         Document document = TestSettings.collection(COLLECTION).find().first();
         Document entry = document.get("entry", Document.class);
@@ -50,7 +49,7 @@ public class MongodbStoreTest {
         String json = "{\"foo\":\"Foo Value\"}";
         String expected = "257b86bf0b88dbf40cacff2b649f763d585df662";
 
-        store.save(new Record(Json.parse(json)));
+        store.save(new Record(json));
 
         Document document = TestSettings.collection(COLLECTION).find().first();
         assertThat(document.get("hash")).isEqualTo(expected);
@@ -62,7 +61,7 @@ public class MongodbStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save(new Record(Json.parse(json)));
+        store.save(new Record(json));
 
         assertThat(store.findByKV("aKey", "AValue").get().toString()).isEqualTo(expected);
         assertThat(store.findByKV("anotherKey", "AnotherValue").get().toString()).isEqualTo(expected);
@@ -76,7 +75,7 @@ public class MongodbStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save(new Record(Json.parse(json)));
+        store.save(new Record(json));
 
         Optional<Record> record = store.findByHash("b90e76e02d99f33a1750e6c4d2623c30511fde25");
         assertThat(record.get().toString()).isEqualTo(expected);
@@ -88,7 +87,7 @@ public class MongodbStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save(new Record(Json.parse(json)));
+        store.save(new Record(json));
 
         HashMap<String, String> q = new HashMap<>();
 
@@ -104,7 +103,7 @@ public class MongodbStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save(new Record(Json.parse(json)));
+        store.save(new Record(json));
 
         HashMap<String, String> q = new HashMap<>();
 
@@ -118,7 +117,7 @@ public class MongodbStoreTest {
         String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save(new Record(Json.parse(json)));
+        store.save(new Record(json));
 
         HashMap<String, String> q = new HashMap<>();
 
@@ -132,8 +131,8 @@ public class MongodbStoreTest {
         String json1 = "{\"aKey\":\"aValue1\",\"anotherKey\":\"anotherThing\"}";
         String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"aValue1\"}";
 
-        store.save(new Record(Json.parse(json1)));
-        store.save(new Record(Json.parse(json2)));
+        store.save(new Record(json1));
+        store.save(new Record(json2));
 
         List<Record> records = store.search("value");
         assertThat(records.size()).isEqualTo(2);
@@ -151,8 +150,8 @@ public class MongodbStoreTest {
         String json1 = "{\"aKey\":\"aValue1\",\"anotherKey\":\"anotherValue1\"}";
         String json2 = "{\"aKey\":\"aValue2\",\"anotherKey\":\"anotherValue2\"}";
 
-        store.save(new Record(Json.parse(json1)));
-        store.save(new Record(Json.parse(json2)));
+        store.save(new Record(json1));
+        store.save(new Record(json2));
 
         assertThat(store.count()).isEqualTo(2);
     }

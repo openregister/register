@@ -1,13 +1,15 @@
 package controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import controllers.conf.Register;
 import play.libs.F;
-import play.mvc.BodyParser;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
@@ -15,6 +17,7 @@ import uk.gov.openregister.domain.Record;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static controllers.Representations.toJsonResponse;
@@ -27,11 +30,19 @@ public class Application extends Controller {
     }
 
 
-    @BodyParser.Of(BodyParser.Json.class)
-    public static Result create() {
+    public static Result renderNewEntryForm() {
+        return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys()));
+    }
 
-        Register.instance.store().save(new Record(request().body().asJson()));
-        return toJsonResponse(202, "Record saved successfully");
+    public static Result create() {
+        String header = request().getHeader("Content-Type");
+        if (header.contains(Http.MimeTypes.JSON)) {
+            return createEntryFromJson();
+        } else if (header.contains(Http.MimeTypes.FORM)) {
+            return createEntryFromHtml();
+        } else {
+            throw new RuntimeException("Unsupported content type: " + header);
+        }
     }
 
     public static F.Promise<Result> findByKey(String key, String value) {
@@ -74,8 +85,19 @@ public class Application extends Controller {
 
     }
 
+    private static Result createEntryFromHtml() {
+        Record record = createRecordFromParams(request().body().asFormUrlEncoded());
+        Register.instance.store().save(record);
+        return redirect("/hash/" + record.getHash());
+    }
+
+    private static Result createEntryFromJson() {
+        Register.instance.store().save(new Record(request().body().asJson()));
+        return toJsonResponse(202, "Record saved successfully");
+    }
+
     // TODO bulk import?
-    public static int readAndSaveToDb(URL url) throws Exception {
+    private static int readAndSaveToDb(URL url) throws Exception {
 
         char cs = url.toString().endsWith(".tsv") ? '\t' : ',';
 
@@ -91,7 +113,19 @@ public class Application extends Controller {
             counter++;
         }
         return counter;
+    }
 
+    private static Record createRecordFromParams(Map<String, String[]> formParameters) {
+        try {
+            Map<String, Object> jsonMap = new HashMap<>();
+            //TODO: this will break when we have multiple values for a key, data parsing will be based on datatype
+            formParameters.forEach((k, v) -> jsonMap.put(k, v[0]));
+            String json = new ObjectMapper().writeValueAsString(jsonMap);
+
+            return new Record(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("TODO: json parsing exception, we need to address this when TODO above is done");
+        }
     }
 
 }

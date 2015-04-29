@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import play.Logger;
+import play.libs.Json;
 import uk.gov.openregister.crypto.Digest;
 
 public class Record {
@@ -12,7 +13,10 @@ public class Record {
     public Record(JsonNode json) {
         this.entry = json;
         this.hash = Digest.shasum(normalise());
+    }
 
+    public Record(String jsonString){
+        this(Json.parse(jsonString));
     }
 
     private String hash;

@@ -1,5 +1,6 @@
 package uk.gov.openregister;
 
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.mongodb.client.MongoCollection;
 import controllers.conf.ApplicationGlobal;
 import org.bson.Document;
@@ -23,12 +24,16 @@ import static play.test.Helpers.testServer;
 public class ApplicationTests {
 
     public static final int PORT = 3333;
+    public static final String BASE_URL = "http://localhost:" + PORT;
     public static final long TIMEOUT = 10000L;
     public static final String REGISTER = "test_register";
+
     private static TestServer server;
 
+    public WebClient webClient = new WebClient();
+
     public WSResponse postJson(String path, String json) {
-        return WS.url("http://localhost:" + PORT + path)
+        return WS.url(BASE_URL + path)
                 .setHeader("Content-Type", "application/json").post(json).get(TIMEOUT);
     }
 
@@ -49,12 +54,13 @@ public class ApplicationTests {
     }
 
     public WSResponse get(String path) {
-        return WS.url("http://localhost:" + PORT + path).get().get(TIMEOUT);
+        return WS.url(BASE_URL + path).get().get(TIMEOUT);
     }
 
     @Before
     public void setUp() throws Exception {
         collection().drop();
+        webClient.getOptions().setRedirectEnabled(true);
     }
 
     protected MongoCollection<Document> collection() {

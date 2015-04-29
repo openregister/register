@@ -10,7 +10,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import org.bson.Document;
-import play.libs.Json;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.Store;
 
@@ -101,7 +100,7 @@ public class MongodbStore extends Store {
 
         return Optional.ofNullable(first).map(document -> {
             Document node = first.get("entry", Document.class);
-            return new Record(Json.parse(node.toJson()));
+            return new Record(node.toJson());
         });
     }
 
@@ -111,7 +110,7 @@ public class MongodbStore extends Store {
 
         MongoIterable<Record> records = documents.map(record -> {
             Document node = record.get("entry", Document.class);
-            return new Record(Json.parse(node.toJson()));
+            return new Record(node.toJson());
         });
 
         return Lists.newArrayList(records);

@@ -9,7 +9,9 @@ GET         /hash/:hash                                 controllers.Application.
 GET         /:key/:value                                controllers.Application.findByKey(key, value)
 
 
+GET         /create                                     controllers.Application.renderNewEntryForm()
 POST        /create                                     controllers.Application.create()
+
 GET         /load                                       controllers.Application.load()
 
 # Map static resources from the /public folder to the /assets URL path

@@ -5,7 +5,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.Test;
-import play.libs.Json;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.ApplicationTests;
 import uk.gov.openregister.domain.Record;
@@ -34,9 +33,9 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testGetSearchPageShowsTheTotalAmountOfEntries() throws Exception {
-        Document r1 = Document.parse(new Record(Json.parse("{\"key\":\"value1\"}")).toString());
-        Document r2 = Document.parse(new Record(Json.parse("{\"key\":\"value2\"}")).toString());
-        Document r3 = Document.parse(new Record(Json.parse("{\"key\":\"value1\",\"another\":\"value\"}")).toString());
+        Document r1 = Document.parse(new Record("{\"key\":\"value1\"}").toString());
+        Document r2 = Document.parse(new Record("{\"key\":\"value2\"}").toString());
+        Document r3 = Document.parse(new Record("{\"key\":\"value1\",\"another\":\"value\"}").toString());
 
         collection().insertMany(Arrays.asList(r1, r2, r3));
 
@@ -49,9 +48,9 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testSubmitSearchQueryAndReturnsListOfEntries() throws Exception {
-        Document r1 = Document.parse(new Record(Json.parse("{\"school\":\"value1\",\"name\":\"1\"}")).toString());
-        Document r2 = Document.parse(new Record(Json.parse("{\"school\":\"value2\",\"name\":\"2\"}")).toString());
-        Document r3 = Document.parse(new Record(Json.parse("{\"school\":\"value1\",\"name\":\"3\"}")).toString());
+        Document r1 = Document.parse(new Record("{\"school\":\"value1\",\"name\":\"1\"}").toString());
+        Document r2 = Document.parse(new Record("{\"school\":\"value2\",\"name\":\"2\"}").toString());
+        Document r3 = Document.parse(new Record("{\"school\":\"value1\",\"name\":\"3\"}").toString());
 
         collection().insertMany(Arrays.asList(r1, r2, r3));
 
@@ -81,7 +80,7 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testRenderFieldWithoutKeyValueAndAFieldWithValueIsAList() throws Exception {
-        Record record1 = new Record(Json.parse("{\"school\":\"value1\",\"name\":\"someName\",\"startDate\":[\"A\",\"B\"]}"));
+        Record record1 = new Record("{\"school\":\"value1\",\"name\":\"someName\",\"startDate\":[\"A\",\"B\"]}");
 
         collection().insertOne(Document.parse(record1.toString()));
 
@@ -109,14 +108,14 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(dt.get(3).text()).isEqualTo("startDate");
         assertThat(dd.get(3).text()).isEqualTo("['A', 'B']");
 
-        assertThat(dt.get(4).text()).isEqualTo("endDate");
+        assertThat(dt.get(4).text()).isEqualTo("website");
         assertThat(dd.get(4).text()).isEqualTo("");
     }
 
 
     @Test
     public void testRenderFieldAsListInEntries() throws Exception {
-        Record record1 = new Record(Json.parse("{\"school\":\"value1\",\"name\":\"someName\",\"startDate\":[\"A\",\"B\"]}"));
+        Record record1 = new Record("{\"school\":\"value1\",\"name\":\"someName\",\"startDate\":[\"A\",\"B\"]}");
 
         collection().insertOne(Document.parse(record1.toString()));
 
@@ -135,7 +134,7 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testEntryShowsNameIfPresent() throws Exception {
-        Record record = new Record(Json.parse("{\"key\":\"value1\",\"name\":\"The Entry\",\"another\":\"1\"}"));
+        Record record = new Record("{\"key\":\"value1\",\"name\":\"The Entry\",\"another\":\"1\"}");
         Document r1 = Document.parse(record.toString());
 
         collection().insertOne(r1);
@@ -154,7 +153,7 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testEntryDoesntShowsNameIfNotPresent() throws Exception {
-        Record record = new Record(Json.parse("{\"key\":\"value1\",\"another\":\"1\"}"));
+        Record record = new Record("{\"key\":\"value1\",\"another\":\"1\"}");
         Document r1 = Document.parse(record.toString());
 
         collection().insertOne(r1);

@@ -20,6 +20,8 @@ libraryDependencies ++= Seq(
   "org.mongodb" % "mongo-java-driver" % "3.0.0",
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-csv" % "2.5.2",
   "org.apache.commons" % "commons-dbcp2" % "2.1",
+  "org.apache.httpcomponents" % "httpclient" % "4.3.1",
+  "org.apache.httpcomponents" % "httpcore" % "4.3.1",
 
   // Test only dependencies
   "com.novocode" % "junit-interface" % "0.11" % "test",
