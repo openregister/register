@@ -28,7 +28,6 @@ public class Application extends Controller {
         return ok(views.html.index.render(ApplicationConf.getString("register.name"), count));
     }
 
-    private static Result createEntryFromHtml() {
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public static Result create() {
         Record record = createRecordFromParams(request().body().asFormUrlEncoded());
@@ -48,7 +47,7 @@ public class Application extends Controller {
         return ok(views.html.docsIndex.render(ApplicationConf.getString("register.name")));
     }
 
-      public static Result docsApi(String api) {
+    public static Result docsApi(String api) {
         switch(api) {
             case "create":
                  return ok(views.html.docsCreate.render(ApplicationConf.getString("register.name")));
@@ -76,5 +75,5 @@ public class Application extends Controller {
             throw new RuntimeException("TODO: json parsing exception, we need to address this when TODO above is done");
         }
     }
-
 }
+
