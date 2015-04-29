@@ -1,12 +1,14 @@
-package controllers.html;
+package functional.html;
 
 import org.junit.Test;
 import play.libs.ws.WSResponse;
-import uk.gov.openregister.ApplicationTests;
+import functional.ApplicationTests;
 
 import static org.fest.assertions.Assertions.assertThat;
 
 public class ApplicationGlobalTest extends ApplicationTests {
+
+
 
     @Test
     public void test404ErrorResponse() throws Exception {

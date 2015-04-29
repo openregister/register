@@ -1,9 +1,9 @@
-package controllers.json;
+package functional.json;
 
 import org.bson.Document;
 import org.junit.Test;
 import play.libs.ws.WSResponse;
-import uk.gov.openregister.ApplicationTests;
+import functional.ApplicationTests;
 import uk.gov.openregister.domain.Record;
 
 import java.util.Arrays;
