@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 public class MongodbStore extends Store {
 
-
     private static final int LIMIT = 100;
     private MongoClientURI conf = new MongoClientURI(databaseURI);
     private MongoDatabase db = new MongoClient(conf).getDatabase(conf.getDatabase());
@@ -43,19 +42,12 @@ public class MongodbStore extends Store {
 
     @Override
     public Optional<Record> findByKV(String key, String value) {
-        BasicDBObject whereQuery = new BasicDBObject();
-
-        whereQuery.put("entry." + key, new BasicDBObject("$regex", "^" + value + "$").append("$options", "i"));
-
-        return findOne(whereQuery);
+        return findOne(new BasicDBObject("entry." + key, value));
     }
 
     @Override
     public Optional<Record> findByHash(String hash) {
-        BasicDBObject whereQuery = new BasicDBObject();
-        whereQuery.put("hash", hash);
-
-        return findOne(whereQuery);
+        return findOne(new BasicDBObject("hash", hash));
     }
 
     @Override

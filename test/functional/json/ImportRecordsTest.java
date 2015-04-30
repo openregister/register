@@ -1,15 +1,15 @@
 package functional.json;
 
-import com.google.common.collect.Lists;
+import com.fasterxml.jackson.databind.JsonNode;
+import functional.ApplicationTests;
 import org.apache.commons.io.FileUtils;
-import org.bson.Document;
 import org.junit.Test;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
-import functional.ApplicationTests;
+import helper.PostgresqlStoreForTesting;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.OK;
@@ -31,17 +31,19 @@ public class ImportRecordsTest extends ApplicationTests {
 
             assertThat(response.getStatus()).isEqualTo(OK);
 
-            ArrayList<Document> documents = Lists.newArrayList(collection().find());
+            List<JsonNode> documents = PostgresqlStoreForTesting.findAll(REGISTER);
 
             assertThat(documents.size()).isEqualTo(2);
-            assertThat(documents.get(0).get("entry")).isNotNull();
-            assertThat(documents.get(0).get("entry", Document.class).get("id")).isEqualTo("123");
-            assertThat(documents.get(0).get("entry", Document.class).get("name")).isEqualTo("somename");
-            assertThat(documents.get(0).get("entry", Document.class).get("address")).isEqualTo("anaddress");
-            assertThat(documents.get(1).get("entry")).isNotNull();
-            assertThat(documents.get(1).get("entry", Document.class).get("id")).isEqualTo("124");
-            assertThat(documents.get(1).get("entry", Document.class).get("name")).isEqualTo("someothername");
-            assertThat(documents.get(1).get("entry", Document.class).get("address")).isEqualTo("anotherplace");
+
+            assertThat(documents.get(0)).isNotNull();
+            assertThat(documents.get(0).get("id").textValue()).isEqualTo("123");
+            assertThat(documents.get(0).get("name").textValue()).isEqualTo("somename");
+            assertThat(documents.get(0).get("address").textValue()).isEqualTo("anaddress");
+
+            assertThat(documents.get(1)).isNotNull();
+            assertThat(documents.get(1).get("id").textValue()).isEqualTo("124");
+            assertThat(documents.get(1).get("name").textValue()).isEqualTo("someothername");
+            assertThat(documents.get(1).get("address").textValue()).isEqualTo("anotherplace");
         } finally {
             tsv.delete();
         }
@@ -62,17 +64,19 @@ public class ImportRecordsTest extends ApplicationTests {
 
             assertThat(response.getStatus()).isEqualTo(OK);
 
-            ArrayList<Document> documents = Lists.newArrayList(collection().find());
+            List<JsonNode> documents = PostgresqlStoreForTesting.findAll(REGISTER);
 
             assertThat(documents.size()).isEqualTo(2);
-            assertThat(documents.get(0).get("entry")).isNotNull();
-            assertThat(documents.get(0).get("entry", Document.class).get("id")).isEqualTo("123");
-            assertThat(documents.get(0).get("entry", Document.class).get("name")).isEqualTo("somename");
-            assertThat(documents.get(0).get("entry", Document.class).get("address")).isEqualTo("anaddress");
-            assertThat(documents.get(1).get("entry")).isNotNull();
-            assertThat(documents.get(1).get("entry", Document.class).get("id")).isEqualTo("124");
-            assertThat(documents.get(1).get("entry", Document.class).get("name")).isEqualTo("someothername");
-            assertThat(documents.get(1).get("entry", Document.class).get("address")).isEqualTo("anotherplace");
+
+            assertThat(documents.get(0)).isNotNull();
+            assertThat(documents.get(0).get("id").textValue()).isEqualTo("123");
+            assertThat(documents.get(0).get("name").textValue()).isEqualTo("somename");
+            assertThat(documents.get(0).get("address").textValue()).isEqualTo("anaddress");
+
+            assertThat(documents.get(1)).isNotNull();
+            assertThat(documents.get(1).get("id").textValue()).isEqualTo("124");
+            assertThat(documents.get(1).get("name").textValue()).isEqualTo("someothername");
+            assertThat(documents.get(1).get("address").textValue()).isEqualTo("anotherplace");
         } finally {
             csv.delete();
         }

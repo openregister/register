@@ -1,8 +1,9 @@
 package functional.json;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import functional.ApplicationTests;
-import org.bson.Document;
 import org.junit.Test;
+import play.libs.Json;
 import play.libs.ws.WSResponse;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -52,10 +53,11 @@ public class CreateRecordTest extends ApplicationTests {
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
 
-        Document document = collection().find().first();
+        WSResponse wsResponse = getByKV("name", "entryName", "json");
+        String body = wsResponse.getBody();
 
-        assertThat(document.get("entry")).isNotNull();
-        assertThat(document.get("entry", Document.class).get("key1")).isEqualTo("value1");
-        assertThat(document.get("entry", Document.class).get("key2")).isEqualTo("value2");
+        JsonNode receivedEntry = Json.parse(body).get("entry");
+
+        assertThat(receivedEntry.asText()).isEqualTo(Json.parse(json).asText());
     }
 }

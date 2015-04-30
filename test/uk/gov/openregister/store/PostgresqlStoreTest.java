@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import controllers.conf.Register;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.openregister.conf.TestConfigurations;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
+import helper.PostgresqlStoreForTesting;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class PostgresqlStoreTest {
         Register schema = mock(Register.class);
         when(schema.keys()).thenReturn(Arrays.asList("aKey", "anotherKey"));
         PostgresqlStoreForTesting.dropTable(TABLE_NAME);
-        store = new PostgresqlStore(TestConfigurations.POSTGRESQL_URI, TABLE_NAME, schema.keys());
+        store = new PostgresqlStore(PostgresqlStoreForTesting.POSTGRESQL_URI, TABLE_NAME, schema.keys());
     }
 
     @Test
