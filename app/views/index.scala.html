@@ -1,4 +1,4 @@
-@(registerName: String, count: Long)
+@(registerName: String, keys: List[String], count: Long)
 
 @main(registerName + " register") {
 
@@ -19,7 +19,7 @@
                 <p class="label-text">Provided by:</p><p class="big-meta">@play.Play.application().configuration().getString("register.department")</p>
                 <p class="label-text">Last updated:</p><p class="big-meta">15 April 2015</p>
                 <p class="label-text">Part of:</p><p class="big-meta">@play.Play.application().configuration().getString("register.registry")</p>
-                <p class="label-text">Fields in this register:</p><p class="homepage-field-labels">field names</p>
+                <p class="label-text">Fields in this register:</p><p class="homepage-field-labels">@keys.mkString(", ")</p>
         </div>
     </div>
 
