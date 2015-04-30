@@ -3,8 +3,8 @@
 # ~~~~
 
 GET         /                                           controllers.Application.index()
-GET         /create                                     controllers.Application.renderNewEntryForm()
-POST        /create-urlencoded                          controllers.Application.create()
+GET         /ui/create                                  controllers.Application.renderNewEntryForm()
+POST        /ui/create                                  controllers.Application.create()
 
 GET         /hash/:hash                                 controllers.api.Rest.findByHash(hash)
 GET         /search                                     controllers.api.Rest.search()

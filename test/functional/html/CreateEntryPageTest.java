@@ -14,7 +14,7 @@ public class CreateEntryPageTest extends ApplicationTests {
 
     @Test
     public void addNewEntry_ignoresTheExtraFormFieldsAndCreatesANewEntryInTheRegister() throws IOException {
-        HtmlPage page = webClient.getPage(BASE_URL + "/create");
+        HtmlPage page = webClient.getPage(BASE_URL + "/ui/create");
         HtmlForm htmlForm = page.getForms().get(0);
 
         htmlForm.getInputByName("name").setValueAttribute("Some name");

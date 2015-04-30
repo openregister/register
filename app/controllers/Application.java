@@ -2,25 +2,26 @@ package controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
 import controllers.conf.Register;
-import uk.gov.openregister.validation.ValidationResult;
-import uk.gov.openregister.validation.Validator;
+import play.data.DynamicForm;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.validation.ValidationResult;
+import uk.gov.openregister.validation.Validator;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static controllers.api.Representations.toHtmlResponse;
-
 public class Application extends Controller {
 
+    private static DynamicForm dynamicForm = new DynamicForm();
+
     public static Result renderNewEntryForm() {
-        return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys()));
+
+        return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys(), dynamicForm));
     }
 
     public static Result index() {
@@ -30,12 +31,19 @@ public class Application extends Controller {
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public static Result create() {
-        Record record = createRecordFromParams(request().body().asFormUrlEncoded());
+
+        DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
+        Record record = createRecordFromParams(dynamicForm.data());
 
         // Validation
         ValidationResult validationResult = new Validator(Register.instance.keys()).validate(record);
         if (!validationResult.isValid()) {
-            return toHtmlResponse(400, Joiner.on(". ").join(validationResult.getMessages()));
+
+
+            validationResult.getMissingKeys()
+                    .forEach(k -> dynamicForm.reject(k, "error.required"));
+
+             return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys(), dynamicForm));
         }
 
         Register.instance.store().save(record);
@@ -60,13 +68,13 @@ public class Application extends Controller {
         }
     }
 
-    private static Record createRecordFromParams(Map<String, String[]> formParameters) {
+    private static Record createRecordFromParams(Map<String, String> formParameters) {
         try {
             Map<String, Object> jsonMap = new HashMap<>();
             //TODO: this will break when we have multiple values for a key, data parsing will be based on datatype
             formParameters.keySet().stream()
                     .filter(key -> Register.instance.keys().contains(key))
-                    .forEach(key -> jsonMap.put(key, formParameters.get(key)[0]));
+                    .forEach(key -> jsonMap.put(key, formParameters.get(key)));
 
             String json = new ObjectMapper().writeValueAsString(jsonMap);
 

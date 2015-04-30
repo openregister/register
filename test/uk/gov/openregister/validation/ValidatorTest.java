@@ -5,6 +5,7 @@ import play.libs.Json;
 import uk.gov.openregister.domain.Record;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -18,7 +19,6 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(true);
-        assertThat(result.getMessages()[0]).isEqualTo("Valid Record");
     }
 
     @Test
@@ -29,7 +29,8 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are mandatory but not found in record: key1");
+        assertThat(result.getMissingKeys()).isEqualTo(Collections.singletonList("key1"));
+        assertThat(result.getInvalidKeys().isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -40,7 +41,8 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are mandatory but not found in record: key2");
+        assertThat(result.getMissingKeys()).isEqualTo(Collections.singletonList("key2"));
+        assertThat(result.getInvalidKeys().isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -51,7 +53,8 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are mandatory but not found in record: key1, key2");
+        assertThat(result.getMissingKeys()).isEqualTo(Arrays.asList("key1", "key2"));
+        assertThat(result.getInvalidKeys().isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -62,7 +65,8 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are allowed in the record: key3");
+        assertThat(result.getMissingKeys().isEmpty()).isEqualTo(true);
+        assertThat(result.getInvalidKeys()).isEqualTo(Collections.singletonList("key3"));
     }
 
     @Test
@@ -73,7 +77,8 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are allowed in the record: key3, key4");
+        assertThat(result.getMissingKeys().isEmpty()).isEqualTo(true);
+        assertThat(result.getInvalidKeys()).isEqualTo(Arrays.asList("key3", "key4"));
     }
 
     @Test
@@ -83,9 +88,10 @@ public class ValidatorTest {
         String json = "{\"key1\":\"valuex\",\"key3\":\"valuey\",\"key4\":\"valuez\"}";
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
+
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are allowed in the record: key3, key4");
-        assertThat(result.getMessages()[1]).isEqualTo("The following keys are mandatory but not found in record: key2");
+        assertThat(result.getMissingKeys()).isEqualTo(Collections.singletonList("key2"));
+        assertThat(result.getInvalidKeys()).isEqualTo(Arrays.asList("key3", "key4"));
     }
 
 }

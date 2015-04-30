@@ -1,20 +1,26 @@
 package uk.gov.openregister.validation;
 
-public class ValidationResult {
-    private boolean valid;
-    private String[] messages;
+import java.util.List;
 
-    public ValidationResult(boolean valid, String[] messages) {
-        this.valid = valid;
-        this.messages = messages;
+public class ValidationResult {
+
+    List<String> invalidKeys;
+    List<String> missingKeys;
+
+    public ValidationResult(List<String> invalidKeys, List<String> missingKeys) {
+        this.invalidKeys = invalidKeys;
+        this.missingKeys = missingKeys;
     }
 
+    public List<String> getInvalidKeys() {
+        return invalidKeys;
+    }
+
+    public List<String> getMissingKeys() {
+        return missingKeys;
+    }
 
     public boolean isValid() {
-        return valid;
-    }
-
-    public String[] getMessages() {
-        return messages;
+        return invalidKeys.isEmpty() && missingKeys.isEmpty();
     }
 }

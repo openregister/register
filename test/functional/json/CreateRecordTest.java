@@ -31,7 +31,7 @@ public class CreateRecordTest extends ApplicationTests {
         WSResponse response = postJson("/create", json);
 
         assertThat(response.getBody())
-                .isEqualTo("{\"status\":400,\"message\":\"The following keys are allowed in the record: invalidKey\"}");
+                .isEqualTo("{\"status\":400,\"message\":\"The following keys are not allowed in the record: invalidKey\"}");
 
     }
 
@@ -41,7 +41,7 @@ public class CreateRecordTest extends ApplicationTests {
         WSResponse response = postJson("/create", json);
 
         assertThat(response.getBody())
-                .isEqualTo("{\"status\":400,\"message\":\"The following keys are allowed in the record: invalidKey. The following keys are mandatory but not found in record: key1\"}");
+                .isEqualTo("{\"status\":400,\"message\":\"The following keys are not allowed in the record: invalidKey\"}");
 
     }
 
