@@ -53,25 +53,26 @@ p.total {
   margin-bottom: 45px;
 }
 
-.search-panel {
-  margin-top: 35px;
-}
-
-.search-field {
-  box-sizing: border-box;    
-  float: left;   
-  width: 50%;   
-  min-width: 0;   
-  display: block;   
-  margin: 0;   
-  border: 0;    
-  height: 35px;     
-  padding: 6px 0;   
-  -webkit-appearance: none;
-  /*width: 100%;
-  float: left;
-  display: block;
-  min-width: 0;*/
+input.postfix {
+  position: absolute;
+  z-index: 4;
+  right: -20;
+  top: 0;
+  width: 35px;
+  height: 37px;
+  border: 1px solid #2372b5;
+  border-width: 0 0 0 1px;
+  border-left-color: #222;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  overflow: hidden;
+  text-indent: -5000px;
+  color: #fff;
+  background-color: #2372b5;
+  background-image: url(/assets/images/search-button-686bc7b2e0a29a7e9fad62a271bc8662.png);
+  background-repeat: no-repeat;
+  background-position: 0 50%;
 }
 
 
@@ -133,9 +134,19 @@ p.total {
 }
 
 .big-number {
-  font-size: 36px;
-  line-height: 40px;
+  font-size: 24px;
+  line-height: 30px;
   font-weight: bold;
+}
+
+.big-meta {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: bold;
+}
+
+.homepage-field-labels {
+  font-family: monospace; 
 }
 
 h2 {
@@ -342,6 +353,10 @@ span.label-text {
   font-size: 1.0rem;
 }
 
+p.label-text {
+  margin-bottom: 5px;
+}
+
 .search-panel {
   margin-top: 0px;
 }
@@ -351,8 +366,5 @@ span.label-text {
   .intro p {
     margin-bottom: 4px;
   }
-  .big-number {
-    font-size: 24px;
-    line-height: 48px;
-  }
+ 
 }

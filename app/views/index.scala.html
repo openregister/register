@@ -14,51 +14,41 @@
             <p>@play.Play.application().configuration().getString("register.description")</p>
         </div> <!-- ./columns -->
 
-        <div class="total-entries">
-                <p><span class="label-text">Total entries:</span></p><span class="big-number">@count</span>
-        </div>
-
         <div class="meta-entries">
-                <p><span class="label-text">Last updated:</span><br/>15 April 2015</p>
-                <p><span class="label-text">Part of:</span><br/>@play.Play.application().configuration().getString("register.registry")</p>
-        </div>
-        <div class="fields-in-register">
-                <p><span class="label-text">Fields in this register:</span><br/>field names</p>
+                <p class="label-text">Total entries:</p><p class="big-number">@count</p>
+                <p class="label-text">Provided by:</p><p class="big-meta">@play.Play.application().configuration().getString("register.department")</p>
+                <p class="label-text">Last updated:</p><p class="big-meta">15 April 2015</p>
+                <p class="label-text">Part of:</p><p class="big-meta">@play.Play.application().configuration().getString("register.registry")</p>
+                <p class="label-text">Fields in this register:</p><p class="homepage-field-labels">field names</p>
         </div>
 
     </div> <!-- ./columns -->
 
     <div class="small-12 large-4 columns">
 
-        <div class="search-panel">
-                <h4>Search this register</h4>
+                <h4>Search register entries</h4>
                 <p>@play.Play.application().configuration().getString("register.searchtext")</p>
 
                 <form action="/search">
-                    <div class="search-field">
-                        <input name="_query" type="text" placeholder="Enter search term">
-                     <!-- ./columns -->
-                        <input type="submit" value="Search" class="button postfix" />
-                    </div>    
+                <div class="row collapse">
+                        <div class="small-8 large-11 columns">
+                                <input name="_query" type="text" placeholder="Enter search term">
+                     
+                             <!-- ./columns -->
+                                <input type="submit" value="Search" class="button postfix" />
+                        </div>
+                </div>    
                 </form>
-        </div><!-- ./row -->
 
-        <hr class="divider"/>
-        <ul class="side-nav">
-            <li><a href="#">API Documentation</a></li>
-            <li><a href="/create">Create an entry</a></li>
-        </ul>
-    </div> <!-- ./columns -->
-</div><!-- ./row -->
+            <hr class="divider"/>
+                <ul class="side-nav">
+                    <li><a href="/docs">API Documentation</a></li>
+                </ul>
+        </div>
+</div>
 
-
-
-<div class="row footer">
-    <div class="small-12 large-12 columns">
 
 @license()
 
-    </div>
-</div>
 
 }
