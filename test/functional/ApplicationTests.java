@@ -1,9 +1,7 @@
 package functional;
 
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.mongodb.client.MongoCollection;
 import controllers.conf.ApplicationGlobal;
-import org.bson.Document;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -12,7 +10,7 @@ import play.libs.ws.WSResponse;
 import play.test.FakeApplication;
 import play.test.Helpers;
 import play.test.TestServer;
-import uk.gov.openregister.store.TestSettings;
+import helper.PostgresqlStoreForTesting;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -58,12 +56,9 @@ public class ApplicationTests {
 
     @Before
     public void setUp() throws Exception {
-        collection().drop();
+        PostgresqlStoreForTesting.dropTable(REGISTER);
+        PostgresqlStoreForTesting.createTable(REGISTER);
         webClient.getOptions().setRedirectEnabled(true);
-    }
-
-    protected MongoCollection<Document> collection() {
-        return TestSettings.collection(REGISTER);
     }
 
     @BeforeClass
