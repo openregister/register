@@ -14,18 +14,40 @@
 * limitations under the License.
 *************************************************************************@
 
-@(registerName: String, message: String)
+@(registerName: String)
 
 @main(registerName + " register") {
 
 @header(registerName)
 
-<div class="row">
-
+  <div class="row">
     <div class="small-12 large-12 columns">
-        <h1 class="error">@message</h1>
-    </div> <!-- /.columns -->
+      <h3>API Documentation</h3>
+    </div>
+  </div>
 
-</div> <!-- /.row -->
+  <div class="row docs">
+    <div class="small-12 large-12 columns">
+      <ul>
+        <li><a href="/docs/api/create">Create an entry</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row docs">
+    <div class="small-12 large-12 columns">
+      <ul>
+        <li><a href="/docs/api/search">Search for an entry</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row docs">
+    <div class="small-12 large-12 columns">
+      <ul>
+        <li><a href="/docs/api/get">Get an entry by an identifier</a></li>
+      </ul>
+    </div>
+  </div>
+
 @license()
+
 }

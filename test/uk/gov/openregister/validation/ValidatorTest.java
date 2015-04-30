@@ -1,10 +1,27 @@
-package controllers;
+/*
+ * Copyright 2015 openregister.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.openregister.validation;
 
 import org.junit.Test;
 import play.libs.Json;
 import uk.gov.openregister.domain.Record;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -18,7 +35,6 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(true);
-        assertThat(result.getMessages()[0]).isEqualTo("Valid Record");
     }
 
     @Test
@@ -29,7 +45,8 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are mandatory but not found in record: key1");
+        assertThat(result.getMissingKeys()).isEqualTo(Collections.singletonList("key1"));
+        assertThat(result.getInvalidKeys().isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -40,7 +57,8 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are mandatory but not found in record: key2");
+        assertThat(result.getMissingKeys()).isEqualTo(Collections.singletonList("key2"));
+        assertThat(result.getInvalidKeys().isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -51,7 +69,8 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are mandatory but not found in record: key1, key2");
+        assertThat(result.getMissingKeys()).isEqualTo(Arrays.asList("key1", "key2"));
+        assertThat(result.getInvalidKeys().isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -62,7 +81,8 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are allowed in the record: key3");
+        assertThat(result.getMissingKeys().isEmpty()).isEqualTo(true);
+        assertThat(result.getInvalidKeys()).isEqualTo(Collections.singletonList("key3"));
     }
 
     @Test
@@ -73,7 +93,8 @@ public class ValidatorTest {
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are allowed in the record: key3, key4");
+        assertThat(result.getMissingKeys().isEmpty()).isEqualTo(true);
+        assertThat(result.getInvalidKeys()).isEqualTo(Arrays.asList("key3", "key4"));
     }
 
     @Test
@@ -83,9 +104,10 @@ public class ValidatorTest {
         String json = "{\"key1\":\"valuex\",\"key3\":\"valuey\",\"key4\":\"valuez\"}";
 
         final ValidationResult result = v.validate(new Record(Json.parse(json)));
+
         assertThat(result.isValid()).isEqualTo(false);
-        assertThat(result.getMessages()[0]).isEqualTo("The following keys are allowed in the record: key3, key4");
-        assertThat(result.getMessages()[1]).isEqualTo("The following keys are mandatory but not found in record: key2");
+        assertThat(result.getMissingKeys()).isEqualTo(Collections.singletonList("key2"));
+        assertThat(result.getInvalidKeys()).isEqualTo(Arrays.asList("key3", "key4"));
     }
 
 }

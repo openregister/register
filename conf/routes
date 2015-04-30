@@ -3,16 +3,18 @@
 # ~~~~
 
 GET         /                                           controllers.Application.index()
-GET         /search                                     controllers.Application.search()
+GET         /ui/create                                  controllers.Application.renderNewEntryForm()
+POST        /ui/create                                  controllers.Application.create()
 
-GET         /hash/:hash                                 controllers.Application.findByHash(hash)
-GET         /:key/:value                                controllers.Application.findByKey(key, value)
+GET         /hash/:hash                                 controllers.api.Rest.findByHash(hash)
+GET         /search                                     controllers.api.Rest.search()
+GET         /:key/:value                                controllers.api.Rest.findByKey(key, value)
+POST        /create                                     controllers.api.Rest.create()
+GET         /load                                       controllers.api.Rest.load()
 
+GET         /docs                                       controllers.Application.docs()
 
-GET         /create                                     controllers.Application.renderNewEntryForm()
-POST        /create                                     controllers.Application.create()
-
-GET         /load                                       controllers.Application.load()
+GET         /docs/api/:api                                       controllers.Application.docsApi(api)
 
 # Map static resources from the /public folder to the /assets URL path
 GET        /assets/*file                  controllers.Assets.at(path="/public", file)

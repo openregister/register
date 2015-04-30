@@ -1,10 +1,28 @@
+/*
+ * Copyright 2015 openregister.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.openregister.store;
 
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoCollection;
 import controllers.conf.Register;
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.openregister.conf.TestConfigurations;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.mongodb.MongodbStore;
 
@@ -19,15 +37,21 @@ import static org.mockito.Mockito.when;
 
 public class MongodbStoreTest {
 
+    public static final String MONGO_URI = "mongodb://localhost/test-openregister";
     public static final String COLLECTION = "store_tests";
     private Store store;
 
+    public static MongoClientURI conf = new MongoClientURI(MONGO_URI);
+    public static MongoCollection<Document> collection(String cn) {
+        return new MongoClient(conf).getDatabase(conf.getDatabase()).getCollection(cn);
+    }
+
     @Before
     public void setUp() throws Exception {
-        TestSettings.collection(COLLECTION).drop();
+        collection(COLLECTION).drop();
         Register schema = mock(Register.class);
         when(schema.keys()).thenReturn(Arrays.asList("aKey", "anotherKey"));
-        store = new MongodbStore(TestConfigurations.MONGO_URI, COLLECTION, schema.keys());
+        store = new MongodbStore(MONGO_URI, COLLECTION, schema.keys());
     }
 
     @Test
@@ -36,7 +60,7 @@ public class MongodbStoreTest {
 
         store.save(new Record(json));
 
-        Document document = TestSettings.collection(COLLECTION).find().first();
+        Document document = collection(COLLECTION).find().first();
         Document entry = document.get("entry", Document.class);
         assertThat(entry).isNotNull();
         assertThat(entry.get("key1")).isEqualTo("value1");
@@ -51,7 +75,7 @@ public class MongodbStoreTest {
 
         store.save(new Record(json));
 
-        Document document = TestSettings.collection(COLLECTION).find().first();
+        Document document = collection(COLLECTION).find().first();
         assertThat(document.get("hash")).isEqualTo(expected);
     }
 
@@ -63,9 +87,10 @@ public class MongodbStoreTest {
 
         store.save(new Record(json));
 
-        assertThat(store.findByKV("aKey", "AValue").get().toString()).isEqualTo(expected);
-        assertThat(store.findByKV("anotherKey", "AnotherValue").get().toString()).isEqualTo(expected);
+        assertThat(store.findByKV("aKey", "aValue").get().toString()).isEqualTo(expected);
+        assertThat(store.findByKV("anotherKey", "anotherValue").get().toString()).isEqualTo(expected);
 
+        assertThat(store.findByKV("anotherKey", "AnotherValue")).isEqualTo(Optional.empty());
         assertThat(store.findByKV("anotherKey", "A")).isEqualTo(Optional.empty());
     }
 

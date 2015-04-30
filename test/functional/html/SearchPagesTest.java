@@ -1,16 +1,28 @@
-package functionaltests.html;
+/*
+ * Copyright 2015 openregister.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import org.bson.Document;
+package functional.html;
+
+import functional.ApplicationTests;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.Test;
-import play.libs.Json;
 import play.libs.ws.WSResponse;
-import functionaltests.ApplicationTests;
 import uk.gov.openregister.domain.Record;
-
-import java.util.Arrays;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.OK;
@@ -31,14 +43,12 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(body).contains("Search this register");
     }
 
-
     @Test
     public void testGetSearchPageShowsTheTotalAmountOfEntries() throws Exception {
-        Document r1 = Document.parse(new Record("{\"key\":\"value1\"}").toString());
-        Document r2 = Document.parse(new Record("{\"key\":\"value2\"}").toString());
-        Document r3 = Document.parse(new Record("{\"key\":\"value1\",\"another\":\"value\"}").toString());
+        postJson("/create","{\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
+        postJson("/create", "{\"name\":\"The Entry\",\"key1\": \"value2\",\"key2\": [\"A\",\"B\"]}");
+        postJson("/create", "{\"name\":\"The Entry\",\"key1\": \"value3\",\"key2\": [\"A\",\"B\"]}");
 
-        collection().insertMany(Arrays.asList(r1, r2, r3));
 
         WSResponse response = get("/");
 
@@ -49,11 +59,9 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testSubmitSearchQueryAndReturnsListOfEntries() throws Exception {
-        Document r1 = Document.parse(new Record(Json.parse("{\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}")).toString());
-        Document r2 = Document.parse(new Record(Json.parse("{\"name\":\"The Entry2\",\"key1\": \"value2\",\"key2\": [\"C\",\"D\"]}")).toString());
-        Document r3 = Document.parse(new Record(Json.parse("{\"name\":\"The Entry3\",\"key1\": \"value1\",\"key2\": [\"E\",\"F\"]}")).toString());
-
-        collection().insertMany(Arrays.asList(r1, r2, r3));
+        postJson("/create", "{\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
+        postJson("/create", "{\"name\":\"The Entry2\",\"key1\": \"value2\",\"key2\": [\"C\",\"D\"]}");
+        postJson("/create", "{\"name\":\"The Entry3\",\"key1\": \"value1\",\"key2\": [\"E\",\"F\"]}");
 
         WSResponse response = get("/search?_query=value1");
         assertThat(response.getStatus()).isEqualTo(OK);
@@ -84,11 +92,11 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testRenderFieldWithoutKeyValueAndAFieldWithValueIsAList() throws Exception {
-        Record record1 = new Record(Json.parse("{\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}"));
+        String json = "{\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String hash =new Record(json).getHash();
+        postJson("/create", json);
 
-        collection().insertOne(Document.parse(record1.toString()));
-
-        WSResponse response = get("/hash/" + record1.getHash());
+        WSResponse response = get("/hash/" + hash);
 
         assertThat(response.getStatus()).isEqualTo(OK);
 
@@ -101,7 +109,7 @@ public class SearchPagesTest extends ApplicationTests {
         Elements dd = dl.select("dd");
 
         assertThat(dt.get(0).text()).isEqualTo("hash");
-        assertThat(dd.get(0).text()).isEqualTo(record1.getHash());
+        assertThat(dd.get(0).text()).isEqualTo(hash);
 
         assertThat(dt.get(1).text()).isEqualTo("name");
         assertThat(dd.get(1).text()).isEqualTo("The Entry");
@@ -116,7 +124,7 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testRenderFieldAsListInEntries() throws Exception {
-        collection().insertOne(Document.parse(new Record(Json.parse("{\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}")).toString()));
+        postJson("/create", "{\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
 
         WSResponse response = search("key1", "value1", "html");
 
@@ -133,12 +141,11 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testEntryShowsNameIfPresent() throws Exception {
-        Record record = new Record(Json.parse("{\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}"));
-        Document r1 = Document.parse(record.toString());
+        String json = "{\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String hash =new Record(json).getHash();
+        postJson("/create", json);
 
-        collection().insertOne(r1);
-
-        WSResponse response = get("/hash/" + record.getHash());
+        WSResponse response = get("/hash/" + hash);
 
         assertThat(response.getStatus()).isEqualTo(OK);
 
@@ -147,22 +154,5 @@ public class SearchPagesTest extends ApplicationTests {
         Element h1 = html.getElementById("entry_name");
         assertThat(h1).isNotNull();
         assertThat(h1.text()).isEqualTo("The Entry");
-    }
-
-
-    @Test
-    public void testEntryDoesntShowsNameIfNotPresent() throws Exception {
-        Record record = new Record("{\"key\":\"value1\",\"another\":\"1\"}");
-        Document r1 = Document.parse(record.toString());
-
-        collection().insertOne(r1);
-
-        WSResponse response = get("/hash/" + record.getHash());
-
-        assertThat(response.getStatus()).isEqualTo(OK);
-
-        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
-
-        assertThat(html.getElementById("entry_name")).isNull();
     }
 }

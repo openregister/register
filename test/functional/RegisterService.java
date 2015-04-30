@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.openregister.crypto;
+package functional;
 
-import org.junit.Test;
+import by.stub.client.StubbyClient;
 
-import static org.fest.assertions.Assertions.assertThat;
+import java.io.File;
 
-public class CryptoTest {
+public class RegisterService {
 
-    @Test
-    public void testHashFunction() throws Exception {
-        assertThat(Digest.shasum("{}")).isEqualTo("9e26dfeeb6e641a33dae4961196235bdb965b21b");
-        assertThat(Digest.shasum("{\"foo\":\"Foo Value\"}")).isEqualTo("257b86bf0b88dbf40cacff2b649f763d585df662");
-        assertThat(Digest.shasum("{\"bar\":\"こんにちは、元気ですか\",\"foo\":\"Foo Value\"}")).isEqualTo("d8d2a8d65415145e4ca092af80cc4c6bfa34519c");
+
+    private static  StubbyClient stubbyClient = new StubbyClient();
+
+    public static void start() throws Exception {
+        String yamlResource = new File(RegisterService.class.getResource("/registers-service.yaml").toURI()).getAbsolutePath();
+        stubbyClient.startJetty(8888, yamlResource);
+    }
+
+    public static void stop() throws Exception {
+        stubbyClient.stopJetty();
     }
 }

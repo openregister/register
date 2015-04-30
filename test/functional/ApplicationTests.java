@@ -1,9 +1,23 @@
-package functionaltests;
+/*
+ * Copyright 2015 openregister.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package functional;
 
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.mongodb.client.MongoCollection;
 import controllers.conf.ApplicationGlobal;
-import org.bson.Document;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -12,7 +26,7 @@ import play.libs.ws.WSResponse;
 import play.test.FakeApplication;
 import play.test.Helpers;
 import play.test.TestServer;
-import uk.gov.openregister.store.TestSettings;
+import helper.PostgresqlStoreForTesting;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -58,12 +72,9 @@ public class ApplicationTests {
 
     @Before
     public void setUp() throws Exception {
-        collection().drop();
+        PostgresqlStoreForTesting.dropTable(REGISTER);
+        PostgresqlStoreForTesting.createTable(REGISTER);
         webClient.getOptions().setRedirectEnabled(true);
-    }
-
-    protected MongoCollection<Document> collection() {
-        return TestSettings.collection(REGISTER);
     }
 
     @BeforeClass

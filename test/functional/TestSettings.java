@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.openregister.crypto;
+package functional;
 
-import org.junit.Test;
+import helper.PostgresqlStoreForTesting;
 
-import static org.fest.assertions.Assertions.assertThat;
+import java.util.HashMap;
+import java.util.Map;
 
-public class CryptoTest {
+public class TestSettings {
 
-    @Test
-    public void testHashFunction() throws Exception {
-        assertThat(Digest.shasum("{}")).isEqualTo("9e26dfeeb6e641a33dae4961196235bdb965b21b");
-        assertThat(Digest.shasum("{\"foo\":\"Foo Value\"}")).isEqualTo("257b86bf0b88dbf40cacff2b649f763d585df662");
-        assertThat(Digest.shasum("{\"bar\":\"こんにちは、元気ですか\",\"foo\":\"Foo Value\"}")).isEqualTo("d8d2a8d65415145e4ca092af80cc4c6bfa34519c");
+    public static Map<String, String> forRegister(String name) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("store.uri", PostgresqlStoreForTesting.POSTGRESQL_URI);
+        map.put("register.name", name);
+        map.put("registers.service.url", "http://localhost:8888");
+        return map;
     }
+
 }

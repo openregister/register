@@ -14,18 +14,29 @@
  * limitations under the License.
  */
 
-package uk.gov.openregister.crypto;
+package uk.gov.openregister.validation;
 
-import org.junit.Test;
+import java.util.List;
 
-import static org.fest.assertions.Assertions.assertThat;
+public class ValidationResult {
 
-public class CryptoTest {
+    List<String> invalidKeys;
+    List<String> missingKeys;
 
-    @Test
-    public void testHashFunction() throws Exception {
-        assertThat(Digest.shasum("{}")).isEqualTo("9e26dfeeb6e641a33dae4961196235bdb965b21b");
-        assertThat(Digest.shasum("{\"foo\":\"Foo Value\"}")).isEqualTo("257b86bf0b88dbf40cacff2b649f763d585df662");
-        assertThat(Digest.shasum("{\"bar\":\"こんにちは、元気ですか\",\"foo\":\"Foo Value\"}")).isEqualTo("d8d2a8d65415145e4ca092af80cc4c6bfa34519c");
+    public ValidationResult(List<String> invalidKeys, List<String> missingKeys) {
+        this.invalidKeys = invalidKeys;
+        this.missingKeys = missingKeys;
+    }
+
+    public List<String> getInvalidKeys() {
+        return invalidKeys;
+    }
+
+    public List<String> getMissingKeys() {
+        return missingKeys;
+    }
+
+    public boolean isValid() {
+        return invalidKeys.isEmpty() && missingKeys.isEmpty();
     }
 }

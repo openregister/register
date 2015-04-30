@@ -1,8 +1,25 @@
-package functionaltests.json;
+/*
+ * Copyright 2015 openregister.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import functionaltests.ApplicationTests;
-import org.bson.Document;
+package functional.json;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import functional.ApplicationTests;
 import org.junit.Test;
+import play.libs.Json;
 import play.libs.ws.WSResponse;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -31,7 +48,7 @@ public class CreateRecordTest extends ApplicationTests {
         WSResponse response = postJson("/create", json);
 
         assertThat(response.getBody())
-                .isEqualTo("{\"status\":400,\"message\":\"The following keys are allowed in the record: invalidKey\"}");
+                .isEqualTo("{\"status\":400,\"message\":\"The following keys are not allowed in the record: invalidKey\"}");
 
     }
 
@@ -41,7 +58,7 @@ public class CreateRecordTest extends ApplicationTests {
         WSResponse response = postJson("/create", json);
 
         assertThat(response.getBody())
-                .isEqualTo("{\"status\":400,\"message\":\"The following keys are allowed in the record: invalidKey. The following keys are mandatory but not found in record: key1\"}");
+                .isEqualTo("{\"status\":400,\"message\":\"The following keys are not allowed in the record: invalidKey\"}");
 
     }
 
@@ -52,10 +69,11 @@ public class CreateRecordTest extends ApplicationTests {
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
 
-        Document document = collection().find().first();
+        WSResponse wsResponse = getByKV("name", "entryName", "json");
+        String body = wsResponse.getBody();
 
-        assertThat(document.get("entry")).isNotNull();
-        assertThat(document.get("entry", Document.class).get("key1")).isEqualTo("value1");
-        assertThat(document.get("entry", Document.class).get("key2")).isEqualTo("value2");
+        JsonNode receivedEntry = Json.parse(body).get("entry");
+
+        assertThat(receivedEntry.asText()).isEqualTo(Json.parse(json).asText());
     }
 }

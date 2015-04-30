@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package uk.gov.openregister.crypto;
+package functional.html;
 
 import org.junit.Test;
+import play.libs.ws.WSResponse;
+import functional.ApplicationTests;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static play.mvc.Http.Status.NOT_FOUND;
 
-public class CryptoTest {
+public class ErrorPagesTest extends ApplicationTests {
+
 
     @Test
-    public void testHashFunction() throws Exception {
-        assertThat(Digest.shasum("{}")).isEqualTo("9e26dfeeb6e641a33dae4961196235bdb965b21b");
-        assertThat(Digest.shasum("{\"foo\":\"Foo Value\"}")).isEqualTo("257b86bf0b88dbf40cacff2b649f763d585df662");
-        assertThat(Digest.shasum("{\"bar\":\"こんにちは、元気ですか\",\"foo\":\"Foo Value\"}")).isEqualTo("d8d2a8d65415145e4ca092af80cc4c6bfa34519c");
+    public void testUnknownHash() throws Exception {
+
+        WSResponse response = get("/hash/123");
+
+        assertThat(response.getStatus()).isEqualTo(NOT_FOUND);
+        String body = response.getBody();
+        assertThat(body).contains("<h1 class=\"error\">Entry not found</h1>");
     }
 }
