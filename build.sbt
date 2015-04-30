@@ -2,7 +2,7 @@ name := """register"""
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayJava)
+lazy val root = (project in file(".")).enablePlugins(PlayJava, AutomateHeaderPlugin)
 
 scalaVersion := "2.11.6"
 
@@ -27,4 +27,11 @@ libraryDependencies ++= Seq(
   "com.novocode" % "junit-interface" % "0.11" % "test",
   "org.jsoup" % "jsoup" % "1.7.2" % "test",
   "by.stub" % "stubby4j" % "3.1.3"  % "test"
+)
+
+import de.heikoseeberger.sbtheader.license.Apache2_0
+
+headers := Map(
+  "java" -> Apache2_0("2015", "openregister.org"),
+  "conf" -> Apache2_0("2015", "openregister.org", "#")
 )
