@@ -1,7 +1,7 @@
 /* Typography */
 body, h1, h2,h3, h4, h5 .button, table, label {
   /*font-family: 'Roboto Slab', serif;*/
-  font-family: 'nta', Arial, Helvetica;
+  font-family: Helvetica, Arial;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -19,7 +19,7 @@ p, dl, ul, label {
 .button {
   background:#2372B5;
   border-bottom:5px solid #255c8a;
-  font-family: 'nta', Arial, Helvetica!important;
+  font-family: Helvetica, Arial;
   font-weight:bold;
   font-size: 1.35rem;
   padding-bottom: 0.5rem;
@@ -39,13 +39,45 @@ p.total {
   margin-bottom: 0px;
 }
 
+.summary-copy p {
+  font-size: 36px;
+  line-height: 40px;
+  font-weight: 700;
+}
+
+.exists-copy p {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 300;
+  margin-top: 45px;
+  margin-bottom: 45px;
+}
+
 .search-panel {
   margin-top: 35px;
 }
 
+.search-field {
+  box-sizing: border-box;    
+  float: left;   
+  width: 50%;   
+  min-width: 0;   
+  display: block;   
+  margin: 0;   
+  border: 0;    
+  height: 35px;     
+  padding: 6px 0;   
+  -webkit-appearance: none;
+  /*width: 100%;
+  float: left;
+  display: block;
+  min-width: 0;*/
+}
+
+
 #header-wrapper {
   width: 100%;
-  background:#2372b5 !important;
+  background: #2372b5 !important;
   padding-top: 5px;
   margin-bottom: 35px;
 }
@@ -53,7 +85,7 @@ p.total {
 .header,
 .top-bar {
   background: inherit;
-  font-family:Helvetica, Arial, sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
 }
 
 .top-bar #header_crest {
@@ -67,14 +99,14 @@ p.total {
 
 .top-bar h1 {
   font-size: 1.35rem;
-  font-family:Helvetica, Arial, sans-serif;
-  font-weight:normal;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: normal;
 }
 
 
 .top-bar a {
-  text-decoration:none;
-  color:#fff;
+  text-decoration: none;
+  color: #fff;
 }
 
 /* intro */
@@ -92,9 +124,17 @@ p.total {
   text-transform: uppercase;
 }
 
+.total-entries {
+  margin-bottom: 20px;
+}
+
+.total-entries p {
+  margin-bottom: 5px;
+}
+
 .big-number {
-  font-size: 45px;
-  line-height: 86px;
+  font-size: 36px;
+  line-height: 40px;
   font-weight: bold;
 }
 
@@ -103,14 +143,23 @@ h2 {
   padding-top: 4px;
 }
 
+/*.side-nav ul {
+  padding-top: 15px;
+}*/
+
+.side-nav li {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
 /* entries in registers*/
 .entry {
-  background:#eceded;
-  border:none;
+  background: #eceded;
+  border: none;
   border-radius: 0;
-  margin-top:1rem;
+  margin-top: 1rem;
   margin-bottom: 1rem;
-  font-family:monospace;
+  font-family: monospace;
 }
 
 .entry dt {
@@ -263,6 +312,12 @@ table.entries td {
   padding-left: 10em;
 }
 
+.footer {
+  margin-top: 30px;
+  padding-top: 15px;
+  /*border-top: 1px solid #BFC1C3;*/
+}
+
 #ogl-logo {
   margin-top: 3px;
 }
@@ -274,11 +329,13 @@ table.entries td {
 .open-government-licence p {
   font-size: 0.7rem;
   margin-left: -10px;
+  line-height: 0.9rem;
 }
 
 hr.divider {
   border: solid #2372b5 !important;
   border-width: 10px 0 0;
+  margin-bottom: 5px;
 }
 
 span.label-text {
@@ -286,7 +343,7 @@ span.label-text {
 }
 
 .search-panel {
-  margin-top: 20px;
+  margin-top: 0px;
 }
 
 /* responsive styles */
@@ -295,7 +352,7 @@ span.label-text {
     margin-bottom: 4px;
   }
   .big-number {
-    font-size: 36px;
+    font-size: 24px;
     line-height: 48px;
   }
 }

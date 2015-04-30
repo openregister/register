@@ -7,50 +7,58 @@
 
 <div class="row">
     <div class="small-12 large-8 columns">
-        <h4>@play.Play.application().configuration().getString("register.title")</h4>
+        <div class="summary-copy">
+            <p>@play.Play.application().configuration().getString("register.title")</p>
+        </div>
+        <div class="exists-copy">
+            <p>@play.Play.application().configuration().getString("register.description")</p>
+        </div> <!-- ./columns -->
+
+        <div class="total-entries">
+                <p><span class="label-text">Total entries:</span></p><span class="big-number">@count</span>
+        </div>
+
+        <div class="meta-entries">
+                <p><span class="label-text">Last updated:</span><br/>15 April 2015</p>
+                <p><span class="label-text">Part of:</span><br/>@play.Play.application().configuration().getString("register.registry")</p>
+        </div>
+        <div class="fields-in-register">
+                <p><span class="label-text">Fields in this register:</span><br/>field names</p>
+        </div>
+
     </div> <!-- ./columns -->
 
-    <div class="small-12 large-3 columns">
-        <p class="total">Total entries:</p>
-        <span class="big-number">@count</span>
+    <div class="small-12 large-4 columns">
+
+        <div class="search-panel">
+                <h4>Search this register</h4>
+                <p>@play.Play.application().configuration().getString("register.searchtext")</p>
+
+                <form action="/search">
+                    <div class="search-field">
+                        <input name="_query" type="text" placeholder="Enter search term">
+                     <!-- ./columns -->
+                        <input type="submit" value="Search" class="button postfix" />
+                    </div>    
+                </form>
+        </div><!-- ./row -->
+
         <hr class="divider"/>
-        <a href="#">API Documentation</a>
+        <ul class="side-nav">
+            <li><a href="#">API Documentation</a></li>
+            <li><a href="/create">Create an entry</a></li>
+        </ul>
     </div> <!-- ./columns -->
 </div><!-- ./row -->
 
 
-<div class="row">
-   <div class="small-12 large-8 columns">
-        <p><span class="label-text">Last updated:</span><br/>15 April 2015</p>
-        <p><span class="label-text">Part of:</span><br/>@play.Play.application().configuration().getString("register.registry")</p>
-    </div> <!-- ./columns -->
-</div><!-- ./row -->
 
-<div class="row">
-   <div class="small-12 large-8 columns">
-        <h5>@play.Play.application().configuration().getString("register.description")</h5>
-    </div> <!-- ./columns -->
-</div><!-- ./row -->
-
-<div class="row search-panel">
-    <div class="small-12 large-8 columns">
-        <h4>Search this register</h4>
-        <p>@play.Play.application().configuration().getString("register.searchtext")</p>
-    </div> <!-- ./columns -->
-</div><!-- ./row -->
-
-<div class="row">
-        <form action="/search">
-            <div class="large-6 columns">
-                <input name="_query" type="text" placeholder="Enter search term">
-            </div> <!-- ./columns -->
-            <div class="large-2 columns end">
-                <input type="submit" value="Search" class="button postfix" />
-            </div> <!-- ./columns -->
-        </form>
-</div><!-- ./row -->
-
+<div class="row footer">
+    <div class="small-12 large-12 columns">
 
 @license()
+
+    </div>
+</div>
 
 }
