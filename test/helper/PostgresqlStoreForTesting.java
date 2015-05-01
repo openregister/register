@@ -12,15 +12,15 @@ public class PostgresqlStoreForTesting {
     public static final String POSTGRESQL_URI = "postgresql://localhost/testopenregister";
 
     public static void createTable(String tableName) throws SQLException, ClassNotFoundException {
-        Statement st = getStatement();
-        st.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb)");
-        st.close();
+        try(Statement st = getStatement()){
+            st.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb)");
+        }
     }
 
     public static void dropTable(String tableName) throws Exception {
-        Statement st = getStatement();
-        st.execute("DROP TABLE IF EXISTS " + tableName);
-        st.close();
+        try(Statement st = getStatement()) {
+            st.execute("DROP TABLE IF EXISTS " + tableName);
+        }
     }
 
     public static List<JsonNode> findAllEntries(String tableName) {
@@ -29,11 +29,10 @@ public class PostgresqlStoreForTesting {
 
     public static List<DataRow> findAll(String tableName) {
         List<DataRow> result = new ArrayList<>();
-        Statement st = null;
-        ResultSet rs = null;
         try {
-            try {
-                st = getStatement();
+            ResultSet rs = null;
+            try(Statement st = getStatement()) {
+
                 st.execute("SELECT * FROM " + tableName);
                 rs = st.getResultSet();
                 while (rs.next()) {
@@ -45,7 +44,6 @@ public class PostgresqlStoreForTesting {
                 }
             } finally {
                 if (rs != null) rs.close();
-                if (st != null) st.close();
             }
         } catch (Exception e) {
             throw new RuntimeException("error", e);

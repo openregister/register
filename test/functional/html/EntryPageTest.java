@@ -87,7 +87,7 @@ public class EntryPageTest extends ApplicationTests {
     }
 
     @Test
-    public void update_validtesMissingValueAndRendersTheSamePage() throws IOException {
+    public void update_validatesMissingValueAndRendersTheSamePage() throws IOException {
         String json = "{\"name\":\"entryName\",\"key1\":\"Key1Value\",\"key2\":\"Key2Value\"}";
         Record record = new Record(json);
         postJson("/create", json);

@@ -6,7 +6,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WSResponse;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import uk.gov.openregister.domain.Record;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -99,7 +98,14 @@ public class CreateRecordTest extends ApplicationTests {
     @Ignore
     @Test
     public void updateShouldFailWhenHashAndPrimaryKeyDoesNotMatch() {
-        throw new NotImplementedException();
+        String json = "{\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        Record record = new Record(json);
+        postJson("/create", json);
+
+        String updatedJson = "{\"name\":\"entryName1\",\"key1\": \"value1\",\"key2\": \"value3\"}";
+        WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
+        assertThat(response.getBody())
+                .isEqualTo("{\"status\":400,\"message\":\"Can not change the primary key\"}");
     }
 
     //TODO: Validation message is wrong

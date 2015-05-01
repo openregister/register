@@ -31,14 +31,10 @@ public class Database {
         }
     }
 
-    public <T> FunctionThatThrows<FunctionThatThrows<ResultSet, T>, T> select(String sql, Object... params ) {
+    public <T> FunctionThatThrows<FunctionThatThrows<ResultSet, T>, T> select(String sql, Object... params) {
         return (FunctionThatThrows<ResultSet, T> p) -> {
-            Connection c = null;
-            PreparedStatement st = null;
-            try {
-
-                c = connectionPool.getConnection();
-                st = c.prepareStatement(sql);
+            try (Connection c = connectionPool.getConnection();
+                 PreparedStatement st = c.prepareStatement(sql)) {
                 for (int i = 0; i < params.length; i++) {
                     st.setObject(i + 1, params[i]);
                 }
@@ -46,15 +42,11 @@ public class Database {
                 return p.andThen(st.getResultSet());
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            } finally {
-                if (c != null) try { c.close(); } catch (Exception e) { }
-                if (st != null) try { st.close(); } catch (Exception e) { }
             }
         };
     }
 
-
-    public void execute(String sql, Object... params ) {
+    public void execute(String sql, Object... params) {
         select(sql, params).andThen(rs -> true);
     }
 }
