@@ -2,11 +2,11 @@ package uk.gov.openregister.store;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.conf.Register;
+import helper.PostgresqlStoreForTesting;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
-import helper.PostgresqlStoreForTesting;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 public class PostgresqlStoreTest {
 
     public static final String TABLE_NAME = "store_tests";
-    private Store store;
+    private PostgresqlStore store;
 
     @Before
     public void setUp() throws Exception {
@@ -52,6 +52,21 @@ public class PostgresqlStoreTest {
         assertThat(hash).isEqualTo(expected);
     }
 
+    @Test
+    public void update_insertNewEntryOnlyWhenAnEntryWithSamePrimaryKeyAvailable() {
+        //assuming key1 is primary key
+        String json1 = "{\"key1\":\"aValue\",\"key2\":\"anotherValue\"}";
+        Record oldRecord = new Record(json1);
+
+        Record newRecord = new Record(json1.replaceAll("anotherValue", "newValue"));
+        store.update(oldRecord.getHash(), "key1", newRecord);
+        assertThat(store.count()).isEqualTo(0);
+
+        store.save(new Record(json1));
+
+        store.update(oldRecord.getHash(), "key1", newRecord);
+        assertThat(store.count()).isEqualTo(2);
+    }
 
     @Test
     public void testFindByKV() {

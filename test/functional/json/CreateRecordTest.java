@@ -5,6 +5,7 @@ import functional.ApplicationTests;
 import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WSResponse;
+import uk.gov.openregister.domain.Record;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.ACCEPTED;
@@ -59,5 +60,23 @@ public class CreateRecordTest extends ApplicationTests {
         JsonNode receivedEntry = Json.parse(body).get("entry");
 
         assertThat(receivedEntry.asText()).isEqualTo(Json.parse(json).asText());
+    }
+
+    @Test
+    public void updatingARecordCreatesNewEntryInRegister() {
+        String json = "{\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
+        String hash = new Record(json).getHash();
+        postJson("/create", json);
+
+        String updatedJson = json.replaceAll("entryName", "newEntryName");
+        WSResponse response = postJson("/supersede/" + hash, updatedJson);
+        assertThat(response.getStatus()).isEqualTo(ACCEPTED);
+
+        WSResponse wsResponse = getByKV("name", "entryName", "json");
+        String body = wsResponse.getBody();
+
+        JsonNode receivedEntry = Json.parse(body).get("entry");
+
+        assertThat(receivedEntry.asText()).isEqualTo(Json.parse(updatedJson).asText());
     }
 }

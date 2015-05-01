@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostgresqlStoreForTesting {
     public static final String POSTGRESQL_URI = "postgresql://localhost/testopenregister";
@@ -22,27 +23,39 @@ public class PostgresqlStoreForTesting {
         st.close();
     }
 
-    public static List<JsonNode> findAll(String tableName) throws Exception {
-        List<JsonNode> result = new ArrayList<>();
+    public static List<JsonNode> findAllEntries(String tableName) {
+        return findAll(tableName).stream().map(t -> t.entry).collect(Collectors.toList());
+    }
+
+    public static List<DataRow> findAll(String tableName) {
+        List<DataRow> result = new ArrayList<>();
         Statement st = null;
         ResultSet rs = null;
         try {
-            st = getStatement();
-            st.execute("SELECT * FROM " + tableName);
-            rs = st.getResultSet();
-            while(rs.next()){
-                result.add(new ObjectMapper().readValue(rs.getString("entry"), JsonNode.class));
+            try {
+                st = getStatement();
+                st.execute("SELECT * FROM " + tableName);
+                rs = st.getResultSet();
+                while (rs.next()) {
+                    result.add(new DataRow(
+                                    rs.getString("hash"),
+                                    new ObjectMapper().readValue(rs.getString("entry"), JsonNode.class)
+                            )
+                    );
+                }
+            } finally {
+                if (rs != null) rs.close();
+                if (st != null) st.close();
             }
-        } finally {
-            if (rs != null) rs.close();
-            if (st != null) st.close();
+        } catch (Exception e) {
+            throw new RuntimeException("error", e);
         }
         return result;
 
     }
 
     public static JsonNode findFirstEntry(String tableName) throws Exception {
-        return findAll(tableName).get(0);
+        return findAll(tableName).get(0).entry;
     }
 
     private static Statement getStatement() throws ClassNotFoundException, SQLException {

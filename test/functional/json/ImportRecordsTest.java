@@ -31,7 +31,7 @@ public class ImportRecordsTest extends ApplicationTests {
 
             assertThat(response.getStatus()).isEqualTo(OK);
 
-            List<JsonNode> documents = PostgresqlStoreForTesting.findAll(REGISTER);
+            List<JsonNode> documents = PostgresqlStoreForTesting.findAllEntries(REGISTER);
 
             assertThat(documents.size()).isEqualTo(2);
 
@@ -64,7 +64,7 @@ public class ImportRecordsTest extends ApplicationTests {
 
             assertThat(response.getStatus()).isEqualTo(OK);
 
-            List<JsonNode> documents = PostgresqlStoreForTesting.findAll(REGISTER);
+            List<JsonNode> documents = PostgresqlStoreForTesting.findAllEntries(REGISTER);
 
             assertThat(documents.size()).isEqualTo(2);
 

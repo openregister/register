@@ -38,11 +38,33 @@ public class PostgresqlStore extends Store {
     @Override
     public void save(Record record) {
 
-        PGobject pgo = new PGobject();
-        pgo.setType("jsonb");
-        try { pgo.setValue(record.getEntry().toString()); } catch (Exception e) {}
+        PGobject pgo = createPGObject(record);
         database.execute("INSERT INTO " + tableName + " (hash, entry) VALUES (?,?)", record.getHash(), pgo);
 
+    }
+
+
+    //TODO: should  throw exception when no entry is updated
+    @Override
+    public void update(String hash, String registerPrimaryKey, Record record) {
+
+        String queryTemplate = "INSERT INTO %s(hash, entry) ( " +
+                    "select '%s','%s' where exists " +
+                    "( " +
+                        "select 1 from %s where hash='%s' and entry @> '{\"%s\":\"%s\"}' " +
+                "    ) " +
+                ")";
+
+        String insertQuery = String.format(queryTemplate,
+                tableName,
+                record.getHash(),
+                createPGObject(record),
+                tableName,
+                hash,
+                registerPrimaryKey,
+                record.getEntry().get(registerPrimaryKey).textValue());
+
+        database.execute(insertQuery);
     }
 
     @Override
@@ -97,6 +119,16 @@ public class PostgresqlStore extends Store {
     public long count() {
         return database.<Long>select("SELECT count(hash) FROM " + tableName + " AS count")
                 .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
+    }
+
+    private PGobject createPGObject(Record record) {
+        PGobject pgo = new PGobject();
+        pgo.setType("jsonb");
+        try {
+            pgo.setValue(record.getEntry().toString());
+        } catch (Exception e) {
+        }
+        return pgo;
     }
 
     private Optional<Record> toOptionalRecord(ResultSet resultSet) throws IOException, SQLException {

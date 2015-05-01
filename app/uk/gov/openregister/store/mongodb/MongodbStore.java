@@ -10,6 +10,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import org.bson.Document;
+import scala.NotImplementedError;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.Store;
 
@@ -80,6 +81,11 @@ public class MongodbStore extends Store {
     public long count() {
         MongoCollection<Document> collection = db.getCollection(this.collection);
         return collection.count();
+    }
+
+    @Override
+    public void update(String hash, String registerPrimaryKey, Record record) {
+        throw new NotImplementedError();
     }
 
     private Optional<Record> findOne(BasicDBObject whereQuery) {

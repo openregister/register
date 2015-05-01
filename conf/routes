@@ -10,6 +10,7 @@ GET         /hash/:hash                                 controllers.api.Rest.fin
 GET         /search                                     controllers.api.Rest.search()
 GET         /:key/:value                                controllers.api.Rest.findByKey(key, value)
 POST        /create                                     controllers.api.Rest.create()
+POST        /supersede/:hash                            controllers.api.Rest.update(hash)
 GET         /load                                       controllers.api.Rest.load()
 
 GET         /docs                                       controllers.Application.docs()

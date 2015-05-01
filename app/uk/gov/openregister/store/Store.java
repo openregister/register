@@ -25,4 +25,6 @@ public abstract class Store {
     public abstract List<Record> search(String query);
 
     public abstract long count();
+
+    public abstract void update(String hash, String registerPrimaryKey, Record record);
 }
