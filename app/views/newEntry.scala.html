@@ -1,22 +1,3 @@
 @(registerName: String, keys: List[String], form: DynamicForm)
 
-@main(registerName + " register") {
-
-@header(registerName)
-
-
-<div class="row">
-
-@helper.form(action = routes.Application.create()) {
-
-@keys.map{ key =>
-@helper.inputText(form(key))
-}
-
-    <input type="submit" name="submit" value="Add" class="button"/>
-}
-</div>
-
-@license()
-
-}
+@entryPage(registerName, keys, form, routes.Application.create(), "Update")

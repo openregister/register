@@ -41,6 +41,12 @@ public class Rest extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public static Result update(String hash) {
         Record r = new Record(request().body().asJson());
+        ValidationResult validationResult = new Validator(Register.instance.keys()).validate(r);
+
+        if (!validationResult.isValid()) {
+            return toJsonResponse(400, "The following keys are not allowed in the record: " + Joiner.on(", ").join(validationResult.getInvalidKeys()));
+        }
+
         Register.instance.store().update(hash, ApplicationConf.getString("register.primaryKey"), r);
         return toJsonResponse(202, "Record saved successfully");
     }

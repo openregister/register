@@ -20,8 +20,41 @@ public class Application extends Controller {
     private static DynamicForm dynamicForm = new DynamicForm();
 
     public static Result renderNewEntryForm() {
-
         return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys(), dynamicForm));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Result renderUpdateEntryForm(String hash) {
+        Record record = Register.instance.store().findByHash(hash).get();
+
+        return ok(views.html.updateEntry.render(ApplicationConf.getString("register.name"),
+                        Register.instance.keys(),
+                        Application.dynamicForm.bind(new ObjectMapper().convertValue(record.getEntry(), Map.class)),
+                        hash)
+        );
+    }
+
+    @BodyParser.Of(BodyParser.FormUrlEncoded.class)
+    public static Result update(String hash) {
+        DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
+        Record record = createRecordFromParams(dynamicForm.data());
+
+        ValidationResult validationResult = new Validator(Register.instance.keys()).validate(record);
+        if (!validationResult.isValid()) {
+
+
+            validationResult.getMissingKeys()
+                    .forEach(k -> dynamicForm.reject(k, "error.required"));
+
+            return ok(views.html.updateEntry.render(ApplicationConf.getString("register.name"),
+                    Register.instance.keys(),
+                    dynamicForm,
+                    hash)
+            );
+        }
+
+        Register.instance.store().update(hash, ApplicationConf.getString("register.primaryKey"), record);
+        return redirect("/hash/" + record.getHash());
     }
 
     public static Result index() {
@@ -43,7 +76,7 @@ public class Application extends Controller {
             validationResult.getMissingKeys()
                     .forEach(k -> dynamicForm.reject(k, "error.required"));
 
-             return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys(), dynamicForm));
+            return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys(), dynamicForm));
         }
 
         Register.instance.store().save(record);
@@ -56,13 +89,13 @@ public class Application extends Controller {
     }
 
     public static Result docsApi(String api) {
-        switch(api) {
+        switch (api) {
             case "create":
-                 return ok(views.html.docsCreate.render(ApplicationConf.getString("register.name")));
+                return ok(views.html.docsCreate.render(ApplicationConf.getString("register.name")));
             case "search":
-                 return ok(views.html.docsSearch.render(ApplicationConf.getString("register.name")));
+                return ok(views.html.docsSearch.render(ApplicationConf.getString("register.name")));
             case "get":
-                 return ok(views.html.docsGet.render(ApplicationConf.getString("register.name")));
+                return ok(views.html.docsGet.render(ApplicationConf.getString("register.name")));
             default:
                 return redirect("/docs");
         }

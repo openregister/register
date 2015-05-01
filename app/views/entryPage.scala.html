@@ -1,0 +1,22 @@
+@(registerName: String, keys: List[String], form: DynamicForm, formAction: play.api.mvc.Call, submitButtonValue: String)
+
+@main(registerName + " register") {
+
+@header(registerName)
+
+
+<div class="row">
+
+@helper.form(action = formAction) {
+
+@keys.map{ key =>
+@helper.inputText(form(key))
+}
+
+    <input type="submit" name="submit" value="Update" class="button"/>
+}
+</div>
+
+@license()
+
+}
