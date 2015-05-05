@@ -8,4 +8,6 @@ public class ApplicationConf {
     public static String getString(String key) {
         return Play.application().configuration().getString(key);
     }
+
+    public static final String registerName = getString("register.name");
 }

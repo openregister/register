@@ -47,7 +47,7 @@ public class Rest extends Controller {
             return toJsonResponse(400, "The following keys are not allowed in the record: " + Joiner.on(", ").join(validationResult.getInvalidKeys()));
         }
 
-        Register.instance.store().update(hash, ApplicationConf.getString("register.primaryKey"), r);
+        Register.instance.store().update(hash, ApplicationConf.registerName.toLowerCase(), r);
         return toJsonResponse(202, "Record saved successfully");
     }
 

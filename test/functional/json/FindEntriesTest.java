@@ -15,7 +15,7 @@ public class FindEntriesTest extends ApplicationTests {
 
     @Test
     public void testFindOneByKey() throws Exception {
-        String json = "{\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
         Record record = new Record(json);
         postJson("/create", json);
 
@@ -27,7 +27,7 @@ public class FindEntriesTest extends ApplicationTests {
 
     @Test
     public void testFindOneByHash() throws Exception {
-        String json = "{\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
         Record record = new Record(json);
         postJson("/create", json);
 
@@ -40,12 +40,12 @@ public class FindEntriesTest extends ApplicationTests {
 
     @Test
     public void testSearch() throws Exception {
-        String expectedJson1 = "{\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
-        String expectedJson2 = "{\"name\":\"The Entry3\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String expectedJson1 = "{\"testregister\":\"testregisterkey\",\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String expectedJson2 = "{\"testregister\":\"testregisterkey\",\"name\":\"The Entry3\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
         postJson("/create", expectedJson1);
         postJson("/create", expectedJson2);
 
-        postJson("/create", "{\"name\":\"The Entry2\",\"key1\": \"value2\",\"key2\": [\"A\",\"B\"]}");
+        postJson("/create", "{\"testregister\":\"testregisterkey\",\"name\":\"The Entry2\",\"key1\": \"value2\",\"key2\": [\"A\",\"B\"]}");
 
 
         WSResponse response = search("key1", "value1", "json");

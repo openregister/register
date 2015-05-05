@@ -11,7 +11,6 @@ public class TestSettings {
         HashMap<String, String> map = new HashMap<>();
         map.put("store.uri", PostgresqlStoreForTesting.POSTGRESQL_URI);
         map.put("register.name", name);
-        map.put("register.primaryKey", "name");
         map.put("registers.service.url", "http://localhost:8888");
         return map;
     }

@@ -16,7 +16,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void testCreateARecordReturns202() {
-        String json = "{\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
     }
@@ -30,7 +30,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void testCreateARecordWithInvalidKeysReturns400() {
-        String json = "{\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
 
         assertThat(response.getBody())
@@ -50,7 +50,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void testCreateARecordStoresItToTheDatabase() {
-        String json = "{\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
 
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
@@ -65,7 +65,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void updatingARecordCreatesNewEntryInRegister() {
-        String json = "{\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
         String hash = new Record(json).getHash();
         postJson("/create", json);
 
@@ -84,11 +84,11 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void updateARecordWithMissingKeysReturns400() {
-        String json = "{\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         Record record = new Record(json);
         postJson("/create", json);
 
-        String updatedJson = "{\"name\":\"entryName\",\"key1\": \"value1\"}";
+        String updatedJson = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
         assertThat(response.getBody())
                 .isEqualTo("{\"status\":400,\"message\":\"The following keys are not allowed in the record: \"}");

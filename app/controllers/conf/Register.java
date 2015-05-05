@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static uk.gov.openregister.config.ApplicationConf.registerName;
+
 public class Register {
 
     public static final Register instance = new Register();
@@ -29,15 +31,14 @@ public class Register {
     }
 
     public void init() {
-        String name = ApplicationConf.getString("register.name");
 
-        if ("register".equalsIgnoreCase(name)) {
+        if ("register".equalsIgnoreCase(registerName)) {
             keys = Arrays.asList(ApplicationConf.getString("registers.service.fields").split(","));
         } else {
 
             String registersServiceUri = ApplicationConf.getString("registers.service.url");
 
-            F.Promise<WSResponse> promise = WS.client().url(registersServiceUri + "/register/" + name + "?_representation=json").execute();
+            F.Promise<WSResponse> promise = WS.client().url(registersServiceUri + "/register/" + registerName + "?_representation=json").execute();
             F.Promise<List<String>> listPromise = promise.map(r -> {
                         List<String> resultKeys = new ArrayList<>();
 
@@ -56,8 +57,8 @@ public class Register {
 
         String uri = ApplicationConf.getString("store.uri");
 
-        if (uri.startsWith("mongodb")) store = new MongodbStore(uri, name, Register.instance.keys);
-        else if (uri.startsWith("postgres")) store = new PostgresqlStore(uri, name, Register.instance.keys);
+        if (uri.startsWith("mongodb")) store = new MongodbStore(uri, registerName, Register.instance.keys);
+        else if (uri.startsWith("postgres")) store = new PostgresqlStore(uri, registerName, Register.instance.keys);
         else throw new RuntimeException("Unable to find store for store.uri=" + uri);
     }
 }
