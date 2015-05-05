@@ -2,6 +2,7 @@ package helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.openregister.domain.Metadata;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ public class PostgresqlStoreForTesting {
 
     public static void createTable(String tableName) throws SQLException, ClassNotFoundException {
         try(Statement st = getStatement()){
-            st.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb)");
+            st.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb,metadata jsonb)");
         }
     }
 
@@ -38,7 +39,8 @@ public class PostgresqlStoreForTesting {
                 while (rs.next()) {
                     result.add(new DataRow(
                                     rs.getString("hash"),
-                                    new ObjectMapper().readValue(rs.getString("entry"), JsonNode.class)
+                                    new ObjectMapper().readValue(rs.getString("entry"), JsonNode.class),
+                                    Metadata.from(rs.getString("metadata"))
                             )
                     );
                 }
@@ -50,10 +52,6 @@ public class PostgresqlStoreForTesting {
         }
         return result;
 
-    }
-
-    public static JsonNode findFirstEntry(String tableName) throws Exception {
-        return findAll(tableName).get(0).entry;
     }
 
     private static Statement getStatement() throws ClassNotFoundException, SQLException {

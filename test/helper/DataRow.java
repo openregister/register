@@ -1,15 +1,16 @@
 package helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import uk.gov.openregister.domain.Metadata;
 
 public class DataRow {
     public String hash;
     public JsonNode entry;
-//    public JsonNode metadata;
+    public Metadata metadata;
 
-    public DataRow(String hash, JsonNode entry/*, JsonNode metadata*/) {
+    public DataRow(String hash, JsonNode entry, Metadata metadata) {
         this.hash = hash;
         this.entry = entry;
-//        this.metadata = metadata;
+        this.metadata = metadata;
     }
 }

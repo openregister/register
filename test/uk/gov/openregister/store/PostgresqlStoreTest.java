@@ -1,10 +1,12 @@
 package uk.gov.openregister.store;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import controllers.conf.Register;
+import helper.DataRow;
 import helper.PostgresqlStoreForTesting;
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,25 +35,18 @@ public class PostgresqlStoreTest {
     }
 
     @Test
-    public void testCreateRecord() throws Exception {
+    public void save_insertsARecordWithMetadataAndHash() throws JSONException {
         String json = "{\"key1\": \"value1\",\"key2\": \"value2\"}";
-
+        String expectedhash = "bd9715d749969faef3434484deb8f33cbb7eab8f";
         store.save(new Record(json));
 
-        JsonNode entry = PostgresqlStoreForTesting.findFirstEntry(TABLE_NAME);
-        assertThat(entry.get("key1").textValue()).isEqualTo("value1");
-        assertThat(entry.get("key2").textValue()).isEqualTo("value2");
-    }
+        List<DataRow> rows = PostgresqlStoreForTesting.findAll(TABLE_NAME);
 
-    @Test
-    public void testOnCreationAnHashIsCreated() throws Exception {
-        String json = "{\"foo\":\"Foo Value\"}";
-        String expected = "257b86bf0b88dbf40cacff2b649f763d585df662";
-
-        store.save(new Record(json));
-
-        String hash = PostgresqlStoreForTesting.findFirstHash(TABLE_NAME);
-        assertThat(hash).isEqualTo(expected);
+        assertThat(rows.size()).isEqualTo(1);
+        assertThat(rows.get(0).hash).isEqualTo(expectedhash);
+        JSONAssert.assertEquals(json, rows.get(0).entry.toString(), true);
+        assertNotNull(rows.get(0).metadata.creationtime);
+        assertEquals("", rows.get(0).metadata.previousEntryHash);
     }
 
     @Test
@@ -62,10 +59,23 @@ public class PostgresqlStoreTest {
         store.update(oldRecord.getHash(), "key1", newRecord);
         assertThat(store.count()).isEqualTo(0);
 
-        store.save(new Record(json1));
+        store.save(oldRecord);
 
         store.update(oldRecord.getHash(), "key1", newRecord);
         assertThat(store.count()).isEqualTo(2);
+    }
+
+    @Test
+    public void update_previousEntryHash_valueIsHashValueOfOldRecord() {
+        String json1 = "{\"key1\":\"aValue\",\"key2\":\"anotherValue\"}";
+        Record oldRecord = new Record(json1);
+        store.save(oldRecord);
+
+        Record newRecord = new Record(json1.replaceAll("anotherValue", "newValue"));
+        store.update(oldRecord.getHash(), "key1", newRecord);
+
+        String actualPreviousEntryHash = PostgresqlStoreForTesting.findAll(TABLE_NAME).stream().filter(row -> row.hash.equals(newRecord.getHash())).map(row -> row.metadata.previousEntryHash).findFirst().get();
+        assertEquals(oldRecord.getHash(), actualPreviousEntryHash);
     }
 
     @Test

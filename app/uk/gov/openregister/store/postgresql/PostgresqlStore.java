@@ -3,7 +3,9 @@ package uk.gov.openregister.store.postgresql;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
+import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.Store;
 
@@ -32,33 +34,30 @@ public class PostgresqlStore extends Store {
     }
 
     public void createTable(String tableName) {
-        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb)");
+        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb, metadata jsonb)");
     }
 
     @Override
     public void save(Record record) {
-
-        PGobject pgo = createPGObject(record);
-        database.execute("INSERT INTO " + tableName + " (hash, entry) VALUES (?,?)", record.getHash(), pgo);
-
+        PGobject pgo = createPGObject(record.getEntry().toString());
+        database.execute("INSERT INTO " + tableName + " (hash, entry, metadata) VALUES (?,?,?)", record.getHash(), pgo, createMetadataObject(""));
     }
-
 
     //TODO: should  throw exception when no entry is updated
     @Override
     public void update(String hash, String registerPrimaryKey, Record record) {
-
-        String queryTemplate = "INSERT INTO %s(hash, entry) ( " +
-                    "select '%s','%s' where exists " +
-                    "( " +
-                        "select 1 from %s where hash='%s' and entry @> '{\"%s\":\"%s\"}' " +
+        String queryTemplate = "INSERT INTO %s(hash, entry, metadata) ( " +
+                "select '%s','%s','%s' where exists " +
+                "( " +
+                "select 1 from %s where hash='%s' and entry @> '{\"%s\":\"%s\"}' " +
                 "    ) " +
                 ")";
 
         String insertQuery = String.format(queryTemplate,
                 tableName,
                 record.getHash(),
-                createPGObject(record),
+                createPGObject(record.getEntry().toString()),
+                createMetadataObject(hash),
                 tableName,
                 hash,
                 registerPrimaryKey,
@@ -121,11 +120,15 @@ public class PostgresqlStore extends Store {
                 .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
     }
 
-    private PGobject createPGObject(Record record) {
+    private PGobject createMetadataObject(String previousEntryHash) {
+        return createPGObject(new Metadata(DateTime.now(), previousEntryHash).normalise());
+    }
+
+    private PGobject createPGObject(String data){
         PGobject pgo = new PGobject();
         pgo.setType("jsonb");
         try {
-            pgo.setValue(record.getEntry().toString());
+            pgo.setValue(data);
         } catch (Exception e) {
         }
         return pgo;
