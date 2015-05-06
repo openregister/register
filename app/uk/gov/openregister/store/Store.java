@@ -16,6 +16,8 @@ public abstract class Store {
 
     public abstract void save(Record s);
 
+    public abstract void deleteAll();
+
     public abstract Optional<Record> findByKV(String key, String value);
 
     public abstract Optional<Record> findByHash(String hash);

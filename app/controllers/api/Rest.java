@@ -36,19 +36,6 @@ public class Rest extends Controller {
         return toJsonResponse(202, "Record saved successfully");
     }
 
-    public static F.Promise<Result> load() {
-        Optional<String[]> urlOpt = Optional.ofNullable(request().queryString().get("url"));
-
-        if (urlOpt.isPresent()) {
-            return F.Promise.promise(() -> readAndSaveToDb(new URL(urlOpt.get()[0])))
-                    .map(i -> toJsonResponse(200, i + " records loaded successfully"));
-
-        } else {
-            return F.Promise.promise(() -> toJsonResponse(400, "'url' parameter is not defined"));
-        }
-
-    }
-
     public static F.Promise<Result> findByKey(String key, String value) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> Register.instance.store().findByKV(key, value));
         return recordF.map(record -> Representations.toRecord(request(), record));
@@ -78,23 +65,5 @@ public class Rest extends Controller {
 
 
 
-    // TODO bulk import?
-    private static int readAndSaveToDb(URL url) throws Exception {
-
-        char cs = url.toString().endsWith(".tsv") ? '\t' : ',';
-
-        CsvMapper mapper = new CsvMapper();
-        CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(cs).withHeader();
-        MappingIterator<JsonNode> it = mapper.reader(JsonNode.class)
-                .with(schema)
-                .readValues(url);
-        int counter = 0;
-        while (it.hasNext()) {
-            JsonNode rowAsNode = it.next();
-            Register.instance.store().save(new Record(rowAsNode));
-            counter++;
-        }
-        return counter;
-    }
 
 }
