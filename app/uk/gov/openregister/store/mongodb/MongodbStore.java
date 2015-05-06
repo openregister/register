@@ -42,6 +42,11 @@ public class MongodbStore extends Store {
     }
 
     @Override
+    public void deleteAll() {
+        db.getCollection(this.collection).drop();
+    }
+
+    @Override
     public Optional<Record> findByKV(String key, String value) {
         return findOne(new BasicDBObject("entry." + key, value));
     }
