@@ -46,6 +46,12 @@ public class PostgresqlStore extends Store {
     }
 
     @Override
+    public void deleteAll() {
+        database.execute("DROP TABLE IF EXISTS " + tableName);
+        createTable(tableName);
+    }
+
+    @Override
     public Optional<Record> findByKV(String key, String value) {
         return database.<Optional<Record>>select("SELECT * FROM " + tableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'")
                 .andThen(this::toOptionalRecord);

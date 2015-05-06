@@ -46,10 +46,6 @@ public class ApplicationTests {
         return get("/search?_representation=" + representation + "&" + key + "=" + value);
     }
 
-    public WSResponse load(String url) {
-        return get("/load?url=" + url);
-    }
-
     public WSResponse get(String path) {
         return WS.url(BASE_URL + path).get().get(TIMEOUT);
     }
