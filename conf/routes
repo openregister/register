@@ -5,6 +5,8 @@
 GET         /                                           controllers.Application.index()
 GET         /ui/create                                  controllers.Application.renderNewEntryForm()
 POST        /ui/create                                  controllers.Application.create()
+GET         /ui/supersede/:hash                         controllers.Application.renderUpdateEntryForm(hash)
+POST        /ui/supersede/:hash                         controllers.Application.update(hash)
 
 GET         /load                                       controllers.api.ImportData.loadWithProgress()
 GET         /load/progress                              controllers.api.ImportData.progress()
@@ -13,6 +15,7 @@ GET         /hash/:hash                                 controllers.api.Rest.fin
 GET         /search                                     controllers.api.Rest.search()
 GET         /:key/:value                                controllers.api.Rest.findByKey(key, value)
 POST        /create                                     controllers.api.Rest.create()
+POST        /supersede/:hash                            controllers.api.Rest.update(hash)
 
 GET         /docs                                       controllers.Application.docs()
 GET         /docs/api/:api                              controllers.Application.docsApi(api)

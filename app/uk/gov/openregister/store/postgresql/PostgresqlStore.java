@@ -3,8 +3,11 @@ package uk.gov.openregister.store.postgresql;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
+import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.Store;
 
 import java.io.IOException;
@@ -32,17 +35,44 @@ public class PostgresqlStore extends Store {
     }
 
     public void createTable(String tableName) {
-        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb)");
+        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb, metadata jsonb)");
+    }
+
+    //TODO confirm no insert which violates register primary key constraint
+    @Override
+    public void save(Record record) {
+        PGobject pgo = createPGObject(record.getEntry().toString());
+        String query = "INSERT INTO " + tableName + " (hash, entry, metadata) VALUES (?,?,?)";
+        int resultUpdated = database.executeUpdate(query, record.getHash(), pgo, createMetadataObject(""));
+        if (resultUpdated == 0) {
+            throw new DatabaseException("No record to insert");
+        }
     }
 
     @Override
-    public void save(Record record) {
+    public void update(String hash, String registerPrimaryKey, Record record) {
+        synchronized (hash.intern()) {
+            String queryTemplate = "INSERT INTO " + tableName + "(hash, entry, metadata) ( " +
+                    "select '%s','%s','%s' " +
+                    "where not exists  ( select 1 from " + tableName +  " where metadata @> '{\"previousEntryHash\":\"%s\"}' ) " +
+                    "and exists ( select 1 from " + tableName +  " where hash='%s' and entry @> '{\"%s\":\"%s\"}')" +
+                    ")";
 
-        PGobject pgo = new PGobject();
-        pgo.setType("jsonb");
-        try { pgo.setValue(record.getEntry().toString()); } catch (Exception e) {}
-        database.execute("INSERT INTO " + tableName + " (hash, entry) VALUES (?,?)", record.getHash(), pgo);
+            String insertQuery = String.format(queryTemplate,
+                    record.getHash(),
+                    createPGObject(record.getEntry().toString()),
+                    createMetadataObject(hash),
+                    hash,
+                    hash,
+                    registerPrimaryKey,
+                    record.getEntry().get(registerPrimaryKey).textValue()
+            );
+            int resultUpdated = database.executeUpdate(insertQuery);
 
+            if (resultUpdated == 0) {
+                throw new DatabaseException("No record to updated");
+            }
+        }
     }
 
     @Override
@@ -105,6 +135,20 @@ public class PostgresqlStore extends Store {
                 .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
     }
 
+    private PGobject createMetadataObject(String previousEntryHash) {
+        return createPGObject(new Metadata(DateTime.now(), previousEntryHash).normalise());
+    }
+
+    private PGobject createPGObject(String data) {
+        PGobject pgo = new PGobject();
+        pgo.setType("jsonb");
+        try {
+            pgo.setValue(data);
+        } catch (Exception e) {
+        }
+        return pgo;
+    }
+
     private Optional<Record> toOptionalRecord(ResultSet resultSet) throws IOException, SQLException {
         if (resultSet != null && resultSet.next()) {
             return Optional.of(toRecord(resultSet));
@@ -127,7 +171,4 @@ public class PostgresqlStore extends Store {
         return result;
     }
 }
-
-
-
 

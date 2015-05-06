@@ -1,6 +1,7 @@
 package uk.gov.openregister.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.domain.Record;
 
 import java.util.*;
@@ -14,34 +15,25 @@ public class Validator {
         this.keys = keys;
     }
 
-    public ValidationResult validate(Record record) {
+    public List<ValError> validate(Record record) {
 
-        List<String> invalidKeys = checkForInvalidKeys(record);
-        List<String> missingKeys = checkForMissingKeys(record);
-
-        return new ValidationResult(invalidKeys, missingKeys);
-    }
-
-    private List<String> checkForInvalidKeys(Record record) {
-        ArrayList<String> invalidKeys = new ArrayList<>();
-
-        record.getEntry().fieldNames().forEachRemaining(key -> {
-            if (!keys.contains(key)) invalidKeys.add(key);
-        });
-
-        return invalidKeys;
-    }
-
-
-    private List<String> checkForMissingKeys(Record record) {
-
-        JsonNode entry = record.getEntry();
-        return this.keys.stream()
-                .filter(k -> !entry.has(k) || (!entry.get(k).isArray() && entry.get(k).asText().isEmpty()))
+        List<ValError> errors = new ArrayList<>();
+        List<ValError> invalidKeyErrors = StreamUtils.asStream(record.getEntry().fieldNames())
+                .filter(key -> !keys.contains(key))
+                .map(key -> new ValError(key, "Key not required"))
                 .collect(Collectors.toList());
 
+        errors.addAll(invalidKeyErrors);
+
+        JsonNode entry = record.getEntry();
+        List<ValError> missingKeyErrors =keys.stream()
+                .filter(k -> !entry.has(k) || (!entry.get(k).isArray() && entry.get(k).asText().isEmpty()))
+                .map(key -> new ValError(key, "Missing required key"))
+                .collect(Collectors.toList());
+
+        errors.addAll(missingKeyErrors);
+
+      return errors;
     }
-
 }
-
 
