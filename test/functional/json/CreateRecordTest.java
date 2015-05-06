@@ -2,16 +2,25 @@ package functional.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import functional.ApplicationTests;
-import org.junit.Ignore;
+import helper.JsonObjectMapper;
+import org.json.JSONException;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 import play.libs.Json;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.domain.Record;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static play.test.Helpers.ACCEPTED;
 import static play.test.Helpers.BAD_REQUEST;
 
+@SuppressWarnings("unchecked")
 public class CreateRecordTest extends ApplicationTests {
 
     @Test
@@ -29,23 +38,30 @@ public class CreateRecordTest extends ApplicationTests {
     }
 
     @Test
-    public void testCreateARecordWithInvalidKeysReturns400() {
+    public void testCreateARecordWithInvalidKeysReturns400() throws JSONException {
         String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
 
-        assertThat(response.getBody())
-                .isEqualTo("{\"status\":400,\"message\":\"The following keys are not allowed in the record: invalidKey\"}");
+        JsonNode result = Json.parse(response.getBody());
+        assertEquals(400, result.get("status").asInt());
+        assertEquals("", result.get("message").textValue());
+        JSONAssert.assertEquals("[{\"key\":\"invalidKey\",\"message\":\"Key not required\"}]", result.get("errors").toString(), true);
 
     }
 
     @Test
     public void testCreateARecordWithInvalidAndMissingKeysReturns400() {
-        String json = "{\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
 
-        assertThat(response.getBody())
-                .isEqualTo("{\"status\":400,\"message\":\"The following keys are not allowed in the record: invalidKey\"}");
+        Map<String, Object> result = JsonObjectMapper.convert(response.getBody(), Map.class);
 
+        assertEquals(400, result.get("status"));
+        assertEquals("", result.get("message"));
+
+        List<Map> errors = (List) result.get("errors");
+        assertEquals(2, errors.size());
+        assertEquals(Arrays.asList("invalidKey", "key1"), errors.stream().map(it -> it.get("key")).collect(Collectors.toList()));
     }
 
     @Test
@@ -81,57 +97,17 @@ public class CreateRecordTest extends ApplicationTests {
         assertThat(receivedEntry.asText()).isEqualTo(Json.parse(updatedJson).asText());
     }
 
-
     @Test
-    public void updateARecordWithMissingKeysReturns400() {
+    public void updateARecordValidatesTheJson() {
         String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         Record record = new Record(json);
         postJson("/create", json);
 
-        String updatedJson = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\"}";
+        String updatedJson = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
         assertThat(response.getBody())
-                .isEqualTo("{\"status\":400,\"message\":\"The following keys are not allowed in the record: \"}");
+                .isEqualTo("{\"message\":\"\",\"errors\":[{\"key\":\"key1\",\"message\":\"Missing required key\"},{\"key\":\"key2\",\"message\":\"Missing required key\"}],\"status\":400}");
 
     }
 
-    @Ignore
-    @Test
-    public void updateShouldFailWhenHashAndPrimaryKeyDoesNotMatch() {
-        String json = "{\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
-        Record record = new Record(json);
-        postJson("/create", json);
-
-        String updatedJson = "{\"name\":\"entryName1\",\"key1\": \"value1\",\"key2\": \"value3\"}";
-        WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
-        assertThat(response.getBody())
-                .isEqualTo("{\"status\":400,\"message\":\"Can not change the primary key\"}");
-    }
-
-    //TODO: Validation message is wrong
-    @Test
-    public void updateARecordWithMissingValueReturns400() {
-        String json = "{\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
-        Record record = new Record(json);
-        postJson("/create", json);
-
-        String updatedJson = "{\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"\"}";
-        WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
-        assertThat(response.getBody())
-                .isEqualTo("{\"status\":400,\"message\":\"The following keys are not allowed in the record: \"}");
-
-    }
-
-    @Test
-    public void updatingARecordByInvalidJsonReturns400() {
-        String json = "{\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
-        Record record = new Record(json);
-        postJson("/create", json);
-
-        String updatedJson = "{\"invalidKey\":\"invalidValue\", \"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
-        WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
-        assertThat(response.getBody())
-                .isEqualTo("{\"status\":400,\"message\":\"The following keys are not allowed in the record: invalidKey\"}");
-
-    }
 }

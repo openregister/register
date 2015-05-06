@@ -1,18 +1,16 @@
 package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.conf.Register;
-import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.validation.ValError;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static play.mvc.Results.ok;
 import static play.mvc.Results.status;
@@ -68,11 +66,18 @@ public class Representations {
         return status(status, views.html.error.render(registerName, message));
     }
 
+
     public static Results.Status toJsonResponse(int statusCode, String message) {
-        ObjectNode result = Json.newObject();
+        return toJsonResponse(statusCode, message, Collections.<ValError>emptyList());
+    }
+
+    public static Results.Status toJsonResponse(int statusCode, String message, List<ValError> errors) {
+        Map<String,Object> result = new HashMap<>();
         result.put("status", statusCode);
         result.put("message", message);
-        return status(statusCode, result);
+        result.put("errors", errors);
+
+        return status(statusCode, (JsonNode) new ObjectMapper().valueToTree(result));
     }
 
     private static Representation representationFor(Map<String, String[]> queryString) {
@@ -88,3 +93,4 @@ public class Representations {
     }
 
 }
+

@@ -8,10 +8,11 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
-import uk.gov.openregister.validation.ValidationResult;
+import uk.gov.openregister.validation.ValError;
 import uk.gov.openregister.validation.Validator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static uk.gov.openregister.config.ApplicationConf.registerName;
@@ -40,22 +41,18 @@ public class Application extends Controller {
         DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        ValidationResult validationResult = new Validator(Register.instance.keys()).validate(record);
-        if (!validationResult.isValid()) {
+        List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(record);
+        if(validationErrors.isEmpty()){
 
-
-            validationResult.getMissingKeys()
-                    .forEach(k -> dynamicForm.reject(k, "error.required"));
-
-            return ok(views.html.updateEntry.render(registerName,
-                            Register.instance.keys(),
-                            dynamicForm,
-                            hash)
-            );
+            Register.instance.store().update(hash, registerName.toLowerCase(), record);
+            return redirect("/hash/" + record.getHash());
         }
+        validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
 
-        Register.instance.store().update(hash, registerName.toLowerCase(), record);
-        return redirect("/hash/" + record.getHash());
+        return ok(views.html.updateEntry.render(registerName,
+                        Register.instance.keys(),
+                        dynamicForm,
+                        hash));
     }
 
     public static Result index() {
@@ -69,19 +66,14 @@ public class Application extends Controller {
         DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        // Validation
-        ValidationResult validationResult = new Validator(Register.instance.keys()).validate(record);
-        if (!validationResult.isValid()) {
-
-
-            validationResult.getMissingKeys()
-                    .forEach(k -> dynamicForm.reject(k, "error.required"));
-
-            return ok(views.html.newEntry.render(registerName, Register.instance.keys(), dynamicForm));
+        List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(record);
+        if(validationErrors.isEmpty()){
+            Register.instance.store().save(record);
+            return redirect("/hash/" + record.getHash());
         }
+        validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
 
-        Register.instance.store().save(record);
-        return redirect("/hash/" + record.getHash());
+        return ok(views.html.newEntry.render(registerName, Register.instance.keys(), dynamicForm));
     }
 
 

@@ -1,19 +1,19 @@
 package controllers.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.google.common.base.Joiner;
 import controllers.conf.Register;
-import uk.gov.openregister.config.ApplicationConf;
-import uk.gov.openregister.validation.ValidationResult;
-import uk.gov.openregister.validation.Validator;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
+import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.validation.ValError;
+import uk.gov.openregister.validation.Validator;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -25,30 +25,32 @@ import static controllers.api.Representations.toJsonResponse;
 public class Rest extends Controller {
 
     @BodyParser.Of(BodyParser.Json.class)
-    public static Result create() {
+    public static Result create() throws JsonProcessingException {
         Record r = new Record(request().body().asJson());
-        // Validation
-        ValidationResult validationResult = new Validator(Register.instance.keys()).validate(r);
-        if (!validationResult.isValid()) {
-            // TODO, incomplete, needs better error messages
-            return toJsonResponse(400, "The following keys are not allowed in the record: " + Joiner.on(", ").join(validationResult.getInvalidKeys()));
+
+        List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(r);
+
+        if (validationErrors.isEmpty()) {
+            Register.instance.store().save(r);
+            return toJsonResponse(202, "Record saved successfully");
         }
-        Register.instance.store().save(r);
-        return toJsonResponse(202, "Record saved successfully");
+
+        return toJsonResponse(400, "", validationErrors);
+
     }
 
     //TODO: do validation
     @BodyParser.Of(BodyParser.Json.class)
     public static Result update(String hash) {
         Record r = new Record(request().body().asJson());
-        ValidationResult validationResult = new Validator(Register.instance.keys()).validate(r);
+        List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(r);
 
-        if (!validationResult.isValid()) {
-            return toJsonResponse(400, "The following keys are not allowed in the record: " + Joiner.on(", ").join(validationResult.getInvalidKeys()));
+        if (validationErrors.isEmpty()) {
+            Register.instance.store().update(hash, ApplicationConf.registerName.toLowerCase(), r);
+            return toJsonResponse(202, "Record saved successfully");
         }
 
-        Register.instance.store().update(hash, ApplicationConf.registerName.toLowerCase(), r);
-        return toJsonResponse(202, "Record saved successfully");
+        return toJsonResponse(400, "", validationErrors);
     }
 
     public static F.Promise<Result> load() {
