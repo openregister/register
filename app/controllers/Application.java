@@ -26,7 +26,7 @@ public class Application extends Controller {
 
     public static Result index() {
         long count = Register.instance.store().count();
-        return ok(views.html.index.render(ApplicationConf.getString("register.name"), count));
+        return ok(views.html.index.render(ApplicationConf.getString("register.name"), Register.instance.keys(), count));
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)

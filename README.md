@@ -32,7 +32,7 @@ Start the application:<br>
 `sbt run`<br>
 
 Access the application at<br>
-`http://localhost:9000`
+[`http://localhost:9000`](http://localhost:9000)
 
 Load some data into the application. For example the list of schools<br>
-`http://localhost:9000/load?url=https://raw.githubusercontent.com/openregister/school.register/master/data/School/schools.tsv`
+[`http://localhost:9000/load?url=https://raw.githubusercontent.com/openregister/school.register/master/data/School/schools.tsv`](http://localhost:9000/load?url=https://raw.githubusercontent.com/openregister/school.register/master/data/School/schools.tsv)

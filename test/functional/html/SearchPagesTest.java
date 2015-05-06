@@ -22,9 +22,12 @@ public class SearchPagesTest extends ApplicationTests {
         String body = response.getBody();
         assertThat(body).contains("The official register of test entries throughout the UK");
         assertThat(body).contains("Part of");
-        assertThat(body).contains("test registry");
+        assertThat(body).contains("Test registry");
         assertThat(body).contains("This register exists as an accurate list of all test entries");
-        assertThat(body).contains("Search this register");
+        assertThat(body).contains("Search register entries");
+
+        assertThat(body).contains("name, key1, key2");
+
     }
 
     @Test
@@ -38,7 +41,7 @@ public class SearchPagesTest extends ApplicationTests {
 
         assertThat(response.getStatus()).isEqualTo(OK);
         String body = response.getBody();
-        assertThat(body).contains("<span class=\"big-number\">3</span>");
+        assertThat(body).contains("<p class=\"big-number\">3</p>");
     }
 
     @Test

@@ -1,4 +1,4 @@
-@(registerName: String, count: Long)
+@(registerName: String, keys: List[String], count: Long)
 
 @main(registerName + " register") {
 
@@ -7,50 +7,48 @@
 
 <div class="row">
     <div class="small-12 large-8 columns">
-        <h4>@play.Play.application().configuration().getString("register.title")</h4>
-    </div> <!-- ./columns -->
+        <div class="summary-copy">
+            <p>@play.Play.application().configuration().getString("register.title")</p>
+        </div>
+        <div class="exists-copy">
+            <p>@play.Play.application().configuration().getString("register.description")</p>
+        </div> <!-- ./columns -->
 
-    <div class="small-12 large-3 columns">
-        <p class="total">Total entries:</p>
-        <span class="big-number">@count</span>
-        <hr class="divider"/>
-        <a href="/docs">API Documentation</a>
-    </div> <!-- ./columns -->
-</div><!-- ./row -->
+        <div class="meta-entries">
+                <p class="label-text">Total entries:</p><p class="big-number">@count</p>
+                <p class="label-text">Provided by:</p><p class="big-meta">@play.Play.application().configuration().getString("register.department")</p>
+                <p class="label-text">Last updated:</p><p class="big-meta">15 April 2015</p>
+                <p class="label-text">Part of:</p><p class="big-meta">@play.Play.application().configuration().getString("register.registry")</p>
+                <p class="label-text">Fields in this register:</p><p class="homepage-field-labels">@keys.mkString(", ")</p>
+        </div>
+    </div>
 
 
-<div class="row">
-   <div class="small-12 large-8 columns">
-        <p><span class="label-text">Last updated:</span><br/>15 April 2015</p>
-        <p><span class="label-text">Part of:</span><br/>@play.Play.application().configuration().getString("register.registry")</p>
-    </div> <!-- ./columns -->
-</div><!-- ./row -->
+    <div class="small-12 large-4 columns">
 
-<div class="row">
-   <div class="small-12 large-8 columns">
-        <h5>@play.Play.application().configuration().getString("register.description")</h5>
-    </div> <!-- ./columns -->
-</div><!-- ./row -->
+                <h4>Search register entries</h4>
+                <p>@play.Play.application().configuration().getString("register.searchtext")</p>
 
-<div class="row search-panel">
-    <div class="small-12 large-8 columns">
-        <h4>Search this register</h4>
-        <p>@play.Play.application().configuration().getString("register.searchtext")</p>
-    </div> <!-- ./columns -->
-</div><!-- ./row -->
+                <form action="/search">
+                <div class="row collapse">
+                        <div class="small-8 large-11 columns">
+                                <input name="_query" type="text" placeholder="Enter search term">
+                     
+                             <!-- ./columns -->
+                                <input type="submit" value="Search" class="button postfix" />
+                        </div>
+                </div>    
+                </form>
 
-<div class="row">
-        <form action="/search">
-            <div class="large-6 columns">
-                <input name="_query" type="text" placeholder="Enter search term">
-            </div> <!-- ./columns -->
-            <div class="large-2 columns end">
-                <input type="submit" value="Search" class="button postfix" />
-            </div> <!-- ./columns -->
-        </form>
-</div><!-- ./row -->
+            <hr class="divider"/>
+                <ul class="side-nav">
+                    <li><a href="/docs">API Documentation</a></li>
+                </ul>
+        </div>
+</div>
 
 
 @license()
+
 
 }
