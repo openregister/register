@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import functional.ApplicationTests;
 import helper.JsonObjectMapper;
 import org.json.JSONException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import play.libs.Json;
@@ -77,6 +78,17 @@ public class CreateRecordTest extends ApplicationTests {
         JsonNode receivedEntry = Json.parse(body).get("entry");
 
         assertThat(receivedEntry.asText()).isEqualTo(Json.parse(json).asText());
+    }
+
+    @Ignore
+    @Test
+    public void createANewRecordWithDuplicatePrimaryKeyDataReturns400() {
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
+        WSResponse response = postJson("/create", json);
+        assertThat(response.getStatus()).isEqualTo(ACCEPTED);
+
+        response = postJson("/create", json.replaceAll("value1", "newValue"));
+        assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
     }
 
     @Test

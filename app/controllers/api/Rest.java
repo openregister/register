@@ -12,6 +12,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.validation.ValError;
 import uk.gov.openregister.validation.Validator;
 
@@ -31,7 +32,12 @@ public class Rest extends Controller {
         List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(r);
 
         if (validationErrors.isEmpty()) {
-            Register.instance.store().save(r);
+            try {
+                Register.instance.store().save(r);
+            } catch (DatabaseException e) {
+                return toJsonResponse(400, e.getMessage());
+            }
+
             return toJsonResponse(202, "Record saved successfully");
         }
 
@@ -48,7 +54,7 @@ public class Rest extends Controller {
         if (validationErrors.isEmpty()) {
             try {
                 Register.instance.store().update(hash, ApplicationConf.registerName.toLowerCase(), r);
-            } catch (Exception e) {
+            } catch (DatabaseException e) {
                 return toJsonResponse(400, e.getMessage());
             }
             return toJsonResponse(202, "Record saved successfully");
