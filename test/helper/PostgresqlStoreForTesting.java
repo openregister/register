@@ -59,13 +59,4 @@ public class PostgresqlStoreForTesting {
         Connection conn = DriverManager.getConnection("jdbc:" + POSTGRESQL_URI);
         return conn.createStatement();
     }
-
-    public static String findFirstHash(String tableName) throws SQLException, ClassNotFoundException {
-
-        Statement st = getStatement();
-        st.execute("SELECT * FROM " + tableName);
-        ResultSet resultSet = st.getResultSet();
-        resultSet.next();
-        return resultSet.getString("hash");
-    }
 }

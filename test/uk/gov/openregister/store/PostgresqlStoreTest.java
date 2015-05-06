@@ -16,8 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -56,9 +55,6 @@ public class PostgresqlStoreTest {
         Record oldRecord = new Record(json1);
 
         Record newRecord = new Record(json1.replaceAll("anotherValue", "newValue"));
-        store.update(oldRecord.getHash(), "key1", newRecord);
-        assertThat(store.count()).isEqualTo(0);
-
         store.save(oldRecord);
 
         store.update(oldRecord.getHash(), "key1", newRecord);
@@ -76,6 +72,59 @@ public class PostgresqlStoreTest {
 
         String actualPreviousEntryHash = PostgresqlStoreForTesting.findAll(TABLE_NAME).stream().filter(row -> row.hash.equals(newRecord.getHash())).map(row -> row.metadata.previousEntryHash).findFirst().get();
         assertEquals(oldRecord.getHash(), actualPreviousEntryHash);
+    }
+
+    @Test
+    public void update_throwsExceptionWhenThereIsNoRecord() {
+        //assuming key1 is primary key
+        String json1 = "{\"key1\":\"aValue\",\"key2\":\"anotherValue\"}";
+        Record oldRecord = new Record(json1);
+
+        Record newRecord = new Record(json1.replaceAll("anotherValue", "newValue"));
+
+        try{
+            store.update(oldRecord.getHash(), "key1", newRecord);
+            fail("Must fail");
+        }catch(RuntimeException e){
+            //success
+        }
+    }
+
+    @Test
+    public void update_throwsExceptionWhenTryToUpdateThePrimaryKey() {
+        //assuming key1 is primary key
+        String json1 = "{\"key1\":\"aValue\",\"key2\":\"anotherValue\"}";
+        Record oldRecord = new Record(json1);
+        store.save(oldRecord);
+
+        Record newRecord = new Record(json1.replaceAll("aValue", "newValue"));
+
+        try{
+            store.update(oldRecord.getHash(), "key1", newRecord);
+            fail("Must fail");
+        }catch(RuntimeException e){
+            //success
+        }
+    }
+
+    @Test
+    public void update_throwsExceptionWhenTryToUpdateOldRecord() {
+        String json = "{\"key1\":\"aValue\",\"key2\":\"key2Value\"}";
+        Record record1 = new Record(json);
+        store.save(record1);
+
+        Record record2 = new Record(json.replaceAll("key2Value", "newValue"));
+        store.update(record1.getHash(), "key1", record2);
+
+        store.update(record2.getHash(), "key1", new Record(json.replaceAll("key2Value", "newValue1")));
+
+        Record record4 = new Record(json.replaceAll("key2Value", "newValue2"));
+        try {
+            store.update(record2.getHash(), "key1", record4);
+            fail("must fail");
+        } catch (RuntimeException e) {
+            //success
+        }
     }
 
     @Test

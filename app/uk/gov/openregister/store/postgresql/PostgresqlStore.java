@@ -40,30 +40,40 @@ public class PostgresqlStore extends Store {
     @Override
     public void save(Record record) {
         PGobject pgo = createPGObject(record.getEntry().toString());
-        database.execute("INSERT INTO " + tableName + " (hash, entry, metadata) VALUES (?,?,?)", record.getHash(), pgo, createMetadataObject(""));
+        int resultUpdated = database.executeUpdate("INSERT INTO " + tableName + " (hash, entry, metadata) VALUES (?,?,?)", record.getHash(), pgo, createMetadataObject(""));
+        if (resultUpdated == 0) {
+            throw new RuntimeException("No record to updated");
+        }
     }
 
     //TODO: should  throw exception when no entry is updated
     @Override
     public void update(String hash, String registerPrimaryKey, Record record) {
-        String queryTemplate = "INSERT INTO %s(hash, entry, metadata) ( " +
-                "select '%s','%s','%s' where exists " +
-                "( " +
-                "select 1 from %s where hash='%s' and entry @> '{\"%s\":\"%s\"}' " +
-                "    ) " +
-                ")";
+        synchronized (hash.intern()) {
+            String queryTemplate = "INSERT INTO %s(hash, entry, metadata) ( " +
+                    "select '%s','%s','%s' " +
+                    "where not exists  ( select 1 from %s where metadata @> '{\"previousEntryHash\":\"%s\"}' ) " +
+                    "and exists ( select 1 from %s where hash='%s' and entry @> '{\"%s\":\"%s\"}')" +
+                    ")";
 
-        String insertQuery = String.format(queryTemplate,
-                tableName,
-                record.getHash(),
-                createPGObject(record.getEntry().toString()),
-                createMetadataObject(hash),
-                tableName,
-                hash,
-                registerPrimaryKey,
-                record.getEntry().get(registerPrimaryKey).textValue());
+            String insertQuery = String.format(queryTemplate,
+                    tableName,
+                    record.getHash(),
+                    createPGObject(record.getEntry().toString()),
+                    createMetadataObject(hash),
+                    tableName,
+                    hash,
+                    tableName,
+                    hash,
+                    registerPrimaryKey,
+                    record.getEntry().get(registerPrimaryKey).textValue()
+            );
+            int resultUpdated = database.executeUpdate(insertQuery);
 
-        database.execute(insertQuery);
+            if (resultUpdated == 0) {
+                throw new RuntimeException("No record to updated");
+            }
+        }
     }
 
     @Override
@@ -124,7 +134,7 @@ public class PostgresqlStore extends Store {
         return createPGObject(new Metadata(DateTime.now(), previousEntryHash).normalise());
     }
 
-    private PGobject createPGObject(String data){
+    private PGobject createPGObject(String data) {
         PGobject pgo = new PGobject();
         pgo.setType("jsonb");
         try {

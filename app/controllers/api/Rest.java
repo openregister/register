@@ -46,7 +46,11 @@ public class Rest extends Controller {
         List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(r);
 
         if (validationErrors.isEmpty()) {
-            Register.instance.store().update(hash, ApplicationConf.registerName.toLowerCase(), r);
+            try {
+                Register.instance.store().update(hash, ApplicationConf.registerName.toLowerCase(), r);
+            } catch (Exception e) {
+                return toJsonResponse(400, e.getMessage());
+            }
             return toJsonResponse(202, "Record saved successfully");
         }
 

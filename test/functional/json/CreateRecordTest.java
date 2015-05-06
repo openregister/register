@@ -110,4 +110,25 @@ public class CreateRecordTest extends ApplicationTests {
 
     }
 
+    @Test
+    public void updateARecordReturns400Json_whenThereIsNoRecordWithTheGivenHash() {
+        String updatedJson = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        WSResponse response = postJson("/supersede/nonExistingHash", updatedJson);
+        assertThat(response.getBody())
+                .isEqualTo("{\"message\":\"No record to updated\",\"errors\":[],\"status\":400}");
+
+    }
+
+    @Test
+    public void updateARecordReturns400Json_whenTryingToUpdatePrimaryKeyColumn() {
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        Record record = new Record(json);
+        assertEquals(202, postJson("/create", json).getStatus());
+
+        String updatedJson = "{\"testregister\":\"newPrimaryKey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
+        assertThat(response.getBody())
+                .isEqualTo("{\"message\":\"No record to updated\",\"errors\":[],\"status\":400}");
+
+    }
 }

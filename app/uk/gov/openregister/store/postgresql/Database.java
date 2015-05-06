@@ -46,6 +46,19 @@ public class Database {
         };
     }
 
+    public int executeUpdate(String sql, Object... params) {
+        try (Connection c = connectionPool.getConnection();
+             PreparedStatement st = c.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) {
+                st.setObject(i + 1, params[i]);
+            }
+            return st.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public void execute(String sql, Object... params) {
         select(sql, params).andThen(rs -> true);
     }
