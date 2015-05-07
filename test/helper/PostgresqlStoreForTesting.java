@@ -2,18 +2,20 @@ package helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.openregister.domain.Metadata;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostgresqlStoreForTesting {
     public static final String POSTGRESQL_URI = "postgresql://localhost/testopenregister";
 
     public static void createTable(String tableName) throws SQLException, ClassNotFoundException {
-        Statement st = getStatement();
-        st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry jsonb)");
-        st.close();
+        try(Statement st = getStatement()){
+            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry jsonb,metadata jsonb)");
+        }
     }
 
     private static String normalized(String tableName) {
@@ -21,46 +23,44 @@ public class PostgresqlStoreForTesting {
     }
 
     public static void dropTable(String tableName) throws Exception {
-        Statement st = getStatement();
-        st.execute("DROP TABLE IF EXISTS " + normalized(tableName));
-        st.close();
+        try(Statement st = getStatement()) {
+            st.execute("DROP TABLE IF EXISTS " + normalized(tableName));
+        }
     }
 
-    public static List<JsonNode> findAll(String tableName) throws Exception {
-        List<JsonNode> result = new ArrayList<>();
-        Statement st = null;
-        ResultSet rs = null;
+    public static List<JsonNode> findAllEntries(String tableName) {
+        return findAll(tableName).stream().map(t -> t.entry).collect(Collectors.toList());
+    }
+
+    public static List<DataRow> findAll(String tableName) {
+        List<DataRow> result = new ArrayList<>();
         try {
-            st = getStatement();
-            st.execute("SELECT * FROM " + normalized(tableName));
-            rs = st.getResultSet();
-            while(rs.next()){
-                result.add(new ObjectMapper().readValue(rs.getString("entry"), JsonNode.class));
+            ResultSet rs = null;
+            try(Statement st = getStatement()) {
+
+                st.execute("SELECT * FROM " + normalized(tableName));
+                rs = st.getResultSet();
+                while (rs.next()) {
+                    result.add(new DataRow(
+                                    rs.getString("hash"),
+                                    new ObjectMapper().readValue(rs.getString("entry"), JsonNode.class),
+                                    Metadata.from(rs.getString("metadata"))
+                            )
+                    );
+                }
+            } finally {
+                if (rs != null) rs.close();
             }
-        } finally {
-            if (rs != null) rs.close();
-            if (st != null) st.close();
+        } catch (Exception e) {
+            throw new RuntimeException("error", e);
         }
         return result;
 
-    }
-
-    public static JsonNode findFirstEntry(String tableName) throws Exception {
-        return findAll(tableName).get(0);
     }
 
     private static Statement getStatement() throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
         Connection conn = DriverManager.getConnection("jdbc:" + POSTGRESQL_URI);
         return conn.createStatement();
-    }
-
-    public static String findFirstHash(String tableName) throws SQLException, ClassNotFoundException {
-
-        Statement st = getStatement();
-        st.execute("SELECT * FROM " + normalized(tableName));
-        ResultSet resultSet = st.getResultSet();
-        resultSet.next();
-        return resultSet.getString("hash");
     }
 }
