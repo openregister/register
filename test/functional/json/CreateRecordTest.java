@@ -2,7 +2,7 @@ package functional.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import functional.ApplicationTests;
-import helper.JsonObjectMapper;
+import uk.gov.openregister.JsonObjectMapper;
 import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -81,7 +81,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void createANewRecordWithDuplicatePrimaryKeyDataReturns400() {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
+        String json = "{\"testregister\":\"testre'gisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
 
@@ -135,7 +135,7 @@ public class CreateRecordTest extends ApplicationTests {
         Record record = new Record(json);
         assertEquals(202, postJson("/create", json).getStatus());
 
-        String updatedJson = "{\"testregister\":\"newPrimaryKey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String updatedJson = "{\"testregister\":\"new'PrimaryKey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
         assertThat(response.getBody())
                 .isEqualTo("{\"message\":\"No record updated\",\"errors\":[],\"status\":400}");

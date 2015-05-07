@@ -35,8 +35,8 @@ public class PostgresqlStoreTest {
 
     @Test
     public void save_insertsARecordWithMetadataAndHash() throws JSONException {
-        String json = "{\"key1\": \"value1\",\"key2\": \"value2\"}";
-        String expectedhash = "bd9715d749969faef3434484deb8f33cbb7eab8f";
+        String json = "{\"key1\": \"va'lue1\",\"key2\": \"value2\"}";
+        String expectedhash = "739a9e55892657e8158db0a44bcea1dc51a1a058";
         store.save("key1", new Record(json));
 
         List<DataRow> rows = PostgresqlStoreForTesting.findAll(TABLE_NAME);
@@ -111,7 +111,7 @@ public class PostgresqlStoreTest {
         Record oldRecord = new Record(json1);
         store.save("key1", oldRecord);
 
-        Record newRecord = new Record(json1.replaceAll("aValue", "newValue"));
+        Record newRecord = new Record(json1.replaceAll("aValue", "new'Value"));
 
         try {
             store.update(oldRecord.getHash(), "key1", newRecord);

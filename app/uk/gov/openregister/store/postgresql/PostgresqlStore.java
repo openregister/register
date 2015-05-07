@@ -2,9 +2,12 @@ package uk.gov.openregister.store.postgresql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
+import uk.gov.openregister.JsonObjectMapper;
 import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.DatabaseException;
@@ -13,10 +16,7 @@ import uk.gov.openregister.store.Store;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PostgresqlStore extends Store {
@@ -40,21 +40,22 @@ public class PostgresqlStore extends Store {
 
     @Override
     public void save(String registerPrimaryKey, Record record) {
+
         String query = "INSERT INTO " + tableName + " (hash, entry, metadata) (" +
                 "select ?,?,? " +
-                "where not exists ( select 1 from " + tableName + " where entry @> '{\"%s\":%s}')" +
+                "where not exists ( select 1 from " + tableName + " where entry @> ?)" +
                 ")";
 
         String insertQuery = String.format(query,
                 registerPrimaryKey,
-                record.getEntry().get(registerPrimaryKey)
+                primaryKeyValue(registerPrimaryKey, record)
         );
 
-        int resultUpdated = database.executeUpdate(
-                insertQuery,
+        int resultUpdated = database.executeUpdate(insertQuery,
                 record.getHash(),
                 createPGObject(record.getEntry().toString()),
-                createMetadataObject("")
+                createPGObject(new Metadata(DateTime.now(), "").normalise()),
+                createPGObject(JsonObjectMapper.convertToString(mapOf(registerPrimaryKey, primaryKeyValue(registerPrimaryKey, record))))
         );
         if (resultUpdated == 0) {
             throw new DatabaseException("No record inserted, a record with primary key value already exists");
@@ -64,24 +65,22 @@ public class PostgresqlStore extends Store {
     @Override
     public void update(String hash, String registerPrimaryKey, Record record) {
         synchronized (hash.intern()) {
-            String queryTemplate = "INSERT INTO " + tableName + "(hash, entry, metadata) ( " +
+
+            String query = "INSERT INTO " + tableName + "(hash, entry, metadata) ( " +
                     "select ?,?,? " +
-                    "where not exists  ( select 1 from " + tableName + " where metadata @> '{\"previousEntryHash\":\"%s\"}' ) " +
-                    "and exists ( select 1 from " + tableName + " where hash=? and entry @> '{\"%s\":%s}')" +
+                    "where not exists  ( select 1 from " + tableName + " where metadata @> ? ) " +
+                    "and exists ( select 1 from " + tableName + " where hash=? and entry @> ?)" +
                     ")";
 
-            String insertQuery = String.format(queryTemplate,
-                    hash,
-                    registerPrimaryKey,
-                    record.getEntry().get(registerPrimaryKey)
-            );
 
             int resultUpdated = database.executeUpdate(
-                    insertQuery,
+                    query,
                     record.getHash(),
                     createPGObject(record.getEntry().toString()),
-                    createMetadataObject(hash),
-                    hash
+                    createPGObject(new Metadata(DateTime.now(), hash).normalise()),
+                    createPGObject(JsonObjectMapper.convertToString(mapOf("previousEntryHash", hash))),
+                    hash,
+                    createPGObject(JsonObjectMapper.convertToString(mapOf(registerPrimaryKey, primaryKeyValue(registerPrimaryKey, record))))
             );
 
             if (resultUpdated == 0) {
@@ -150,8 +149,17 @@ public class PostgresqlStore extends Store {
                 .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
     }
 
-    private PGobject createMetadataObject(String previousEntryHash) {
-        return createPGObject(new Metadata(DateTime.now(), previousEntryHash).normalise());
+    //TODO: this will be deleted when we know the datatype of primary key
+    private Object primaryKeyValue(String registerPrimaryKey, Record record) {
+        JsonNode jsonNode = record.getEntry().get(registerPrimaryKey);
+        if (jsonNode instanceof TextNode) {
+            return jsonNode.textValue();
+        } else if (jsonNode instanceof IntNode) {
+            return jsonNode.intValue();
+        } else {
+            throw new RuntimeException("Confirm is it acceptable???");
+        }
+
     }
 
     private PGobject createPGObject(String data) {
@@ -185,5 +193,12 @@ public class PostgresqlStore extends Store {
         }
         return result;
     }
+
+    private Map<String, Object> mapOf(String key, Object value){
+        Map<String, Object> map = new HashMap<>();
+        map.put(key, value);
+        return map;
+    }
+
 }
 

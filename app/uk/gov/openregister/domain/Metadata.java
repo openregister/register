@@ -3,6 +3,10 @@ package uk.gov.openregister.domain;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.joda.time.DateTime;
 import play.libs.Json;
+import uk.gov.openregister.JsonObjectMapper;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Metadata {
     public final DateTime creationtime;
@@ -14,7 +18,10 @@ public class Metadata {
     }
 
     public String normalise(){
-        return String.format("{\"creationTime\" : \"%s\", \"previousEntryHash\":\"%s\"}", creationtime.toString(), previousEntryHash);
+        Map<String, Object> map = new HashMap<>();
+        map.put("creationTime",  creationtime.toString());
+        map.put("previousEntryHash",  previousEntryHash);
+        return JsonObjectMapper.convertToString(map);
     }
 
     public static Metadata from(String metadataJson) {
