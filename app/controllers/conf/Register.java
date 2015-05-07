@@ -6,7 +6,6 @@ import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.store.Store;
-import uk.gov.openregister.store.mongodb.MongodbStore;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
 import java.util.ArrayList;
@@ -19,11 +18,11 @@ import static uk.gov.openregister.config.ApplicationConf.registerName;
 public class Register {
 
     public static final Register instance = new Register();
-    private List<String> keys = new ArrayList<>();
     private Store store;
+    private RegisterInfo registerInfo;
 
-    public List<String> keys() {
-        return keys;
+    public RegisterInfo registerInfo(){
+        return registerInfo;
     }
 
     public Store store() {
@@ -33,7 +32,7 @@ public class Register {
     public void init() {
 
         if ("register".equalsIgnoreCase(registerName)) {
-            keys = Arrays.asList(ApplicationConf.getString("registers.service.fields").split(","));
+            registerInfo = new RegisterInfo(registerName, registerName.toLowerCase(), Arrays.asList(ApplicationConf.getString("registers.service.fields").split(",")));
         } else {
 
             String registersServiceUri = ApplicationConf.getString("registers.service.url");
@@ -52,13 +51,11 @@ public class Register {
                         return resultKeys;
                     }
             );
-            keys = listPromise.get(10000);
+            registerInfo = new RegisterInfo(registerName, registerName.toLowerCase(), listPromise.get(10000));
         }
 
         String uri = ApplicationConf.getString("store.uri");
 
-        if (uri.startsWith("mongodb")) store = new MongodbStore(uri, registerName, Register.instance.keys);
-        else if (uri.startsWith("postgres")) store = new PostgresqlStore(uri, registerName, Register.instance.keys);
-        else throw new RuntimeException("Unable to find store for store.uri=" + uri);
+        store = new PostgresqlStore(uri, registerInfo);
     }
 }

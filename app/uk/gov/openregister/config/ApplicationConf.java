@@ -10,6 +10,4 @@ public class ApplicationConf {
     }
 
     public static final String registerName = getString("register.name");
-
-    public static final String registerPrimaryKey = registerName.toLowerCase();
 }

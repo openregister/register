@@ -1,6 +1,6 @@
 package uk.gov.openregister.store;
 
-import controllers.conf.Register;
+import controllers.conf.RegisterInfo;
 import helper.DataRow;
 import helper.PostgresqlStoreForTesting;
 import org.json.JSONException;
@@ -17,8 +17,6 @@ import java.util.Optional;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class PostgresqlStoreTest {
 
@@ -27,17 +25,15 @@ public class PostgresqlStoreTest {
 
     @Before
     public void setUp() throws Exception {
-        Register schema = mock(Register.class);
-        when(schema.keys()).thenReturn(Arrays.asList("aKey", "anotherKey"));
         PostgresqlStoreForTesting.dropTable(TABLE_NAME);
-        store = new PostgresqlStore(PostgresqlStoreForTesting.POSTGRESQL_URI, TABLE_NAME, schema.keys());
+        store = new PostgresqlStore(PostgresqlStoreForTesting.POSTGRESQL_URI, new RegisterInfo(TABLE_NAME, TABLE_NAME.toLowerCase(),Arrays.asList("store_tests", "anotherKey")));
     }
 
     @Test
     public void save_insertsARecordWithMetadataAndHash() throws JSONException {
-        String json = "{\"key1\": \"va'lue1\",\"key2\": \"value2\"}";
-        String expectedhash = "739a9e55892657e8158db0a44bcea1dc51a1a058";
-        store.save("key1", new Record(json));
+        String json = "{\"store_tests\": \"va'lue1\",\"key2\": \"value2\"}";
+        String expectedhash = "13b7e046212329ca01bd66cc505028dd3ce993b3";
+        store.save(new Record(json));
 
         List<DataRow> rows = PostgresqlStoreForTesting.findAll(TABLE_NAME);
 
@@ -50,12 +46,12 @@ public class PostgresqlStoreTest {
 
     @Test
     public void save_throwsExceptionWhenTryToInsertARecordWithDupliocateValueOfPrimaryKey() {
-        String json = "{\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"store_tests\": \"value1\",\"key2\": \"value2\"}";
 
-        store.save("key1", new Record(json));
+        store.save(new Record(json));
 
         try {
-            store.save("key1", new Record(json.replaceAll("value2", "newValue")));
+            store.save(new Record(json.replaceAll("value2", "newValue")));
             fail("must throw exception");
         } catch (DatabaseException e) {
             //success
@@ -64,25 +60,24 @@ public class PostgresqlStoreTest {
 
     @Test
     public void update_insertNewEntryOnlyWhenAnEntryWithSamePrimaryKeyAvailable() {
-        //assuming key1 is primary key
-        String json1 = "{\"key1\":\"aValue\",\"key2\":\"anotherValue\"}";
+        String json1 = "{\"store_tests\":\"aValue\",\"key2\":\"anotherValue\"}";
         Record oldRecord = new Record(json1);
 
         Record newRecord = new Record(json1.replaceAll("anotherValue", "newValue"));
-        store.save("key1", oldRecord);
+        store.save(oldRecord);
 
-        store.update(oldRecord.getHash(), "key1", newRecord);
+        store.update(oldRecord.getHash(), newRecord);
         assertThat(store.count()).isEqualTo(2);
     }
 
     @Test
     public void update_previousEntryHash_valueIsHashValueOfOldRecord() {
-        String json1 = "{\"key1\":\"aValue\",\"key2\":\"anotherValue\"}";
+        String json1 = "{\"store_tests\":\"aValue\",\"key2\":\"anotherValue\"}";
         Record oldRecord = new Record(json1);
-        store.save("key1", oldRecord);
+        store.save(oldRecord);
 
         Record newRecord = new Record(json1.replaceAll("anotherValue", "newValue"));
-        store.update(oldRecord.getHash(), "key1", newRecord);
+        store.update(oldRecord.getHash(), newRecord);
 
         String actualPreviousEntryHash = PostgresqlStoreForTesting.findAll(TABLE_NAME).stream().filter(row -> row.hash.equals(newRecord.getHash())).map(row -> row.metadata.previousEntryHash).findFirst().get();
         assertEquals(oldRecord.getHash(), actualPreviousEntryHash);
@@ -90,14 +85,13 @@ public class PostgresqlStoreTest {
 
     @Test
     public void update_throwsExceptionWhenThereIsNoRecord() {
-        //assuming key1 is primary key
-        String json1 = "{\"key1\":\"aValue\",\"key2\":\"anotherValue\"}";
+        String json1 = "{\"store_tests\":\"aValue\",\"key2\":\"anotherValue\"}";
         Record oldRecord = new Record(json1);
 
         Record newRecord = new Record(json1.replaceAll("anotherValue", "newValue"));
 
         try {
-            store.update(oldRecord.getHash(), "key1", newRecord);
+            store.update(oldRecord.getHash(), newRecord);
             fail("Must fail");
         } catch (RuntimeException e) {
             //success
@@ -106,15 +100,14 @@ public class PostgresqlStoreTest {
 
     @Test
     public void update_throwsExceptionWhenTryToUpdateThePrimaryKey() {
-        //assuming key1 is primary key
-        String json1 = "{\"key1\":\"aValue\",\"key2\":\"anotherValue\"}";
+        String json1 = "{\"store_tests\":\"aValue\",\"key2\":\"anotherValue\"}";
         Record oldRecord = new Record(json1);
-        store.save("key1", oldRecord);
+        store.save(oldRecord);
 
         Record newRecord = new Record(json1.replaceAll("aValue", "new'Value"));
 
         try {
-            store.update(oldRecord.getHash(), "key1", newRecord);
+            store.update(oldRecord.getHash(), newRecord);
             fail("Must fail");
         } catch (RuntimeException e) {
             //success
@@ -123,18 +116,18 @@ public class PostgresqlStoreTest {
 
     @Test
     public void update_throwsExceptionWhenTryToUpdateOldRecord() {
-        String json = "{\"key1\":\"aValue\",\"key2\":\"key2Value\"}";
+        String json = "{\"store_tests\":\"aValue\",\"key2\":\"key2Value\"}";
         Record record1 = new Record(json);
-        store.save("key1", record1);
+        store.save(record1);
 
         Record record2 = new Record(json.replaceAll("key2Value", "newValue"));
-        store.update(record1.getHash(), "key1", record2);
+        store.update(record1.getHash(), record2);
 
-        store.update(record2.getHash(), "key1", new Record(json.replaceAll("key2Value", "newValue1")));
+        store.update(record2.getHash(), new Record(json.replaceAll("key2Value", "newValue1")));
 
         Record record4 = new Record(json.replaceAll("key2Value", "newValue2"));
         try {
-            store.update(record2.getHash(), "key1", record4);
+            store.update(record2.getHash(), record4);
             fail("must fail");
         } catch (RuntimeException e) {
             //success
@@ -142,104 +135,104 @@ public class PostgresqlStoreTest {
     }
 
     @Test
-    public void testFindByKV() {
-        String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
+    public void testFindByKV() throws JSONException {
+        String json = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save("aKey", new Record(json));
+        store.save(new Record(json));
 
-        Optional<Record> record = store.findByKV("aKey", "aValue");
-        assertThat(record.get().toString()).isEqualTo(expected);
+        Optional<Record> record = store.findByKV("store_tests", "aValue");
+        JSONAssert.assertEquals( expected, record.get().toString(),true);
     }
 
     @Test
-    public void testFindByHash() {
-        String json = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
+    public void testFindByHash() throws JSONException {
+        String json = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save("aKey", new Record(json));
+        store.save(new Record(json));
 
-        Optional<Record> record = store.findByHash("b90e76e02d99f33a1750e6c4d2623c30511fde25");
-        assertThat(record.get().toString()).isEqualTo(expected);
+        Optional<Record> record = store.findByHash("0b5f9e93b101ba410da10279229b6e0aa1411b85");
+        JSONAssert.assertEquals(expected, record.get().toString(), true);
     }
 
 
     @Test
-    public void testSearch() {
-        String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String json2 = "{\"aKey\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
+    public void testSearch() throws JSONException {
+        String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String json2 = "{\"store_tests\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
+        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save("aKey", new Record(json1));
-        store.save("aKey", new Record(json2));
+        store.save(new Record(json1));
+        store.save(new Record(json2));
 
         HashMap<String, String> q = new HashMap<>();
 
-        q.put("aKey", "aV");
+        q.put("store_tests", "aV");
         List<Record> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        assertThat(records.get(0).toString()).isEqualTo(expected);
+        JSONAssert.assertEquals( expected, records.get(0).toString(),true);
     }
 
     @Test
-    public void testSearchEverywhere() {
-        String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
+    public void testSearchEverywhere() throws JSONException {
+        String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String json2 = "{\"store_tests\":\"different\",\"anotherKey\":\"anotherValue\"}";
+        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save("aKey", new Record(json1));
-        store.save("aKey", new Record(json2));
+        store.save(new Record(json1));
+        store.save(new Record(json2));
 
         HashMap<String, String> q = new HashMap<>();
 
-        q.put("aKey", "Val");
+        q.put("store_tests", "Val");
         List<Record> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        assertThat(records.get(0).toString()).isEqualTo(expected);
+        JSONAssert.assertEquals(expected, records.get(0).toString(), true);
     }
 
     @Test
-    public void testSearchCaseInsensitive() {
-        String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
+    public void testSearchCaseInsensitive() throws JSONException {
+        String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String json2 = "{\"store_tests\":\"different\",\"anotherKey\":\"anotherValue\"}";
+        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save("aKey", new Record(json1));
-        store.save("aKey", new Record(json2));
+        store.save(new Record(json1));
+        store.save(new Record(json2));
 
         HashMap<String, String> q = new HashMap<>();
 
-        q.put("aKey", "aval");
+        q.put("store_tests", "aval");
         List<Record> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        assertThat(records.get(0).toString()).isEqualTo(expected);
+        JSONAssert.assertEquals(expected,records.get(0).toString(), true);
     }
 
     @Test
-    public void testSearchWithMultipleValues() {
-        String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"b90e76e02d99f33a1750e6c4d2623c30511fde25\",\"entry\":{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
+    public void testSearchWithMultipleValues() throws JSONException {
+        String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String json2 = "{\"store_tests\":\"different\",\"anotherKey\":\"anotherValue\"}";
+        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
-        store.save("aKey", new Record(json1));
-        store.save("aKey", new Record(json2));
+        store.save(new Record(json1));
+        store.save(new Record(json2));
 
         HashMap<String, String> q = new HashMap<>();
 
-        q.put("aKey", "aval");
+        q.put("store_tests", "aval");
         q.put("anotherKey", "anotherValue");
         List<Record> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        assertThat(records.get(0).toString()).isEqualTo(expected);
+        JSONAssert.assertEquals(expected, records.get(0).toString(), true);
     }
 
     @Test
     public void testSearchAll() {
-        String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String json2 = "{\"aKey\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
+        String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String json2 = "{\"store_tests\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
 
-        store.save("aKey", new Record(json1));
-        store.save("aKey", new Record(json2));
+        store.save(new Record(json1));
+        store.save(new Record(json2));
 
         HashMap<String, String> q = new HashMap<>();
 
@@ -249,11 +242,11 @@ public class PostgresqlStoreTest {
 
     @Test
     public void testSearchWithQuery() {
-        String json1 = "{\"aKey\":\"aValue1\",\"anotherKey\":\"anotherThing\"}";
-        String json2 = "{\"aKey\":\"different\",\"anotherKey\":\"aValue1\"}";
+        String json1 = "{\"store_tests\":\"aValue1\",\"anotherKey\":\"anotherThing\"}";
+        String json2 = "{\"store_tests\":\"different\",\"anotherKey\":\"aValue1\"}";
 
-        store.save("aKey", new Record(json1));
-        store.save("aKey", new Record(json2));
+        store.save(new Record(json1));
+        store.save(new Record(json2));
 
         List<Record> records = store.search("value");
         assertThat(records.size()).isEqualTo(2);
@@ -261,11 +254,11 @@ public class PostgresqlStoreTest {
 
     @Test
     public void testCount() {
-        String json1 = "{\"aKey\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String json2 = "{\"aKey\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
+        String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String json2 = "{\"store_tests\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
 
-        store.save("aKey", new Record(json1));
-        store.save("aKey", new Record(json2));
+        store.save(new Record(json1));
+        store.save(new Record(json2));
 
         assertThat(store.count()).isEqualTo(2);
     }

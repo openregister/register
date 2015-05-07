@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static controllers.api.Representations.toJsonResponse;
-import static uk.gov.openregister.config.ApplicationConf.registerPrimaryKey;
 
 public class Rest extends Controller {
 
@@ -24,11 +23,11 @@ public class Rest extends Controller {
     public static Result create() throws JsonProcessingException {
         Record r = new Record(request().body().asJson());
 
-        List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(r);
+        List<ValError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
-                Register.instance.store().save(registerPrimaryKey, r);
+                Register.instance.store().save(r);
             } catch (DatabaseException e) {
                 return toJsonResponse(400, e.getMessage());
             }
@@ -44,11 +43,11 @@ public class Rest extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public static Result update(String hash) {
         Record r = new Record(request().body().asJson());
-        List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(r);
+        List<ValError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
-                Register.instance.store().update(hash, registerPrimaryKey, r);
+                Register.instance.store().update(hash, r);
             } catch (DatabaseException e) {
                 return toJsonResponse(400, e.getMessage());
             }

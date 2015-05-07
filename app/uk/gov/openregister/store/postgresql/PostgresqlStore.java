@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import controllers.conf.RegisterInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
@@ -21,17 +22,15 @@ import java.util.stream.Collectors;
 
 public class PostgresqlStore extends Store {
 
-    private String tableName;
-    private List<String> keys;
+    private final RegisterInfo registerInfo;
     private Database database;
 
-    public PostgresqlStore(String databaseURI, String tableName, List<String> keys) {
+    public PostgresqlStore(String databaseURI, RegisterInfo registerInfo) {
         super(databaseURI);
-        this.tableName = tableName;
-        this.keys = keys;
+        this.registerInfo = registerInfo;
         database = new Database(databaseURI);
 
-        createTable(tableName);
+        createTable(registerInfo.tableName);
     }
 
     public void createTable(String tableName) {
@@ -39,23 +38,19 @@ public class PostgresqlStore extends Store {
     }
 
     @Override
-    public void save(String registerPrimaryKey, Record record) {
+    public void save(Record record) {
 
-        String query = "INSERT INTO " + tableName + " (hash, entry, metadata) (" +
+        String query = "INSERT INTO " + registerInfo.tableName + " (hash, entry, metadata) (" +
                 "select ?,?,? " +
-                "where not exists ( select 1 from " + tableName + " where entry @> ?)" +
+                "where not exists ( select 1 from " + registerInfo.tableName + " where entry @> ?)" +
                 ")";
 
-        String insertQuery = String.format(query,
-                registerPrimaryKey,
-                primaryKeyValue(registerPrimaryKey, record)
-        );
-
-        int resultUpdated = database.executeUpdate(insertQuery,
+        int resultUpdated = database.executeUpdate(
+                query,
                 record.getHash(),
                 createPGObject(record.getEntry().toString()),
                 createPGObject(new Metadata(DateTime.now(), "").normalise()),
-                createPGObject(JsonObjectMapper.convertToString(mapOf(registerPrimaryKey, primaryKeyValue(registerPrimaryKey, record))))
+                createPGObject(JsonObjectMapper.convertToString(mapOf(registerInfo.primaryKey, primaryKeyValue(record))))
         );
         if (resultUpdated == 0) {
             throw new DatabaseException("No record inserted, a record with primary key value already exists");
@@ -63,13 +58,13 @@ public class PostgresqlStore extends Store {
     }
 
     @Override
-    public void update(String hash, String registerPrimaryKey, Record record) {
+    public void update(String hash, Record record) {
         synchronized (hash.intern()) {
 
-            String query = "INSERT INTO " + tableName + "(hash, entry, metadata) ( " +
+            String query = "INSERT INTO " + registerInfo.tableName + "(hash, entry, metadata) ( " +
                     "select ?,?,? " +
-                    "where not exists  ( select 1 from " + tableName + " where metadata @> ? ) " +
-                    "and exists ( select 1 from " + tableName + " where hash=? and entry @> ?)" +
+                    "where not exists  ( select 1 from " + registerInfo.tableName + " where metadata @> ? ) " +
+                    "and exists ( select 1 from " + registerInfo.tableName + " where hash=? and entry @> ?)" +
                     ")";
 
 
@@ -80,7 +75,7 @@ public class PostgresqlStore extends Store {
                     createPGObject(new Metadata(DateTime.now(), hash).normalise()),
                     createPGObject(JsonObjectMapper.convertToString(mapOf("previousEntryHash", hash))),
                     hash,
-                    createPGObject(JsonObjectMapper.convertToString(mapOf(registerPrimaryKey, primaryKeyValue(registerPrimaryKey, record))))
+                    createPGObject(JsonObjectMapper.convertToString(mapOf(registerInfo.primaryKey, primaryKeyValue(record))))
             );
 
             if (resultUpdated == 0) {
@@ -91,27 +86,27 @@ public class PostgresqlStore extends Store {
 
     @Override
     public void deleteAll() {
-        database.execute("DROP TABLE IF EXISTS " + tableName);
-        createTable(tableName);
+        database.execute("DROP TABLE IF EXISTS " + registerInfo.tableName);
+        createTable(registerInfo.tableName);
     }
 
     @Override
     public Optional<Record> findByKV(String key, String value) {
-        return database.<Optional<Record>>select("SELECT * FROM " + tableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'")
+        return database.<Optional<Record>>select("SELECT * FROM " + registerInfo.tableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'")
                 .andThen(this::toOptionalRecord);
     }
 
     @Override
     public Optional<Record> findByHash(String hash) {
 
-        return database.<Optional<Record>>select("SELECT * FROM " + tableName + " WHERE hash = ?", hash)
+        return database.<Optional<Record>>select("SELECT * FROM " + registerInfo.tableName + " WHERE hash = ?", hash)
                 .andThen(this::toOptionalRecord);
 
     }
 
     @Override
     public List<Record> search(Map<String, String> map) {
-        String sql = "SELECT * FROM " + tableName;
+        String sql = "SELECT * FROM " + registerInfo.tableName;
 
         if (!map.isEmpty()) {
             List<String> where = map.keySet().stream()
@@ -129,10 +124,10 @@ public class PostgresqlStore extends Store {
     @Override
     public List<Record> search(String query) {
 
-        String sql = "SELECT * FROM " + tableName;
+        String sql = "SELECT * FROM " + registerInfo.tableName;
 
-        if (!keys.isEmpty()) {
-            List<String> where = keys.stream()
+        if (!registerInfo.keys.isEmpty()) {
+            List<String> where = registerInfo.keys.stream()
                     .map(k -> "entry->>'" + k + "' ILIKE '%" + query + "%'")
                     .collect(Collectors.toList());
             sql += " WHERE " + StringUtils.join(where, " OR ");
@@ -145,13 +140,13 @@ public class PostgresqlStore extends Store {
 
     @Override
     public long count() {
-        return database.<Long>select("SELECT count(hash) FROM " + tableName + " AS count")
+        return database.<Long>select("SELECT count(hash) FROM " + registerInfo.tableName + " AS count")
                 .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
     }
 
     //TODO: this will be deleted when we know the datatype of primary key
-    private Object primaryKeyValue(String registerPrimaryKey, Record record) {
-        JsonNode jsonNode = record.getEntry().get(registerPrimaryKey);
+    private Object primaryKeyValue(Record record) {
+        JsonNode jsonNode = record.getEntry().get(registerInfo.primaryKey);
         if (jsonNode instanceof TextNode) {
             return jsonNode.textValue();
         } else if (jsonNode instanceof IntNode) {

@@ -17,14 +17,13 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.openregister.config.ApplicationConf.registerName;
-import static uk.gov.openregister.config.ApplicationConf.registerPrimaryKey;
 
 public class Application extends Controller {
 
     private static DynamicForm dynamicForm = new DynamicForm();
 
     public static Result renderNewEntryForm() {
-        return ok(views.html.newEntry.render(registerName, Register.instance.keys(), dynamicForm));
+        return ok(views.html.newEntry.render(registerName, Register.instance.registerInfo().keys, dynamicForm));
     }
 
     @SuppressWarnings("unchecked")
@@ -32,7 +31,7 @@ public class Application extends Controller {
         Record record = Register.instance.store().findByHash(hash).get();
 
         return ok(views.html.updateEntry.render(registerName,
-                        Register.instance.keys(),
+                        Register.instance.registerInfo().keys,
                         Application.dynamicForm.bind(new ObjectMapper().convertValue(record.getEntry(), Map.class)),
                         hash)
         );
@@ -43,30 +42,30 @@ public class Application extends Controller {
         DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(record);
+        List<ValError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(record);
         if (validationErrors.isEmpty()) {
 
             try {
-                Register.instance.store().update(hash, registerPrimaryKey, record);
+                Register.instance.store().update(hash, record);
                 return redirect("/hash/" + record.getHash());
             } catch (DatabaseException e) {
                 dynamicForm.reject(e.getMessage());
                 return ok(views.html.updateEntry.render(registerName,
-                        Register.instance.keys(),
+                        Register.instance.registerInfo().keys,
                         dynamicForm,
                         hash));
             }
         }
         validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
         return ok(views.html.updateEntry.render(registerName,
-                Register.instance.keys(),
+                Register.instance.registerInfo().keys,
                 dynamicForm,
                 hash));
     }
 
     public static Result index() {
         long count = Register.instance.store().count();
-        return ok(views.html.index.render(registerName, Register.instance.keys(), count));
+        return ok(views.html.index.render(registerName, Register.instance.registerInfo().keys, count));
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
@@ -75,19 +74,19 @@ public class Application extends Controller {
         DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(record);
+        List<ValError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(record);
         if (validationErrors.isEmpty()) {
             try {
-                Register.instance.store().save(registerPrimaryKey, record);
+                Register.instance.store().save(record);
                 return redirect("/hash/" + record.getHash());
             } catch (DatabaseException e) {
                 dynamicForm.reject(e.getMessage());
-                return ok(views.html.newEntry.render(registerName, Register.instance.keys(), dynamicForm));
+                return ok(views.html.newEntry.render(registerName, Register.instance.registerInfo().keys, dynamicForm));
             }
         }
         validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
 
-        return ok(views.html.newEntry.render(registerName, Register.instance.keys(), dynamicForm));
+        return ok(views.html.newEntry.render(registerName, Register.instance.registerInfo().keys, dynamicForm));
     }
 
 
@@ -113,7 +112,7 @@ public class Application extends Controller {
             Map<String, Object> jsonMap = new HashMap<>();
             //TODO: this will break when we have multiple values for a key, data parsing will be based on datatype
             formParameters.keySet().stream()
-                    .filter(key -> Register.instance.keys().contains(key))
+                    .filter(key -> Register.instance.registerInfo().keys.contains(key))
                     .forEach(key -> jsonMap.put(key, formParameters.get(key)));
 
             String json = new ObjectMapper().writeValueAsString(jsonMap);

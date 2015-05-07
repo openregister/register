@@ -14,7 +14,7 @@ public abstract class Store {
 
     protected String databaseURI;
 
-    public abstract void save(String registerPrimaryKey, Record s);
+    public abstract void save(Record s);
 
     public abstract void deleteAll();
 
@@ -28,5 +28,5 @@ public abstract class Store {
 
     public abstract long count();
 
-    public abstract void update(String hash, String registerPrimaryKey, Record record);
+    public abstract void update(String hash, Record record);
 }

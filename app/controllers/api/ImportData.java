@@ -17,8 +17,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import static uk.gov.openregister.config.ApplicationConf.registerPrimaryKey;
-
 public class ImportData extends Controller {
 
 
@@ -57,7 +55,7 @@ public class ImportData extends Controller {
                 Register.instance.store().deleteAll();
                 while (it.hasNext()) {
                     JsonNode rowAsNode = it.next();
-                    Register.instance.store().save(registerPrimaryKey, new Record(rowAsNode));
+                    Register.instance.store().save(new Record(rowAsNode));
                     counter++;
                     if (counter % 1000 == 0) {
                         notifyProgress("Importing... (" + counter + " records)", false, false, counter, out);
