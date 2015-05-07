@@ -51,7 +51,7 @@ public class Register {
                         return resultKeys;
                     }
             );
-            keys = listPromise.get(10000);
+            keys = listPromise.get(30000);
         }
 
         String uri = ApplicationConf.getString("store.uri");
