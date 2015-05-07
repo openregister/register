@@ -1,8 +1,8 @@
-@(registerName: String, keys: List[String], record: uk.gov.openregister.domain.Record)
+@(keys: List[String], record: uk.gov.openregister.domain.Record)
 
-@main(registerName + " register") {
+@main() {
 
-@header(registerName)
+@header()
 
 <div class="row">
 
@@ -13,7 +13,7 @@
         <h1 id="entry_name">@name.textValue</h1>
         }
 
-        <p>An entry in the <a href="/">@registerName register</a>.</p>
+        <p>An entry in the <a href="/">@controllers.conf.Register.instance.friendlyName() register</a>.</p>
 
         <h2>View fields</h2>
 

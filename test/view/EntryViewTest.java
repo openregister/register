@@ -16,7 +16,7 @@ public class EntryViewTest {
     public void testEntryDoesntShowsNameIfNotPresent() throws Exception {
         String json = "{\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
 
-        Html render = entry.render("theregister", Arrays.asList("key1", "key2"), new Record(json));
+        Html render = entry.render(Arrays.asList("key1", "key2"), new Record(json));
         org.jsoup.nodes.Document html = Jsoup.parse(contentAsString(render));
 
         assertThat(html.getElementById("entry_name")).isNull();

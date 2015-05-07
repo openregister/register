@@ -24,11 +24,11 @@ public class PostgresqlStore extends Store {
 
     public PostgresqlStore(String databaseURI, String tableName, List<String> keys) {
         super(databaseURI);
-        this.tableName = tableName;
+        this.tableName = tableName.replaceAll("-", "_");
         this.keys = keys;
         database = new Database(databaseURI);
 
-        createTable(tableName);
+        createTable(this.tableName);
     }
 
     public void createTable(String tableName) {

@@ -12,13 +12,17 @@ public class PostgresqlStoreForTesting {
 
     public static void createTable(String tableName) throws SQLException, ClassNotFoundException {
         Statement st = getStatement();
-        st.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb)");
+        st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry jsonb)");
         st.close();
+    }
+
+    private static String normalized(String tableName) {
+        return tableName.replaceAll("-", "_");
     }
 
     public static void dropTable(String tableName) throws Exception {
         Statement st = getStatement();
-        st.execute("DROP TABLE IF EXISTS " + tableName);
+        st.execute("DROP TABLE IF EXISTS " + normalized(tableName));
         st.close();
     }
 
@@ -28,7 +32,7 @@ public class PostgresqlStoreForTesting {
         ResultSet rs = null;
         try {
             st = getStatement();
-            st.execute("SELECT * FROM " + tableName);
+            st.execute("SELECT * FROM " + normalized(tableName));
             rs = st.getResultSet();
             while(rs.next()){
                 result.add(new ObjectMapper().readValue(rs.getString("entry"), JsonNode.class));
@@ -54,7 +58,7 @@ public class PostgresqlStoreForTesting {
     public static String findFirstHash(String tableName) throws SQLException, ClassNotFoundException {
 
         Statement st = getStatement();
-        st.execute("SELECT * FROM " + tableName);
+        st.execute("SELECT * FROM " + normalized(tableName));
         ResultSet resultSet = st.getResultSet();
         resultSet.next();
         return resultSet.getString("hash");

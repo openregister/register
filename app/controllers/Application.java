@@ -7,7 +7,6 @@ import play.data.DynamicForm;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
-import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.validation.ValidationResult;
 import uk.gov.openregister.validation.Validator;
@@ -21,12 +20,12 @@ public class Application extends Controller {
 
     public static Result renderNewEntryForm() {
 
-        return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys(), dynamicForm));
+        return ok(views.html.newEntry.render(Register.instance.keys(), dynamicForm));
     }
 
     public static Result index() {
         long count = Register.instance.store().count();
-        return ok(views.html.index.render(ApplicationConf.getString("register.name"), Register.instance.keys(), count));
+        return ok(views.html.index.render(Register.instance.keys(), count));
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
@@ -43,7 +42,7 @@ public class Application extends Controller {
             validationResult.getMissingKeys()
                     .forEach(k -> dynamicForm.reject(k, "error.required"));
 
-             return ok(views.html.newEntry.render(ApplicationConf.getString("register.name"), Register.instance.keys(), dynamicForm));
+             return ok(views.html.newEntry.render(Register.instance.keys(), dynamicForm));
         }
 
         Register.instance.store().save(record);

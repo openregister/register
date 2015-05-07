@@ -1,20 +1,15 @@
 package controllers.api;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.base.Joiner;
 import controllers.conf.Register;
-import uk.gov.openregister.validation.ValidationResult;
-import uk.gov.openregister.validation.Validator;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.validation.ValidationResult;
+import uk.gov.openregister.validation.Validator;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;

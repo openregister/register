@@ -1,6 +1,6 @@
 - request:
     method: GET
-    url: /register/test_register
+    url: /register/test-register
     query:
         _representation: json
 
@@ -9,7 +9,7 @@
     headers:
       content-type: application/json
     body: >
-      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"register":"test_register","fields":["name","key1","key2"]}}
+      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"register": "test-register","name": "Test Register", "fields":["name","key1","key2"]}}
 
 - request:
     url: ^.*$

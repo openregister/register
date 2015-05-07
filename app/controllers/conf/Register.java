@@ -19,6 +19,8 @@ public class Register {
     public static final Register instance = new Register();
     private List<String> keys = new ArrayList<>();
     private Store store;
+    private String name;
+    private String friendlyName;
 
     public List<String> keys() {
         return keys;
@@ -29,7 +31,7 @@ public class Register {
     }
 
     public void init() {
-        String name = ApplicationConf.getString("register.name");
+        name = ApplicationConf.getString("register.name");
 
         if ("register".equalsIgnoreCase(name)) {
             keys = Arrays.asList(ApplicationConf.getString("registers.service.fields").split(","));
@@ -38,20 +40,20 @@ public class Register {
             String registersServiceUri = ApplicationConf.getString("registers.service.url");
 
             F.Promise<WSResponse> promise = WS.client().url(registersServiceUri + "/register/" + name + "?_representation=json").execute();
-            F.Promise<List<String>> listPromise = promise.map(r -> {
-                        List<String> resultKeys = new ArrayList<>();
 
-                        //TODO: If response is non 200, what do we want?
-                        if (r.getStatus() == 200) {
-                            Iterator<JsonNode> elements = r.asJson().get("entry").get("fields").elements();
-                            while (elements.hasNext()) {
-                                resultKeys.add(elements.next().textValue());
-                            }
-                        }
-                        return resultKeys;
-                    }
-            );
-            keys = listPromise.get(30000);
+            WSResponse r = promise.get(30000);
+            keys = new ArrayList<>();
+
+            //TODO: If response is non 200, what do we want?
+            if (r.getStatus() == 200) {
+                JsonNode entry = r.asJson().get("entry");
+                Iterator<JsonNode> elements = entry.get("fields").elements();
+                while (elements.hasNext()) {
+                    keys.add(elements.next().textValue());
+                }
+
+                friendlyName = entry.get("name").textValue();
+            }
         }
 
         String uri = ApplicationConf.getString("store.uri");
@@ -59,5 +61,13 @@ public class Register {
         if (uri.startsWith("mongodb")) store = new MongodbStore(uri, name, Register.instance.keys);
         else if (uri.startsWith("postgres")) store = new PostgresqlStore(uri, name, Register.instance.keys);
         else throw new RuntimeException("Unable to find store for store.uri=" + uri);
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public String friendlyName() {
+        return friendlyName;
     }
 }
