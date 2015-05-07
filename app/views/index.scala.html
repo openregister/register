@@ -1,8 +1,8 @@
-@(registerName: String, keys: List[String], count: Long)
+@(keys: List[String], count: Long)
 
-@main(registerName + " register") {
+@main() {
 
-@header(registerName)
+@header()
 
 
 <div class="row">
@@ -33,16 +33,16 @@
                 <div class="row collapse">
                         <div class="small-8 large-11 columns">
                                 <input name="_query" type="text" placeholder="Enter search term">
-                     
+
                              <!-- ./columns -->
                                 <input type="submit" value="Search" class="button postfix" />
                         </div>
-                </div>    
+                </div>
                 </form>
 
             <hr class="divider"/>
                 <ul class="side-nav">
-                    <li><a href="/docs">API Documentation</a></li>
+                    <li><a href="http://www.openregister.org/documentation">API Documentation</a></li>
                 </ul>
         </div>
 </div>

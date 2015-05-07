@@ -14,13 +14,17 @@ public class PostgresqlStoreForTesting {
 
     public static void createTable(String tableName) throws SQLException, ClassNotFoundException {
         try(Statement st = getStatement()){
-            st.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb,metadata jsonb)");
+            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry jsonb,metadata jsonb)");
         }
+    }
+
+    private static String normalized(String tableName) {
+        return tableName.replaceAll("-", "_");
     }
 
     public static void dropTable(String tableName) throws Exception {
         try(Statement st = getStatement()) {
-            st.execute("DROP TABLE IF EXISTS " + tableName);
+            st.execute("DROP TABLE IF EXISTS " + normalized(tableName));
         }
     }
 
@@ -34,7 +38,7 @@ public class PostgresqlStoreForTesting {
             ResultSet rs = null;
             try(Statement st = getStatement()) {
 
-                st.execute("SELECT * FROM " + tableName);
+                st.execute("SELECT * FROM " + normalized(tableName));
                 rs = st.getResultSet();
                 while (rs.next()) {
                     result.add(new DataRow(

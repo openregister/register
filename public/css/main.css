@@ -80,7 +80,7 @@ input.postfix {
   width: 100%;
   background: #2372b5 !important;
   padding-top: 5px;
-  margin-bottom: 35px;
+  margin-bottom: 20px;
 }
 
 .header,
@@ -108,6 +108,19 @@ input.postfix {
 .top-bar a {
   text-decoration: none;
   color: #fff;
+
+}
+
+#phase-banner p {
+  margin-bottom: 10px;
+}
+
+#phase-banner hr {
+  margin-bottom: 35px;
+}
+
+.alpha-phase {
+  background-color: #d53880;
 }
 
 /* intro */

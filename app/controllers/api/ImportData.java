@@ -10,7 +10,6 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
-import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
 
 import java.net.URL;
@@ -21,7 +20,7 @@ public class ImportData extends Controller {
 
 
     public static Result loadWithProgress() {
-        return ok(views.html.load.render(ApplicationConf.getString("register.name"), "Data import"));
+        return ok(views.html.load.render("Data import"));
     }
 
     public static WebSocket<JsonNode> progress() {

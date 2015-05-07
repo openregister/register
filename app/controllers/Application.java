@@ -88,25 +88,7 @@ public class Application extends Controller {
 
         return ok(views.html.newEntry.render(registerName, Register.instance.registerInfo().keys, dynamicForm));
     }
-
-
-    public static Result docs() {
-        return ok(views.html.docsIndex.render(registerName));
-    }
-
-    public static Result docsApi(String api) {
-        switch (api) {
-            case "create":
-                return ok(views.html.docsCreate.render(registerName));
-            case "search":
-                return ok(views.html.docsSearch.render(registerName));
-            case "get":
-                return ok(views.html.docsGet.render(registerName));
-            default:
-                return redirect("/docs");
-        }
-    }
-
+    
     private static Record createRecordFromParams(Map<String, String> formParameters) {
         try {
             Map<String, Object> jsonMap = new HashMap<>();

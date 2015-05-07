@@ -23,7 +23,7 @@ public class ApplicationTests {
     public static final int PORT = 3333;
     public static final String BASE_URL = "http://localhost:" + PORT;
     public static final long TIMEOUT = 10000L;
-    public static final String REGISTER = "testregister";
+    public static final String REGISTER = "test-register";
 
     private static TestServer server;
 
