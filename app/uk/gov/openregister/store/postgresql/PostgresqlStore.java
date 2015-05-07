@@ -55,7 +55,7 @@ public class PostgresqlStore extends Store {
             String queryTemplate = "INSERT INTO " + tableName + "(hash, entry, metadata) ( " +
                     "select '%s','%s','%s' " +
                     "where not exists  ( select 1 from " + tableName +  " where metadata @> '{\"previousEntryHash\":\"%s\"}' ) " +
-                    "and exists ( select 1 from " + tableName +  " where hash='%s' and entry @> '{\"%s\":\"%s\"}')" +
+                    "and exists ( select 1 from " + tableName +  " where hash='%s' and entry @> '{\"%s\":%s}')" +
                     ")";
 
             String insertQuery = String.format(queryTemplate,
@@ -65,7 +65,7 @@ public class PostgresqlStore extends Store {
                     hash,
                     hash,
                     registerPrimaryKey,
-                    record.getEntry().get(registerPrimaryKey).textValue()
+                    record.getEntry().get(registerPrimaryKey)
             );
             int resultUpdated = database.executeUpdate(insertQuery);
 
@@ -144,7 +144,7 @@ public class PostgresqlStore extends Store {
         pgo.setType("jsonb");
         try {
             pgo.setValue(data);
-        } catch (Exception e) {
+        } catch (Exception e) { //success: api setter throws checked exception
         }
         return pgo;
     }
