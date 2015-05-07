@@ -35,6 +35,7 @@ public class Register {
 
         if ("register".equalsIgnoreCase(name)) {
             keys = Arrays.asList(ApplicationConf.getString("registers.service.fields").split(","));
+            friendlyName = "Register";
         } else {
 
             String registersServiceUri = ApplicationConf.getString("registers.service.url");
