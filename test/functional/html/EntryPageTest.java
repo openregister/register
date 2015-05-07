@@ -23,7 +23,7 @@ public class EntryPageTest extends ApplicationTests {
         HtmlPage page = webClient.getPage(BASE_URL + "/ui/create");
         HtmlForm htmlForm = page.getForms().get(0);
 
-        htmlForm.getInputByName("testregister").setValueAttribute("Testregister key");
+        htmlForm.getInputByName("test-register").setValueAttribute("Testregister key");
         htmlForm.getInputByName("name").setValueAttribute("Some name");
         htmlForm.getInputByName("key1").setValueAttribute("Some key1");
         htmlForm.getInputByName("key2").setValueAttribute("some key2");
@@ -38,14 +38,14 @@ public class EntryPageTest extends ApplicationTests {
 
 @Test
     public void create_returnsErrorWhenTryToNewEntryWithDuplicatePrimaryKey() throws IOException {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
 
         assertEquals(202, postJson("/create", json).getStatus());
 
         HtmlPage page = webClient.getPage(BASE_URL + "/ui/create");
         HtmlForm htmlForm = page.getForms().get(0);
 
-        htmlForm.getInputByName("testregister").setValueAttribute("testregisterkey");
+        htmlForm.getInputByName("test-register").setValueAttribute("testregisterkey");
         htmlForm.getInputByName("name").setValueAttribute("Some name");
         htmlForm.getInputByName("key1").setValueAttribute("Some key1");
         htmlForm.getInputByName("key2").setValueAttribute("some key2");
@@ -79,14 +79,14 @@ public class EntryPageTest extends ApplicationTests {
 
     @Test
     public void update_updatesTheEntryInTheRegister() throws IOException, JSONException {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"Key1Value\",\"key2\":\"Key2Value\"}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"Key1Value\",\"key2\":\"Key2Value\"}";
         Record record = new Record(json);
         postJson("/create", json);
 
         HtmlPage page = webClient.getPage(BASE_URL + "/ui/supersede/" + record.getHash());
         HtmlForm form = page.getForms().get(0);
 
-        assertThat(form.getInputByName("testregister").getValueAttribute()).isEqualTo("testregisterkey");
+        assertThat(form.getInputByName("test-register").getValueAttribute()).isEqualTo("testregisterkey");
         assertThat(form.getInputByName("name").getValueAttribute()).isEqualTo("entryName");
         assertThat(form.getInputByName("key1").getValueAttribute()).isEqualTo("Key1Value");
         assertThat(form.getInputByName("key2").getValueAttribute()).isEqualTo("Key2Value");
@@ -102,7 +102,7 @@ public class EntryPageTest extends ApplicationTests {
 
         String jsonResponse = webClient.getPage(resultUrl + "?_representation=json").getWebResponse().getContentAsString();
         JSONAssert.assertEquals(
-                "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"updated Some key1\",\"key2\":\"updated key2\"}",
+                "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"updated Some key1\",\"key2\":\"updated key2\"}",
                 Json.parse(jsonResponse).get("entry").toString(),
                 true);
 
@@ -110,7 +110,7 @@ public class EntryPageTest extends ApplicationTests {
 
     @Test
     public void update_validatesMissingValueAndRendersTheSamePage() throws IOException {
-        String json = "{\"testregister\":\"Testregisterkey\",\"name\":\"entryName\",\"key1\":\"Key1Value\",\"key2\":\"Key2Value\"}";
+        String json = "{\"test-register\":\"Testregisterkey\",\"name\":\"entryName\",\"key1\":\"Key1Value\",\"key2\":\"Key2Value\"}";
         Record record = new Record(json);
         postJson("/create", json);
 

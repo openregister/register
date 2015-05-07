@@ -1,8 +1,8 @@
-@(registerName: String, keys: List[String], form: DynamicForm, formAction: play.api.mvc.Call, submitButtonValue: String)
+@(keys: List[String], form: DynamicForm, formAction: play.api.mvc.Call, submitButtonValue: String)
 
-@main(registerName + " register") {
+@main() {
 
-@header(registerName)
+@header()
 
 @form.globalErrors.map { error =>
 <div class="error">@error</div>

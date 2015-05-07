@@ -32,9 +32,9 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testGetSearchPageShowsTheTotalAmountOfEntries() throws Exception {
-        postJson("/create","{\"testregister\":\"testregisterkey1\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
-        postJson("/create", "{\"testregister\":\"testregisterkey2\",\"name\":\"The Entry\",\"key1\": \"value2\",\"key2\": [\"A\",\"B\"]}");
-        postJson("/create", "{\"testregister\":\"testregisterkey3\",\"name\":\"The Entry\",\"key1\": \"value3\",\"key2\": [\"A\",\"B\"]}");
+        postJson("/create","{\"test-register\":\"testregisterkey1\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
+        postJson("/create", "{\"test-register\":\"testregisterkey2\",\"name\":\"The Entry\",\"key1\": \"value2\",\"key2\": [\"A\",\"B\"]}");
+        postJson("/create", "{\"test-register\":\"testregisterkey3\",\"name\":\"The Entry\",\"key1\": \"value3\",\"key2\": [\"A\",\"B\"]}");
 
 
         WSResponse response = get("/");
@@ -46,9 +46,9 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testSubmitSearchQueryAndReturnsListOfEntries() throws Exception {
-        postJson("/create", "{\"testregister\":\"testregisterkey1\",\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
-        postJson("/create", "{\"testregister\":\"testregisterkey2\",\"name\":\"The Entry2\",\"key1\": \"value2\",\"key2\": [\"C\",\"D\"]}");
-        postJson("/create", "{\"testregister\":\"testregisterkey3\",\"name\":\"The Entry3\",\"key1\": \"value1\",\"key2\": [\"E\",\"F\"]}");
+        postJson("/create", "{\"test-register\":\"testregisterkey1\",\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
+        postJson("/create", "{\"test-register\":\"testregisterkey2\",\"name\":\"The Entry2\",\"key1\": \"value2\",\"key2\": [\"C\",\"D\"]}");
+        postJson("/create", "{\"test-register\":\"testregisterkey3\",\"name\":\"The Entry3\",\"key1\": \"value1\",\"key2\": [\"E\",\"F\"]}");
 
         WSResponse response = get("/search?_query=value1");
         assertThat(response.getStatus()).isEqualTo(OK);
@@ -60,20 +60,20 @@ public class SearchPagesTest extends ApplicationTests {
         Elements tr = table.select("tr");
         Elements th = tr.first().select("th");
         assertThat(th.get(0).text()).isEqualTo("hash");
-        assertThat(th.get(1).text()).isEqualTo("testregister");
+        assertThat(th.get(1).text()).isEqualTo("test-register");
         assertThat(th.get(2).text()).isEqualTo("name");
         assertThat(th.get(3).text()).isEqualTo("key1");
         assertThat(th.get(4).text()).isEqualTo("key2");
 
         Elements td1 = tr.get(1).select("td");
-        assertThat(td1.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/85add0ce250cc7a33e4eea2c7ea82e55582debaf\">85add0c</a>");
+        assertThat(td1.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/39837068f586ab19bcb2b5f2408b024438e75c43\">3983706</a>");
         assertThat(td1.get(1).text()).isEqualTo("testregisterkey1");
         assertThat(td1.get(2).text()).isEqualTo("The Entry1");
         assertThat(td1.get(3).text()).isEqualTo("value1");
         assertThat(td1.get(4).text()).isEqualTo("['A', 'B']");
 
         Elements td2 = tr.get(2).select("td");
-        assertThat(td2.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/950dac55b0c65de4f4fb98d218609597529df802\">950dac5</a>");
+        assertThat(td2.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/9dd019eb60715299711418bc7a3542e93a466f58\">9dd019e</a>");
         assertThat(td2.get(1).text()).isEqualTo("testregisterkey3");
         assertThat(td2.get(2).text()).isEqualTo("The Entry3");
         assertThat(td2.get(3).text()).isEqualTo("value1");
@@ -82,7 +82,7 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testRenderFieldWithoutKeyValueAndAFieldWithValueIsAList() throws Exception {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
         String hash =new Record(json).getHash();
         postJson("/create", json);
 
@@ -101,7 +101,7 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(dt.get(0).text()).isEqualTo("hash");
         assertThat(dd.get(0).text()).isEqualTo(hash);
 
-        assertThat(dt.get(1).text()).isEqualTo("testregister");
+        assertThat(dt.get(1).text()).isEqualTo("test-register");
         assertThat(dd.get(1).text()).isEqualTo("testregisterkey");
 
         assertThat(dt.get(2).text()).isEqualTo("name");
@@ -117,7 +117,7 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testRenderFieldAsListInEntries() throws Exception {
-        postJson("/create", "{\"testregister\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
+        postJson("/create", "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
 
         WSResponse response = search("key1", "value1", "html");
 
@@ -134,7 +134,7 @@ public class SearchPagesTest extends ApplicationTests {
 
     @Test
     public void testEntryShowsNameIfPresent() throws Exception {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
         String hash =new Record(json).getHash();
         postJson("/create", json);
 

@@ -8,7 +8,7 @@ public class RegisterInfo {
     public final List<String> keys;
 
     public RegisterInfo(String tableName, String primaryKey, List<String> keys) {
-        this.tableName = tableName;
+        this.tableName = tableName.replaceAll("-", "_");
         this.primaryKey = primaryKey;
         this.keys = keys;
     }

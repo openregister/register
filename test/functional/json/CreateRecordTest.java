@@ -25,7 +25,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void testCreateARecordReturns202() {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
     }
@@ -39,7 +39,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void testCreateARecordWithInvalidKeysReturns400() throws JSONException {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
 
         JsonNode result = Json.parse(response.getBody());
@@ -51,7 +51,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void testCreateARecordWithInvalidAndMissingKeysReturns400() {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
 
         Map<String, Object> result = JsonObjectMapper.convert(response.getBody(), Map.class);
@@ -66,7 +66,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void testCreateARecordStoresItToTheDatabase() {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
 
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
@@ -81,7 +81,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void createANewRecordWithDuplicatePrimaryKeyDataReturns400() {
-        String json = "{\"testregister\":\"testre'gisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
+        String json = "{\"test-register\":\"testre'gisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
 
@@ -91,7 +91,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void updatingARecordCreatesNewEntryInRegister() {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
         String hash = new Record(json).getHash();
         postJson("/create", json);
 
@@ -109,11 +109,11 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void updateARecordValidatesTheJson() {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         Record record = new Record(json);
         postJson("/create", json);
 
-        String updatedJson = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\"}";
+        String updatedJson = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
         assertThat(response.getBody())
                 .isEqualTo("{\"message\":\"\",\"errors\":[{\"key\":\"key1\",\"message\":\"Missing required key\"},{\"key\":\"key2\",\"message\":\"Missing required key\"}],\"status\":400}");
@@ -122,7 +122,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void updateARecordReturns400Json_whenThereIsNoRecordWithTheGivenHash() {
-        String updatedJson = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String updatedJson = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/supersede/nonExistingHash", updatedJson);
         assertThat(response.getBody())
                 .isEqualTo("{\"message\":\"No record updated\",\"errors\":[],\"status\":400}");
@@ -131,11 +131,11 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void updateARecordReturns400Json_whenTryingToUpdatePrimaryKeyColumn() {
-        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         Record record = new Record(json);
         assertEquals(202, postJson("/create", json).getStatus());
 
-        String updatedJson = "{\"testregister\":\"new'PrimaryKey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
+        String updatedJson = "{\"test-register\":\"new'PrimaryKey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
         assertThat(response.getBody())
                 .isEqualTo("{\"message\":\"No record updated\",\"errors\":[],\"status\":400}");
