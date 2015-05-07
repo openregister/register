@@ -40,8 +40,8 @@ public class FindEntriesTest extends ApplicationTests {
 
     @Test
     public void testSearch() throws Exception {
-        String expectedJson1 = "{\"testregister\":\"testregisterkey\",\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
-        String expectedJson2 = "{\"testregister\":\"testregisterkey\",\"name\":\"The Entry3\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String expectedJson1 = "{\"testregister\":\"testregisterkey1\",\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String expectedJson2 = "{\"testregister\":\"testregisterkey2\",\"name\":\"The Entry3\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
         postJson("/create", expectedJson1);
         postJson("/create", expectedJson2);
 

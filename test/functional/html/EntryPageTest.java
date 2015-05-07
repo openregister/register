@@ -12,6 +12,7 @@ import uk.gov.openregister.domain.Record;
 import java.io.IOException;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -33,6 +34,25 @@ public class EntryPageTest extends ApplicationTests {
 
         String resultJson = webClient.getPage(resultPage.getUrl() + "?_representation=json").getWebResponse().getContentAsString();
         assertFalse(resultJson.contains("submit"));
+    }
+
+@Test
+    public void create_returnsErrorWhenTryToNewEntryWithDuplicatePrimaryKey() throws IOException {
+        String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
+
+        assertEquals(202, postJson("/create", json).getStatus());
+
+        HtmlPage page = webClient.getPage(BASE_URL + "/ui/create");
+        HtmlForm htmlForm = page.getForms().get(0);
+
+        htmlForm.getInputByName("testregister").setValueAttribute("testregisterkey");
+        htmlForm.getInputByName("name").setValueAttribute("Some name");
+        htmlForm.getInputByName("key1").setValueAttribute("Some key1");
+        htmlForm.getInputByName("key2").setValueAttribute("some key2");
+
+        HtmlPage resultPage = htmlForm.getInputByName("submit").click();
+
+        assertEquals("http://localhost:3333/ui/create", resultPage.getUrl().toString());
     }
 
     @Test

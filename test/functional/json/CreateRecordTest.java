@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import functional.ApplicationTests;
 import helper.JsonObjectMapper;
 import org.json.JSONException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import play.libs.Json;
@@ -80,7 +79,6 @@ public class CreateRecordTest extends ApplicationTests {
         assertThat(receivedEntry.asText()).isEqualTo(Json.parse(json).asText());
     }
 
-    @Ignore
     @Test
     public void createANewRecordWithDuplicatePrimaryKeyDataReturns400() {
         String json = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
@@ -127,7 +125,7 @@ public class CreateRecordTest extends ApplicationTests {
         String updatedJson = "{\"testregister\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/supersede/nonExistingHash", updatedJson);
         assertThat(response.getBody())
-                .isEqualTo("{\"message\":\"No record to updated\",\"errors\":[],\"status\":400}");
+                .isEqualTo("{\"message\":\"No record updated\",\"errors\":[],\"status\":400}");
 
     }
 
@@ -140,7 +138,7 @@ public class CreateRecordTest extends ApplicationTests {
         String updatedJson = "{\"testregister\":\"newPrimaryKey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
         assertThat(response.getBody())
-                .isEqualTo("{\"message\":\"No record to updated\",\"errors\":[],\"status\":400}");
+                .isEqualTo("{\"message\":\"No record updated\",\"errors\":[],\"status\":400}");
 
     }
 }

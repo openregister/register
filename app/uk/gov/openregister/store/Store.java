@@ -14,7 +14,7 @@ public abstract class Store {
 
     protected String databaseURI;
 
-    public abstract void save(Record s);
+    public abstract void save(String registerPrimaryKey, Record s);
 
     public abstract void deleteAll();
 

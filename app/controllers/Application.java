@@ -8,6 +8,7 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.validation.ValError;
 import uk.gov.openregister.validation.Validator;
 
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.openregister.config.ApplicationConf.registerName;
+import static uk.gov.openregister.config.ApplicationConf.registerPrimaryKey;
 
 public class Application extends Controller {
 
@@ -42,17 +44,24 @@ public class Application extends Controller {
         Record record = createRecordFromParams(dynamicForm.data());
 
         List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(record);
-        if(validationErrors.isEmpty()){
+        if (validationErrors.isEmpty()) {
 
-            Register.instance.store().update(hash, registerName.toLowerCase(), record);
-            return redirect("/hash/" + record.getHash());
-        }
-        validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
-
-        return ok(views.html.updateEntry.render(registerName,
+            try {
+                Register.instance.store().update(hash, registerPrimaryKey, record);
+                return redirect("/hash/" + record.getHash());
+            } catch (DatabaseException e) {
+                dynamicForm.reject(e.getMessage());
+                return ok(views.html.updateEntry.render(registerName,
                         Register.instance.keys(),
                         dynamicForm,
                         hash));
+            }
+        }
+        validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
+        return ok(views.html.updateEntry.render(registerName,
+                Register.instance.keys(),
+                dynamicForm,
+                hash));
     }
 
     public static Result index() {
@@ -67,9 +76,14 @@ public class Application extends Controller {
         Record record = createRecordFromParams(dynamicForm.data());
 
         List<ValError> validationErrors = new Validator(Register.instance.keys()).validate(record);
-        if(validationErrors.isEmpty()){
-            Register.instance.store().save(record);
-            return redirect("/hash/" + record.getHash());
+        if (validationErrors.isEmpty()) {
+            try {
+                Register.instance.store().save(registerPrimaryKey, record);
+                return redirect("/hash/" + record.getHash());
+            } catch (DatabaseException e) {
+                dynamicForm.reject(e.getMessage());
+                return ok(views.html.newEntry.render(registerName, Register.instance.keys(), dynamicForm));
+            }
         }
         validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
 

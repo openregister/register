@@ -38,14 +38,26 @@ public class PostgresqlStore extends Store {
         database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb, metadata jsonb)");
     }
 
-    //TODO confirm no insert which violates register primary key constraint
     @Override
-    public void save(Record record) {
-        PGobject pgo = createPGObject(record.getEntry().toString());
-        String query = "INSERT INTO " + tableName + " (hash, entry, metadata) VALUES (?,?,?)";
-        int resultUpdated = database.executeUpdate(query, record.getHash(), pgo, createMetadataObject(""));
+    public void save(String registerPrimaryKey, Record record) {
+        String query = "INSERT INTO " + tableName + " (hash, entry, metadata) (" +
+                "select ?,?,? " +
+                "where not exists ( select 1 from " + tableName + " where entry @> '{\"%s\":%s}')" +
+                ")";
+
+        String insertQuery = String.format(query,
+                registerPrimaryKey,
+                record.getEntry().get(registerPrimaryKey)
+        );
+
+        int resultUpdated = database.executeUpdate(
+                insertQuery,
+                record.getHash(),
+                createPGObject(record.getEntry().toString()),
+                createMetadataObject("")
+        );
         if (resultUpdated == 0) {
-            throw new DatabaseException("No record to insert");
+            throw new DatabaseException("No record inserted, a record with primary key value already exists");
         }
     }
 
@@ -53,24 +65,27 @@ public class PostgresqlStore extends Store {
     public void update(String hash, String registerPrimaryKey, Record record) {
         synchronized (hash.intern()) {
             String queryTemplate = "INSERT INTO " + tableName + "(hash, entry, metadata) ( " +
-                    "select '%s','%s','%s' " +
-                    "where not exists  ( select 1 from " + tableName +  " where metadata @> '{\"previousEntryHash\":\"%s\"}' ) " +
-                    "and exists ( select 1 from " + tableName +  " where hash='%s' and entry @> '{\"%s\":%s}')" +
+                    "select ?,?,? " +
+                    "where not exists  ( select 1 from " + tableName + " where metadata @> '{\"previousEntryHash\":\"%s\"}' ) " +
+                    "and exists ( select 1 from " + tableName + " where hash=? and entry @> '{\"%s\":%s}')" +
                     ")";
 
             String insertQuery = String.format(queryTemplate,
-                    record.getHash(),
-                    createPGObject(record.getEntry().toString()),
-                    createMetadataObject(hash),
-                    hash,
                     hash,
                     registerPrimaryKey,
                     record.getEntry().get(registerPrimaryKey)
             );
-            int resultUpdated = database.executeUpdate(insertQuery);
+
+            int resultUpdated = database.executeUpdate(
+                    insertQuery,
+                    record.getHash(),
+                    createPGObject(record.getEntry().toString()),
+                    createMetadataObject(hash),
+                    hash
+            );
 
             if (resultUpdated == 0) {
-                throw new DatabaseException("No record to updated");
+                throw new DatabaseException("No record updated");
             }
         }
     }

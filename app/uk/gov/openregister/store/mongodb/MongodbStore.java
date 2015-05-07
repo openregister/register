@@ -35,7 +35,7 @@ public class MongodbStore extends Store {
     }
 
     @Override
-    public void save(Record s) {
+    public void save(String registerPrimaryKey, Record s) {
 
         MongoCollection<Document> collection = db.getCollection(this.collection);
         collection.insertOne(Document.parse(s.toString()));

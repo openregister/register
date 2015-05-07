@@ -1,27 +1,22 @@
 package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import controllers.conf.Register;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
-import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.validation.ValError;
 import uk.gov.openregister.validation.Validator;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import static controllers.api.Representations.toJsonResponse;
+import static uk.gov.openregister.config.ApplicationConf.registerPrimaryKey;
 
 public class Rest extends Controller {
 
@@ -33,7 +28,7 @@ public class Rest extends Controller {
 
         if (validationErrors.isEmpty()) {
             try {
-                Register.instance.store().save(r);
+                Register.instance.store().save(registerPrimaryKey, r);
             } catch (DatabaseException e) {
                 return toJsonResponse(400, e.getMessage());
             }
@@ -53,7 +48,7 @@ public class Rest extends Controller {
 
         if (validationErrors.isEmpty()) {
             try {
-                Register.instance.store().update(hash, ApplicationConf.registerName.toLowerCase(), r);
+                Register.instance.store().update(hash, registerPrimaryKey, r);
             } catch (DatabaseException e) {
                 return toJsonResponse(400, e.getMessage());
             }
