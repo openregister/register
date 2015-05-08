@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import play.libs.F;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
+import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static uk.gov.openregister.config.ApplicationConf.registerName;
 
@@ -48,13 +49,11 @@ public class Register {
             //TODO: If response is non 200, what do we want?
             if (r.getStatus() == 200) {
                 JsonNode entry = r.asJson().get("entry");
-                Iterator<JsonNode> elements = entry.get("fields").elements();
-                while (elements.hasNext()) {
-                    keys.add(elements.next().textValue());
-                }
 
+                keys = StreamUtils.asStream(entry.get("fields").elements()).map(JsonNode::textValue).collect(Collectors.toList());
                 friendlyName = entry.get("name").textValue();
             }
+
             registerInfo = new RegisterInfo(registerName, registerName.toLowerCase(), keys);
         }
 

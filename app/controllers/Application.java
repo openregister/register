@@ -20,7 +20,34 @@ public class Application extends Controller {
 
     private static DynamicForm dynamicForm = new DynamicForm();
 
+
+    public static Result index() {
+        long count = Register.instance.store().count();
+        return ok(views.html.index.render(Register.instance.registerInfo().keys, count));
+    }
+
     public static Result renderNewEntryForm() {
+        return ok(views.html.newEntry.render(Register.instance.registerInfo().keys, dynamicForm));
+    }
+
+    @BodyParser.Of(BodyParser.FormUrlEncoded.class)
+    public static Result create() {
+
+        DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
+        Record record = createRecordFromParams(dynamicForm.data());
+
+        List<ValError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(record);
+        if (validationErrors.isEmpty()) {
+            try {
+                Register.instance.store().save(record);
+                return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
+            } catch (DatabaseException e) {
+                dynamicForm.reject(e.getMessage());
+                return ok(views.html.newEntry.render(Register.instance.registerInfo().keys, dynamicForm));
+            }
+        }
+        validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
+
         return ok(views.html.newEntry.render(Register.instance.registerInfo().keys, dynamicForm));
     }
 
@@ -45,7 +72,7 @@ public class Application extends Controller {
 
             try {
                 Register.instance.store().update(hash, record);
-                return redirect("/hash/" + record.getHash());
+                return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
             } catch (DatabaseException e) {
                 dynamicForm.reject(e.getMessage());
                 return ok(views.html.updateEntry.render(
@@ -61,32 +88,6 @@ public class Application extends Controller {
                 hash));
     }
 
-    public static Result index() {
-        long count = Register.instance.store().count();
-        return ok(views.html.index.render(Register.instance.registerInfo().keys, count));
-    }
-
-    @BodyParser.Of(BodyParser.FormUrlEncoded.class)
-    public static Result create() {
-
-        DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
-        Record record = createRecordFromParams(dynamicForm.data());
-
-        List<ValError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(record);
-        if (validationErrors.isEmpty()) {
-            try {
-                Register.instance.store().save(record);
-                return redirect("/hash/" + record.getHash());
-            } catch (DatabaseException e) {
-                dynamicForm.reject(e.getMessage());
-                return ok(views.html.newEntry.render(Register.instance.registerInfo().keys, dynamicForm));
-            }
-        }
-        validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
-
-        return ok(views.html.newEntry.render(Register.instance.registerInfo().keys, dynamicForm));
-    }
-    
     private static Record createRecordFromParams(Map<String, String> formParameters) {
         try {
             Map<String, Object> jsonMap = new HashMap<>();
