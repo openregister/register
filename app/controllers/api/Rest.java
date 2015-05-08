@@ -1,13 +1,14 @@
 package controllers.api;
 
-import com.google.common.base.Joiner;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import controllers.conf.Register;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
-import uk.gov.openregister.validation.ValidationResult;
+import uk.gov.openregister.store.DatabaseException;
+import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
 import java.util.HashMap;
@@ -19,16 +20,41 @@ import static controllers.api.Representations.toJsonResponse;
 public class Rest extends Controller {
 
     @BodyParser.Of(BodyParser.Json.class)
-    public static Result create() {
+    public static Result create() throws JsonProcessingException {
         Record r = new Record(request().body().asJson());
-        // Validation
-        ValidationResult validationResult = new Validator(Register.instance.keys()).validate(r);
-        if (!validationResult.isValid()) {
-            // TODO, incomplete, needs better error messages
-            return toJsonResponse(400, "The following keys are not allowed in the record: " + Joiner.on(", ").join(validationResult.getInvalidKeys()));
+
+        List<ValidationError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(r);
+
+        if (validationErrors.isEmpty()) {
+            try {
+                Register.instance.store().save(r);
+            } catch (DatabaseException e) {
+                return toJsonResponse(400, e.getMessage());
+            }
+
+            return toJsonResponse(202, "Record saved successfully");
         }
-        Register.instance.store().save(r);
-        return toJsonResponse(202, "Record saved successfully");
+
+        return toJsonResponse(400, "", validationErrors);
+
+    }
+
+    //TODO: do validation
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result update(String hash) {
+        Record r = new Record(request().body().asJson());
+        List<ValidationError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(r);
+
+        if (validationErrors.isEmpty()) {
+            try {
+                Register.instance.store().update(hash, r);
+            } catch (DatabaseException e) {
+                return toJsonResponse(400, e.getMessage());
+            }
+            return toJsonResponse(202, "Record saved successfully");
+        }
+
+        return toJsonResponse(400, "", validationErrors);
     }
 
     public static F.Promise<Result> findByKey(String key, String value) {
@@ -57,7 +83,6 @@ public class Rest extends Controller {
 
         return recordsF.map(records -> Representations.toListOfRecords(request(), records));
     }
-
 
 
 

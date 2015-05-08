@@ -1,22 +1,3 @@
 @(keys: List[String], form: DynamicForm)
 
-@main() {
-
-@header()
-
-
-<div class="row">
-
-@helper.form(action = routes.Application.create()) {
-
-@keys.map{ key =>
-@helper.inputText(form(key))
-}
-
-    <input type="submit" name="submit" value="Add" class="button"/>
-}
-</div>
-
-@license()
-
-}
+@editableEntry(keys, form, routes.Application.create(), "Add")

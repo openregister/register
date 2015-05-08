@@ -15,7 +15,7 @@ public class Record {
         this.hash = Digest.shasum(normalise());
     }
 
-    public Record(String jsonString){
+    public Record(String jsonString) {
         this(Json.parse(jsonString));
     }
 
@@ -32,6 +32,7 @@ public class Record {
     }
 
     private static final ObjectMapper SORTED_MAPPER = new ObjectMapper();
+
     static {
         SORTED_MAPPER.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
     }
@@ -55,4 +56,5 @@ public class Record {
             return entry.toString();
         }
     }
+
 }

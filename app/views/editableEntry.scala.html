@@ -1,0 +1,25 @@
+@(keys: List[String], form: DynamicForm, formAction: play.api.mvc.Call, submitButtonValue: String)
+
+@main() {
+
+@header()
+
+@form.globalErrors.map { error =>
+<div class="error">@error</div>
+}
+
+<div class="row">
+
+@helper.form(action = formAction) {
+
+@keys.map{ key =>
+@helper.inputText(form(key))
+}
+
+    <input type="submit" name="submit" value="@submitButtonValue" class="button"/>
+}
+</div>
+
+@license()
+
+}

@@ -1,25 +1,21 @@
 package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.conf.Register;
-import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
-import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.validation.ValidationError;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static play.mvc.Results.ok;
 import static play.mvc.Results.status;
 
 public class Representations {
-
 
     enum Representation {
         HTML,
@@ -46,7 +42,7 @@ public class Representations {
             case JSON:
                 return ok(new ObjectMapper().writeValueAsString(records));
             case HTML:
-                return ok(views.html.entries.render(Register.instance.keys(), records));
+                return ok(views.html.entries.render(Register.instance.registerInfo().keys, records));
             default:
                 return toJsonResponse(400, "Unsupported representation '" + representation + "'");
         }
@@ -58,7 +54,7 @@ public class Representations {
             case JSON:
                 return recordO.map(record -> ok(record.toString())).orElse(toJsonResponse(404, "Entry not found"));
             case HTML:
-                return recordO.map(record -> ok(views.html.entry.render(Register.instance.keys(), record)))
+                return recordO.map(record -> ok(views.html.entry.render(Register.instance.registerInfo().keys, record)))
                         .orElse(toHtmlResponse(404, "Entry not found"));
             default:
                 return toJsonResponse(400, "Unsupported representation '" + representation + "'");
@@ -69,11 +65,18 @@ public class Representations {
         return status(status, views.html.error.render(message));
     }
 
+
     public static Results.Status toJsonResponse(int statusCode, String message) {
-        ObjectNode result = Json.newObject();
+        return toJsonResponse(statusCode, message, Collections.<ValidationError>emptyList());
+    }
+
+    public static Results.Status toJsonResponse(int statusCode, String message, List<ValidationError> errors) {
+        Map<String,Object> result = new HashMap<>();
         result.put("status", statusCode);
         result.put("message", message);
-        return status(statusCode, result);
+        result.put("errors", errors);
+
+        return status(statusCode, (JsonNode) new ObjectMapper().valueToTree(result));
     }
 
     private static Representation representationFor(Map<String, String[]> queryString) {
@@ -89,3 +92,4 @@ public class Representations {
     }
 
 }
+
