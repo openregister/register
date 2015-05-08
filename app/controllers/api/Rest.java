@@ -11,6 +11,7 @@ import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class Rest extends Controller {
     public static Result create() throws JsonProcessingException {
         Record r = new Record(request().body().asJson());
 
-        List<ValidationError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(r);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.registerInfo().keys).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
@@ -43,7 +44,7 @@ public class Rest extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public static Result update(String hash) {
         Record r = new Record(request().body().asJson());
-        List<ValidationError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(r);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.registerInfo().keys).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {

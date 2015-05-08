@@ -12,6 +12,7 @@ import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class Application extends Controller {
         DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        List<ValidationError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(record);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.registerInfo().keys).validate(record);
         if (validationErrors.isEmpty()) {
             try {
                 Register.instance.store().save(record);
@@ -67,7 +68,7 @@ public class Application extends Controller {
         DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        List<ValidationError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(record);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.registerInfo().keys).validate(record);
         if (validationErrors.isEmpty()) {
 
             try {

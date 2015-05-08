@@ -60,7 +60,8 @@ public class EntryPageTest extends ApplicationTests {
         HtmlPage page = webClient.getPage(BASE_URL + "/ui/create");
         HtmlForm htmlForm = page.getForms().get(0);
 
-        htmlForm.getInputByName("name").setValueAttribute("");
+        htmlForm.getInputByName("test-register").setValueAttribute("");
+        htmlForm.getInputByName("name").setValueAttribute("some name");
         htmlForm.getInputByName("key1").setValueAttribute("Some key1");
         htmlForm.getInputByName("key2").setValueAttribute("some key2");
 
@@ -70,8 +71,8 @@ public class EntryPageTest extends ApplicationTests {
 
         htmlForm = resultPage.getForms().get(0);
 
-        assertThat(htmlForm.getInputByName("name").getValueAttribute()).isEqualTo("");
-        assertThat(htmlForm.getElementsByAttribute("dl", "id", "name_field").get(0).getElementsByAttribute("dd", "class", "error").get(0).asText()).isEqualTo("This field is required");
+        assertThat(htmlForm.getElementsByAttribute("dl", "id", "test-register_field").get(0).getElementsByAttribute("dd", "class", "error").get(0).asText()).isEqualTo("This field is required");
+        assertThat(htmlForm.getInputByName("name").getValueAttribute()).isEqualTo("some name");
         assertThat(htmlForm.getInputByName("key1").getValueAttribute()).isEqualTo("Some key1");
         assertThat(htmlForm.getInputByName("key2").getValueAttribute()).isEqualTo("some key2");
 
@@ -117,6 +118,7 @@ public class EntryPageTest extends ApplicationTests {
         HtmlPage page = webClient.getPage(BASE_URL + "/ui/supersede/" + record.getHash());
         HtmlForm form = page.getForms().get(0);
 
+        form.getInputByName("test-register").setValueAttribute("");
         form.getInputByName("name").setValueAttribute("entryName");
         form.getInputByName("key1").setValueAttribute("");
         form.getInputByName("key2").setValueAttribute("updated key2");
@@ -129,7 +131,7 @@ public class EntryPageTest extends ApplicationTests {
 
         assertThat(form.getInputByName("name").getValueAttribute()).isEqualTo("entryName");
         assertThat(form.getInputByName("key1").getValueAttribute()).isEqualTo("");
-        assertThat(form.getElementsByAttribute("dl", "id", "key1_field").get(0).getElementsByAttribute("dd", "class", "error").get(0).asText()).isEqualTo("This field is required");
+        assertThat(form.getElementsByAttribute("dl", "id", "test-register_field").get(0).getElementsByAttribute("dd", "class", "error").get(0).asText()).isEqualTo("This field is required");
         assertThat(form.getInputByName("key2").getValueAttribute()).isEqualTo("updated key2");
 
     }

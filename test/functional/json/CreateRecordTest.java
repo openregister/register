@@ -51,7 +51,7 @@ public class CreateRecordTest extends ApplicationTests {
 
     @Test
     public void testCreateARecordWithInvalidAndMissingKeysReturns400() {
-        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key2\": \"value2\"}";
+        String json = "{\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
 
         Map<String, Object> result = JsonObjectMapper.convert(response.getBody(), Map.class);
@@ -61,7 +61,7 @@ public class CreateRecordTest extends ApplicationTests {
 
         List<Map> errors = (List) result.get("errors");
         assertEquals(2, errors.size());
-        assertEquals(Arrays.asList("invalidKey", "key1"), errors.stream().map(it -> it.get("key")).collect(Collectors.toList()));
+        assertEquals(Arrays.asList("invalidKey", "test-register"), errors.stream().map(it -> it.get("key")).collect(Collectors.toList()));
     }
 
     @Test
@@ -113,10 +113,10 @@ public class CreateRecordTest extends ApplicationTests {
         Record record = new Record(json);
         postJson("/create", json);
 
-        String updatedJson = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\"}";
+        String updatedJson = "{\"test-register\":\"\",\"name\":\"entryName\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
         assertThat(response.getBody())
-                .isEqualTo("{\"message\":\"\",\"errors\":[{\"key\":\"key1\",\"message\":\"Missing required key\"},{\"key\":\"key2\",\"message\":\"Missing required key\"}],\"status\":400}");
+                .isEqualTo("{\"message\":\"\",\"errors\":[{\"key\":\"test-register\",\"message\":\"Missing required key\"}],\"status\":400}");
 
     }
 

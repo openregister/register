@@ -14,13 +14,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static uk.gov.openregister.config.ApplicationConf.registerName;
 
 public class Register {
 
     public static final Register instance = new Register();
     private Store store;
     private RegisterInfo registerInfo;
+    private String name;
     private String friendlyName;
 
     public RegisterInfo registerInfo(){
@@ -32,16 +32,17 @@ public class Register {
     }
 
     public void init() {
+        name = ApplicationConf.getString("register.name");
 
-        if ("register".equalsIgnoreCase(registerName)) {
+        if ("register".equalsIgnoreCase(name)) {
             List<String> keys = Arrays.asList(ApplicationConf.getString("registers.service.fields").split(","));
-            registerInfo = new RegisterInfo(registerName, registerName.toLowerCase(), keys);
+            registerInfo = new RegisterInfo(name, name.toLowerCase(), keys);
             friendlyName = "Register";
         } else {
 
             String registersServiceUri = ApplicationConf.getString("registers.service.url");
 
-            F.Promise<WSResponse> promise = WS.client().url(registersServiceUri + "/register/" + registerName + "?_representation=json").execute();
+            F.Promise<WSResponse> promise = WS.client().url(registersServiceUri + "/register/" + name + "?_representation=json").execute();
 
             WSResponse r = promise.get(30000);
             List<String> keys = new ArrayList<>();
@@ -54,7 +55,7 @@ public class Register {
                 friendlyName = entry.get("name").textValue();
             }
 
-            registerInfo = new RegisterInfo(registerName, registerName.toLowerCase(), keys);
+            registerInfo = new RegisterInfo(name, name.toLowerCase(), keys);
         }
 
         String uri = ApplicationConf.getString("store.uri");
@@ -64,5 +65,9 @@ public class Register {
 
     public String friendlyName() {
         return friendlyName;
+    }
+
+    public String name() {
+        return name;
     }
 }

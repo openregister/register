@@ -5,6 +5,7 @@ import play.libs.Json;
 import uk.gov.openregister.domain.Record;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -15,7 +16,7 @@ public class ValidatorTest {
     @Test
     public void validate_returnsEmptyListWhenNoValidationError() throws Exception {
 
-        Validator v = new Validator(Arrays.asList("key1", "key2"));
+        Validator v = new Validator(Collections.singletonList("key1"), Arrays.asList("key1", "key2"));
         String json = "{\"key1\":\"valuex\",\"key2\":[\"entry1\",\"entry2\"]}";
 
         List<ValidationError> result = v.validate(new Record(Json.parse(json)));
@@ -25,7 +26,7 @@ public class ValidatorTest {
     @Test
     public void validate_returnsListOfAllErrors() throws Exception {
 
-        Validator v = new Validator(Arrays.asList("name","key1", "key2"));
+        Validator v = new Validator(Collections.singletonList("name"), Arrays.asList("name","key1", "key2"));
         String json = "{\"invalidKey\":\"invalidKeyValue\",\"key1\":\"valuex\",\"key2\":[\"entry1\",\"entry2\"]}";
 
         List<ValidationError> result = v.validate(new Record(Json.parse(json)));
