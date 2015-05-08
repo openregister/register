@@ -9,7 +9,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.DatabaseException;
-import uk.gov.openregister.validation.ValError;
+import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public class Application extends Controller {
         DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        List<ValError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(record);
+        List<ValidationError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(record);
         if (validationErrors.isEmpty()) {
             try {
                 Register.instance.store().save(record);
@@ -67,7 +67,7 @@ public class Application extends Controller {
         DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        List<ValError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(record);
+        List<ValidationError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(record);
         if (validationErrors.isEmpty()) {
 
             try {

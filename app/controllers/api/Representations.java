@@ -8,13 +8,12 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import uk.gov.openregister.domain.Record;
-import uk.gov.openregister.validation.ValError;
+import uk.gov.openregister.validation.ValidationError;
 
 import java.util.*;
 
 import static play.mvc.Results.ok;
 import static play.mvc.Results.status;
-import static uk.gov.openregister.config.ApplicationConf.registerName;
 
 public class Representations {
 
@@ -68,10 +67,10 @@ public class Representations {
 
 
     public static Results.Status toJsonResponse(int statusCode, String message) {
-        return toJsonResponse(statusCode, message, Collections.<ValError>emptyList());
+        return toJsonResponse(statusCode, message, Collections.<ValidationError>emptyList());
     }
 
-    public static Results.Status toJsonResponse(int statusCode, String message, List<ValError> errors) {
+    public static Results.Status toJsonResponse(int statusCode, String message, List<ValidationError> errors) {
         Map<String,Object> result = new HashMap<>();
         result.put("status", statusCode);
         result.put("message", message);

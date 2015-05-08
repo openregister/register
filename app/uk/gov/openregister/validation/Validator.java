@@ -15,20 +15,20 @@ public class Validator {
         this.keys = keys;
     }
 
-    public List<ValError> validate(Record record) {
+    public List<ValidationError> validate(Record record) {
 
-        List<ValError> errors = new ArrayList<>();
-        List<ValError> invalidKeyErrors = StreamUtils.asStream(record.getEntry().fieldNames())
+        List<ValidationError> errors = new ArrayList<>();
+        List<ValidationError> invalidKeyErrors = StreamUtils.asStream(record.getEntry().fieldNames())
                 .filter(key -> !keys.contains(key))
-                .map(key -> new ValError(key, "Key not required"))
+                .map(key -> new ValidationError(key, "Key not required"))
                 .collect(Collectors.toList());
 
         errors.addAll(invalidKeyErrors);
 
         JsonNode entry = record.getEntry();
-        List<ValError> missingKeyErrors =keys.stream()
+        List<ValidationError> missingKeyErrors =keys.stream()
                 .filter(k -> !entry.has(k) || (!entry.get(k).isArray() && entry.get(k).asText().isEmpty()))
-                .map(key -> new ValError(key, "Missing required key"))
+                .map(key -> new ValidationError(key, "Missing required key"))
                 .collect(Collectors.toList());
 
         errors.addAll(missingKeyErrors);

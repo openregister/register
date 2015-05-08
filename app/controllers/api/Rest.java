@@ -1,8 +1,6 @@
 package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Joiner;
-import com.google.common.base.Joiner;
 import controllers.conf.Register;
 import play.libs.F;
 import play.mvc.BodyParser;
@@ -10,7 +8,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.DatabaseException;
-import uk.gov.openregister.validation.ValError;
+import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
 import java.util.HashMap;
@@ -25,7 +23,7 @@ public class Rest extends Controller {
     public static Result create() throws JsonProcessingException {
         Record r = new Record(request().body().asJson());
 
-        List<ValError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(r);
+        List<ValidationError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
@@ -45,7 +43,7 @@ public class Rest extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public static Result update(String hash) {
         Record r = new Record(request().body().asJson());
-        List<ValError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(r);
+        List<ValidationError> validationErrors = new Validator(Register.instance.registerInfo().keys).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
