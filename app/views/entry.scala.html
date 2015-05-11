@@ -1,4 +1,4 @@
-@(keys: List[String], record: uk.gov.openregister.domain.Record)
+@(fields: List[String], record: uk.gov.openregister.domain.Record)
 
 @main() {
 
@@ -21,7 +21,7 @@
             <dl>
                 <dt class="hash">hash</dt>
                 <dd class="hash">@record.getHash</dd>
-                @keys.map { key =>
+                @fields.map { key =>
                 <dt class="@key">@key</dt>
                 <dd class="@key">@entryValue(record.getEntry.get(key))</dd>
                 }

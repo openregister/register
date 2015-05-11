@@ -1,4 +1,4 @@
-@(keys: List[String], form: DynamicForm, formAction: play.api.mvc.Call, submitButtonValue: String)
+@(fields: List[String], form: DynamicForm, formAction: play.api.mvc.Call, submitButtonValue: String)
 
 @main() {
 
@@ -12,7 +12,7 @@
 
 @helper.form(action = formAction) {
 
-@keys.map{ key =>
+@fields.map{ key =>
 @helper.inputText(form(key))
 }
 

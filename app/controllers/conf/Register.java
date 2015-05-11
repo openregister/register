@@ -19,7 +19,7 @@ public class Register {
 
     public static final Register instance = new Register();
     private Store store;
-    private List<String> keys;
+    private List<String> fields;
     private String name;
     private String friendlyName;
 
@@ -32,7 +32,7 @@ public class Register {
         name = ApplicationConf.getString("register.name");
 
         if ("register".equalsIgnoreCase(name)) {
-            keys = Arrays.asList(ApplicationConf.getString("registers.service.fields").split(","));
+            fields = Arrays.asList(ApplicationConf.getString("registers.service.fields").split(","));
             friendlyName = "Register";
         } else {
 
@@ -44,7 +44,7 @@ public class Register {
             if (r.getStatus() == 200) {
                 JsonNode entry = r.asJson().get("entry");
 
-                keys = StreamUtils.asStream(entry.get("fields").elements()).map(JsonNode::textValue).collect(Collectors.toList());
+                fields = StreamUtils.asStream(entry.get("fields").elements()).map(JsonNode::textValue).collect(Collectors.toList());
                 friendlyName = entry.get("name").textValue();
             }
 
@@ -52,7 +52,7 @@ public class Register {
 
         String uri = ApplicationConf.getString("store.uri");
 
-        store = new PostgresqlStore(uri, new RegisterInfo(name, name.toLowerCase(), keys));
+        store = new PostgresqlStore(uri, new RegisterInfo(name, name.toLowerCase(), fields));
     }
 
     public String friendlyName() {
@@ -63,7 +63,7 @@ public class Register {
         return name;
     }
 
-    public List<String> keys() {
-        return keys;
+    public List<String> fields() {
+        return fields;
     }
 }
