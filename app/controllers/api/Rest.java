@@ -24,7 +24,7 @@ public class Rest extends Controller {
     public static Result create() throws JsonProcessingException {
         Record r = new Record(request().body().asJson());
 
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.registerInfo().keys).validate(r);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.keys()).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
@@ -44,7 +44,7 @@ public class Rest extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public static Result update(String hash) {
         Record r = new Record(request().body().asJson());
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.registerInfo().keys).validate(r);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.keys()).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {

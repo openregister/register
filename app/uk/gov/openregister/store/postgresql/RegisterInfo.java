@@ -1,4 +1,4 @@
-package controllers.conf;
+package uk.gov.openregister.store.postgresql;
 
 import java.util.List;
 

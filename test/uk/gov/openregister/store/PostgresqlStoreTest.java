@@ -1,6 +1,6 @@
 package uk.gov.openregister.store;
 
-import controllers.conf.RegisterInfo;
+import uk.gov.openregister.store.postgresql.RegisterInfo;
 import helper.DataRow;
 import helper.PostgresqlStoreForTesting;
 import org.json.JSONException;

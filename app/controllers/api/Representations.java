@@ -42,7 +42,7 @@ public class Representations {
             case JSON:
                 return ok(new ObjectMapper().writeValueAsString(records));
             case HTML:
-                return ok(views.html.entries.render(Register.instance.registerInfo().keys, records));
+                return ok(views.html.entries.render(Register.instance.keys(), records));
             default:
                 return toJsonResponse(400, "Unsupported representation '" + representation + "'");
         }
@@ -54,7 +54,7 @@ public class Representations {
             case JSON:
                 return recordO.map(record -> ok(record.toString())).orElse(toJsonResponse(404, "Entry not found"));
             case HTML:
-                return recordO.map(record -> ok(views.html.entry.render(Register.instance.registerInfo().keys, record)))
+                return recordO.map(record -> ok(views.html.entry.render(Register.instance.keys(), record)))
                         .orElse(toHtmlResponse(404, "Entry not found"));
             default:
                 return toJsonResponse(400, "Unsupported representation '" + representation + "'");

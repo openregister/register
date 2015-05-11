@@ -8,8 +8,8 @@ import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
+import uk.gov.openregister.store.postgresql.RegisterInfo;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,13 +19,10 @@ public class Register {
 
     public static final Register instance = new Register();
     private Store store;
-    private RegisterInfo registerInfo;
+    private List<String> keys;
     private String name;
     private String friendlyName;
 
-    public RegisterInfo registerInfo(){
-        return registerInfo;
-    }
 
     public Store store() {
         return store;
@@ -35,17 +32,13 @@ public class Register {
         name = ApplicationConf.getString("register.name");
 
         if ("register".equalsIgnoreCase(name)) {
-            List<String> keys = Arrays.asList(ApplicationConf.getString("registers.service.fields").split(","));
-            registerInfo = new RegisterInfo(name, name.toLowerCase(), keys);
+            keys = Arrays.asList(ApplicationConf.getString("registers.service.fields").split(","));
             friendlyName = "Register";
         } else {
 
             String registersServiceUri = ApplicationConf.getString("registers.service.url");
-
             F.Promise<WSResponse> promise = WS.client().url(registersServiceUri + "/register/" + name + "?_representation=json").execute();
-
             WSResponse r = promise.get(30000);
-            List<String> keys = new ArrayList<>();
 
             //TODO: If response is non 200, what do we want?
             if (r.getStatus() == 200) {
@@ -55,12 +48,11 @@ public class Register {
                 friendlyName = entry.get("name").textValue();
             }
 
-            registerInfo = new RegisterInfo(name, name.toLowerCase(), keys);
         }
 
         String uri = ApplicationConf.getString("store.uri");
 
-        store = new PostgresqlStore(uri, registerInfo);
+        store = new PostgresqlStore(uri, new RegisterInfo(name, name.toLowerCase(), keys));
     }
 
     public String friendlyName() {
@@ -69,5 +61,9 @@ public class Register {
 
     public String name() {
         return name;
+    }
+
+    public List<String> keys() {
+        return keys;
     }
 }

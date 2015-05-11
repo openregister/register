@@ -11,7 +11,7 @@ public class RegisterInitTest extends ApplicationTests {
 
     @Test
     public void testKeysAreReadOnStartup() throws Exception {
-        assertThat(Register.instance.registerInfo().keys).isEqualTo(Arrays.asList("test-register", "name", "key1", "key2"));
+        assertThat(Register.instance.keys()).isEqualTo(Arrays.asList("test-register", "name", "key1", "key2"));
     }
 
     @Test
