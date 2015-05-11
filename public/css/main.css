@@ -121,6 +121,15 @@ input.postfix {
 
 .alpha-phase {
   background-color: #d53880;
+  font-size: 1rem;
+  /*border-radius: 0!important;*/
+  padding: 0.5rem;
+}
+
+.alpha-description {
+  vertical-align: baseline;
+  font-size: 1rem;
+  margin-left: 0.5rem;
 }
 
 /* intro */
