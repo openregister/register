@@ -52,8 +52,8 @@ public class ApplicationTests {
 
     @Before
     public void setUp() throws Exception {
-        PostgresqlStoreForTesting.dropTable(REGISTER);
-        PostgresqlStoreForTesting.createTable(REGISTER);
+        PostgresqlStoreForTesting.dropTables(REGISTER);
+        PostgresqlStoreForTesting.createTables(REGISTER);
         webClient.getOptions().setRedirectEnabled(true);
     }
 

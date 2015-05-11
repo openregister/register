@@ -6,6 +6,7 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Database {
 
@@ -58,8 +59,11 @@ public class Database {
         }
     }
 
-
     public void execute(String sql, Object... params) {
         select(sql, params).andThen(rs -> true);
+    }
+
+    public Connection getConnection() throws SQLException {
+        return connectionPool.getConnection();
     }
 }

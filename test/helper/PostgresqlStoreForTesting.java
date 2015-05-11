@@ -7,14 +7,14 @@ import uk.gov.openregister.domain.Metadata;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PostgresqlStoreForTesting {
     public static final String POSTGRESQL_URI = "postgresql://localhost/testopenregister";
 
-    public static void createTable(String tableName) throws SQLException, ClassNotFoundException {
+    public static void createTables(String tableName) throws SQLException, ClassNotFoundException {
         try(Statement st = getStatement()){
             st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry jsonb,metadata jsonb)");
+            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + "_history (hash varchar(40) primary key,entry jsonb,metadata jsonb)");
         }
     }
 
@@ -22,14 +22,11 @@ public class PostgresqlStoreForTesting {
         return tableName.replaceAll("-", "_");
     }
 
-    public static void dropTable(String tableName) throws Exception {
+    public static void dropTables(String tableName) throws Exception {
         try(Statement st = getStatement()) {
             st.execute("DROP TABLE IF EXISTS " + normalized(tableName));
+            st.execute("DROP TABLE IF EXISTS " + normalized(tableName) + "_history");
         }
-    }
-
-    public static List<JsonNode> findAllEntries(String tableName) {
-        return findAll(tableName).stream().map(t -> t.entry).collect(Collectors.toList());
     }
 
     public static List<DataRow> findAll(String tableName) {

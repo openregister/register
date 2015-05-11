@@ -8,7 +8,7 @@ import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
-import uk.gov.openregister.store.postgresql.RegisterInfo;
+import uk.gov.openregister.store.postgresql.DBInfo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +52,7 @@ public class Register {
 
         String uri = ApplicationConf.getString("store.uri");
 
-        store = new PostgresqlStore(uri, new RegisterInfo(name, name.toLowerCase(), fields));
+        store = new PostgresqlStore(uri, new DBInfo(name, name.toLowerCase(), fields));
     }
 
     public String friendlyName() {
