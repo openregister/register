@@ -132,7 +132,8 @@ public class PostgresqlStoreTest {
             store.update(oldRecord.getHash(), newRecord);
             fail("Must fail");
         } catch (DatabaseException e) {
-            //success
+            assertEquals(oldRecord.getHash(), PostgresqlStoreForTesting.findAll(TABLE_NAME).get(0).hash);
+            assertEquals(1, PostgresqlStoreForTesting.findAll(HISTORY_TABLE_NAME).size());
         }
     }
 

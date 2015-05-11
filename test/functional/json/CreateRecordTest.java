@@ -90,7 +90,7 @@ public class CreateRecordTest extends ApplicationTests {
     }
 
     @Test
-    public void updatingARecordCreatesNewEntryInRegister() {
+    public void updatingARecordUpdatesTheEntryInRegister() {
         String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
         String hash = new Record(json).getHash();
         postJson("/create", json);

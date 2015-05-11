@@ -83,7 +83,8 @@ public class PostgresqlStore extends Store {
             PGobject entryObject = createPGObject(record.getEntry().toString());
             PGobject metadataObject = createPGObject(new Metadata(DateTime.now(), oldhash).normalise());
 
-            try (PreparedStatement st = connection.prepareStatement("UPDATE " + dbInfo.tableName + " SET hash=?, entry=?, metadata=? where hash=? and entry @> ?")) {
+            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, metadata) " +
+                            "( select ?,?,?  where exists ( select 1 from " + dbInfo.tableName + " where hash=? and entry @> ?))")) {
                 st.setObject(1, newHash);
                 st.setObject(2, entryObject);
                 st.setObject(3, metadataObject);
@@ -94,6 +95,11 @@ public class PostgresqlStore extends Store {
                 if (result == 0) {
                     throw new DatabaseException("No record updated");
                 }
+            }
+
+            try(PreparedStatement st = connection.prepareStatement("DELETE FROM " + dbInfo.tableName + " where hash=?")){
+                st.setObject(1, oldhash);
+                st.executeUpdate();
             }
 
             try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry,metadata) VALUES(?, ?, ?)")) {
