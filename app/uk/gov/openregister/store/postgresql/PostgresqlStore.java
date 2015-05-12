@@ -129,7 +129,7 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<History> findAllByKeyValue(String key, String value) {
+    public List<History> history(String key, String value) {
         return database.<List<History>>select("SELECT hash,metadata::json->>'creationTime' as creationTime FROM " + dbInfo.historyTableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }' limit 100")
                 .andThen((resultSet) -> {
                     List<History> allHistory = new ArrayList<>();

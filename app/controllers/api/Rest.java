@@ -73,7 +73,7 @@ public class Rest extends Controller {
                         Representations.toRecord(
                                 request(),
                                 record,
-                                record.map(r -> store.findAllByKeyValue(primaryKey, r.getEntry().get(primaryKey).textValue())).orElse(emptyList())
+                                record.map(r -> store.history(primaryKey, r.getEntry().get(primaryKey).textValue())).orElse(emptyList())
                         )
         );
     }

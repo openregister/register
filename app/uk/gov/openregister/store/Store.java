@@ -15,7 +15,7 @@ public interface Store {
 
     Optional<Record> findByKV(String key, String value);
 
-    List<History> findAllByKeyValue(String key, String value);
+    List<History> history(String key, String value);
 
     Optional<Record> findByHash(String hash);
 

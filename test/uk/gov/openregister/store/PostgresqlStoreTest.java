@@ -179,7 +179,7 @@ public class PostgresqlStoreTest {
     }
 
     @Test
-    public void findAllByKeyValue_returnsAllHashFromHistoryForTheGivenKeyValue() {
+    public void history_returnsAllHistoryForTheGivenKeyValueOrderedByLatest() {
         String json = "{\"store_tests\":\"aValue\",\"key\":\"value1\"}";
         Record record1 = new Record(json);
         store.save(record1);
@@ -188,7 +188,7 @@ public class PostgresqlStoreTest {
         Record record3 = new Record(json.replace("value1", "value3"));
         store.update(record2.getHash(), record3);
 
-        List<History> resultValues = store.findAllByKeyValue("store_tests", "aValue");
+        List<History> resultValues = store.history("store_tests", "aValue");
 
         assertThat(resultValues.size()).isEqualTo(3);
 
