@@ -178,6 +178,25 @@ public class PostgresqlStoreTest {
     }
 
     @Test
+    public void findAllByKeyValue_returnsAllHashFromHistoryForTheGivenKeyValue() {
+        String json = "{\"store_tests\":\"aValue\",\"key\":\"value1\"}";
+        Record record1 = new Record(json);
+        store.save(record1);
+        Record record2 = new Record(json.replace("value1", "value2"));
+        store.update(record1.getHash(), record2);
+        Record record3 = new Record(json.replace("value1", "value3"));
+        store.update(record2.getHash(), record3);
+
+        List<String> resultValues = store.findAllByKeyValue("store_tests", "aValue");
+
+        assertThat(resultValues.size()).isEqualTo(3);
+
+        assertThat(resultValues.get(0)).isEqualTo(record3.getHash());
+        assertThat(resultValues.get(1)).isEqualTo(record2.getHash());
+        assertThat(resultValues.get(2)).isEqualTo(record1.getHash());
+    }
+
+    @Test
     public void testSearch() throws JSONException {
         String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String json2 = "{\"store_tests\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";

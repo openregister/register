@@ -14,6 +14,8 @@ public abstract class Store {
 
     public abstract Optional<Record> findByKV(String key, String value);
 
+    public abstract List<String> findAllByKeyValue(String key, String value);
+
     public abstract Optional<Record> findByHash(String hash);
 
     public abstract List<Record> search(Map<String, String> map);

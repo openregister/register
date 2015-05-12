@@ -1,4 +1,4 @@
-@(fields: List[String], record: uk.gov.openregister.domain.Record)
+@(fields: List[String], record: uk.gov.openregister.domain.Record, allRecords: List[String])
 
 @main() {
 
@@ -35,6 +35,20 @@
     </div> <!-- /.columns -->
 
 </div> <!-- /.row -->
+
+<div class="row">
+    <div class="small-12 large-12 columns">
+
+        <h2>History</h2>
+
+        <div class="panel entry">
+
+            @allRecords.map{ hash =>
+            <a href="/hash/@hash">@hash</a> <br/>
+            }
+        </div>
+    </div>
+</div>
 
 @license()
 

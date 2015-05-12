@@ -128,6 +128,20 @@ public class PostgresqlStore extends Store {
     }
 
     @Override
+    public List<String> findAllByKeyValue(String key, String value) {
+        return database.<List<String>>select("SELECT hash FROM " + dbInfo.historyTableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'")
+                .andThen((resultSet) -> {
+                    List<String> allHash = new ArrayList<>();
+                    while(resultSet.next()){
+                        allHash.add(resultSet.getString("hash"));
+                    }
+                    Collections.reverse(allHash);
+                    return allHash;
+                });
+
+    }
+
+    @Override
     public Optional<Record> findByHash(String hash) {
         return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.historyTableName + " WHERE hash = ?", hash).andThen(this::toOptionalRecord);
     }
