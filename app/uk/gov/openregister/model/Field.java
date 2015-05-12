@@ -1,4 +1,4 @@
-package uk.gov.openregister.config;
+package uk.gov.openregister.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.text.WordUtils;
@@ -7,7 +7,6 @@ import java.util.Optional;
 
 public class Field {
 
-    public static final Datatype STRING_TYPE = new Datatype("string");
     String name;
     String frendlyName;
     Datatype datatype;
@@ -18,7 +17,7 @@ public class Field {
 
         name = Optional.of(node.get("field")).map(JsonNode::asText).get();
         frendlyName = Optional.ofNullable(node.get("name")).map(JsonNode::asText).orElse(WordUtils.capitalize(name));
-        datatype = Optional.ofNullable(node.get("datatype")).map(d -> new Datatype(d.asText())).orElse(STRING_TYPE);
+        datatype = Optional.ofNullable(node.get("datatype")).map(d -> Datatype.of(d.asText())).orElse(Datatype.DEFAULT);
         cardinality = Optional.ofNullable(node.get("cardinality")).map(c -> Cardinality.fromValue(c.textValue())).orElse(Cardinality.ONE);
         register = Optional.ofNullable(node.get("register")).map(JsonNode::asText).filter(s -> !s.isEmpty() && !"null".equals(s));
     }
@@ -26,7 +25,7 @@ public class Field {
     public Field(String name) {
         this.name = name;
         this.frendlyName = WordUtils.capitalize(name);
-        this.datatype = STRING_TYPE;
+        this.datatype = Datatype.DEFAULT;
         this.cardinality = Cardinality.ONE;
         this.register = Optional.empty();
     }
@@ -34,7 +33,7 @@ public class Field {
     public Field(String name, Cardinality cardinality) {
         this.name = name;
         this.frendlyName = WordUtils.capitalize(name);
-        this.datatype = new Datatype("string");
+        this.datatype = Datatype.DEFAULT;
         this.cardinality = cardinality;
         this.register = Optional.empty();
     }

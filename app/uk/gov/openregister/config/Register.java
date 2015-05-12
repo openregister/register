@@ -1,5 +1,6 @@
 package uk.gov.openregister.config;
 
+import uk.gov.openregister.model.Field;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
 import uk.gov.openregister.store.postgresql.RegisterInfo;

@@ -5,8 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import play.twirl.api.Html;
 import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.config.ApplicationConf;
-import uk.gov.openregister.config.Datatype;
-import uk.gov.openregister.config.Field;
+import uk.gov.openregister.model.Datatype;
+import uk.gov.openregister.model.Field;
 
 import java.util.stream.Collectors;
 

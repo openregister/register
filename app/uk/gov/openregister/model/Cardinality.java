@@ -1,4 +1,4 @@
-package uk.gov.openregister.config;
+package uk.gov.openregister.model;
 
 public enum Cardinality {
 

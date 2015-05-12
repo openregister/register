@@ -3,7 +3,6 @@ package controllers.html;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.App;
-import uk.gov.openregister.config.Register;
 import play.data.DynamicForm;
 import play.mvc.BodyParser;
 import play.mvc.Controller;

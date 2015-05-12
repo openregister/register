@@ -5,6 +5,7 @@ import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.config.*;
+import uk.gov.openregister.model.Field;
 
 import java.util.ArrayList;
 import java.util.List;

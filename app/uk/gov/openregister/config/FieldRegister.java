@@ -1,5 +1,7 @@
 package uk.gov.openregister.config;
 
+import uk.gov.openregister.model.Field;
+
 import java.util.Arrays;
 import java.util.List;
 

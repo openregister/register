@@ -1,11 +1,8 @@
-package uk.gov.openregister.conf;
+package uk.gov.openregister.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Test;
 import play.libs.Json;
-import uk.gov.openregister.config.Cardinality;
-import uk.gov.openregister.config.Datatype;
-import uk.gov.openregister.config.Field;
 
 import java.util.Optional;
 
