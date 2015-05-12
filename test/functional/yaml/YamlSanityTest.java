@@ -27,6 +27,7 @@ public class YamlSanityTest extends ApplicationTests {
 
         WSResponse response = getByKV("key1", "value1", "yaml");
         assertThat(response.getStatus()).isEqualTo(OK);
+        assertThat(response.getHeader("Content-type")).isEqualTo("text/yaml; charset=utf-8");
         assertThat(response.getBody()).isEqualTo(EXPECTED_YAML);
     }
 
@@ -37,6 +38,7 @@ public class YamlSanityTest extends ApplicationTests {
         WSResponse response = getByHash(EXPECTED_HASH, "yaml");
 
         assertThat(response.getStatus()).isEqualTo(OK);
+        assertThat(response.getHeader("Content-type")).isEqualTo("text/yaml; charset=utf-8");
         assertThat(response.getBody()).isEqualTo(EXPECTED_YAML);
     }
 
