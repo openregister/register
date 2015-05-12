@@ -20,7 +20,7 @@ public class Representations {
 
     public static final String REPRESENTATION = "_representation";
 
-    enum Representation {
+    enum RepresentationImpls implements Representation {
         HTML {
             @Override
             public Result toResponse(int status, String message) {
@@ -54,11 +54,7 @@ public class Representations {
             public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history) {
                 return recordO.map(record -> ok(record.toString())).orElse(toJsonResponse(404, "Entry not found"));
             }
-        };
-
-        abstract public Result toResponse(int status, String message);
-        abstract public Result toListOfRecords(List<Record> records) throws JsonProcessingException;
-        abstract public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history);
+        }
     }
 
 
@@ -97,9 +93,9 @@ public class Representations {
 
     private static Representation representationFor(String representation) {
         if ("json".equalsIgnoreCase(representation)) {
-            return Representation.JSON;
+            return RepresentationImpls.JSON;
         } else {
-            return Representation.HTML;
+            return RepresentationImpls.HTML;
         }
     }
 
