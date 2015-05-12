@@ -1,7 +1,7 @@
 package uk.gov.openregister.store;
 
 import uk.gov.openregister.domain.Record;
-import uk.gov.openregister.domain.History;
+import uk.gov.openregister.domain.RecordVersionInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ public interface Store {
 
     Optional<Record> findByKV(String key, String value);
 
-    List<History> history(String key, String value);
+    List<RecordVersionInfo> history(String key, String value);
 
     Optional<Record> findByHash(String hash);
 

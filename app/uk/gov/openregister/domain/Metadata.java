@@ -9,17 +9,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Metadata {
-    public final DateTime creationtime;
+    public final DateTime creationTime;
     public final String previousEntryHash;
 
-    public Metadata(DateTime creationtime, String previousEntryHash) {
-        this.creationtime = creationtime;
+    public Metadata(DateTime creationTime, String previousEntryHash) {
+        this.creationTime = creationTime;
         this.previousEntryHash = previousEntryHash;
     }
 
     public String normalise(){
         Map<String, Object> map = new HashMap<>();
-        map.put("creationTime",  creationtime.toString());
+        map.put("creationTime", creationTime.toString());
         map.put("previousEntryHash",  previousEntryHash);
         return JsonObjectMapper.convertToString(map);
     }

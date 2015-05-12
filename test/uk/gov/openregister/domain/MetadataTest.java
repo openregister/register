@@ -20,7 +20,7 @@ public class MetadataTest {
         DateTime creationTime = DateTime.now();
 
         Metadata metadata = Metadata.from("{\"creationTime\":\"" + creationTime.toString() + "\",\"previousEntryHash\":\"someHash\"}");
-        assertEquals(creationTime.toString(), metadata.creationtime.toString());
+        assertEquals(creationTime.toString(), metadata.creationTime.toString());
         assertEquals("someHash", metadata.previousEntryHash);
     }
 }
