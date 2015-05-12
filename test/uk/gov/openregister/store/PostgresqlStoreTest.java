@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import uk.gov.openregister.domain.History;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.postgresql.DBInfo;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
@@ -187,13 +188,13 @@ public class PostgresqlStoreTest {
         Record record3 = new Record(json.replace("value1", "value3"));
         store.update(record2.getHash(), record3);
 
-        List<String> resultValues = store.findAllByKeyValue("store_tests", "aValue");
+        List<History> resultValues = store.findAllByKeyValue("store_tests", "aValue");
 
         assertThat(resultValues.size()).isEqualTo(3);
 
-        assertThat(resultValues.get(0)).isEqualTo(record3.getHash());
-        assertThat(resultValues.get(1)).isEqualTo(record2.getHash());
-        assertThat(resultValues.get(2)).isEqualTo(record1.getHash());
+        assertThat(resultValues.get(0).hash).isEqualTo(record3.getHash());
+        assertThat(resultValues.get(1).hash).isEqualTo(record2.getHash());
+        assertThat(resultValues.get(2).hash).isEqualTo(record1.getHash());
     }
 
     @Test

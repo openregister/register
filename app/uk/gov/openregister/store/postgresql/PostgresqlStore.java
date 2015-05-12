@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
 import uk.gov.openregister.JsonObjectMapper;
+import uk.gov.openregister.domain.History;
 import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.DatabaseException;
@@ -128,15 +129,15 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<String> findAllByKeyValue(String key, String value) {
-        return database.<List<String>>select("SELECT hash FROM " + dbInfo.historyTableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'")
+    public List<History> findAllByKeyValue(String key, String value) {
+        return database.<List<History>>select("SELECT hash,metadata::json->>'creationTime' as creationTime FROM " + dbInfo.historyTableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }' limit 100")
                 .andThen((resultSet) -> {
-                    List<String> allHash = new ArrayList<>();
-                    while(resultSet.next()){
-                        allHash.add(resultSet.getString("hash"));
+                    List<History> allHistory = new ArrayList<>();
+                    while (resultSet.next()) {
+                        allHistory.add(new History(resultSet.getString("hash"), DateTime.parse(resultSet.getString("creationTime"))));
                     }
-                    Collections.reverse(allHash);
-                    return allHash;
+                    Collections.sort(allHistory);
+                    return allHistory;
                 });
 
     }
@@ -236,6 +237,5 @@ public class PostgresqlStore implements Store {
         map.put(key, value);
         return map;
     }
-
 }
 

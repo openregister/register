@@ -1,4 +1,4 @@
-@(fields: List[String], record: uk.gov.openregister.domain.Record, allRecords: List[String])
+@(fields: List[String], record: uk.gov.openregister.domain.Record, allRecords: List[uk.gov.openregister.domain.History])
 
 @main() {
 
@@ -42,14 +42,21 @@
         <h2>History</h2>
 
         <div class="panel entry">
-
-            @allRecords.map{ hash =>
-            <p><a href="/hash/@hash">@hash</a> </p>
-            }
+            <table>
+                <tbody>
+                <td>hash</td>
+                <td>timestamp</td>
+                </tbody>
+                @allRecords.map{ history =>
+                <tr>
+                    <td><a href="/hash/@history.hash">@history.hash</a></td>
+                    <td>@history.timestamp</td>
+                </tr>
+                }
+            </table>
         </div>
     </div>
 </div>
-
 @license()
 
 }

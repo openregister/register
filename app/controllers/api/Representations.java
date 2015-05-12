@@ -8,6 +8,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.domain.History;
 import uk.gov.openregister.validation.ValidationError;
 
 import java.util.*;
@@ -48,7 +49,7 @@ public class Representations {
         }
     }
 
-    public static Result toRecord(Http.Request request, Optional<Record> recordO, List<String> history) {
+    public static Result toRecord(Http.Request request, Optional<Record> recordO, List<History> history) {
         Representation representation = representationFor(request.queryString());
         switch (representation) {
             case JSON:
