@@ -16,10 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import static controllers.api.Representations.representationFor;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class Rest extends Controller {
+
+    public static final String REPRESENTATION_QUERY_PARAM = "_representation";
 
     @BodyParser.Of(BodyParser.Json.class)
     public static Result create() throws JsonProcessingException {
@@ -61,16 +64,17 @@ public class Rest extends Controller {
 
     public static F.Promise<Result> findByKey(String key, String value) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> Register.instance.store().findByKV(key, value));
-        return recordF.map(record -> Representations.toRecord(request(), record, emptyList()));
+        Representation representation = representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
+        return recordF.map(record -> representation.toRecord(record, emptyList()));
     }
 
     public static F.Promise<Result> findByHash(String hash) {
         Store store = Register.instance.store();
         String primaryKey = Register.instance.name();
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
+        Representation representation = representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
         return recordF.map(record ->
-                        Representations.toRecord(
-                                request(),
+                        representation.toRecord(
                                 record,
                                 record.map(r -> store.history(primaryKey, r.getEntry().get(primaryKey).textValue())).orElse(emptyList())
                         )
@@ -91,7 +95,8 @@ public class Rest extends Controller {
             }
         });
 
-        return recordsF.map(records -> Representations.toListOfRecords(request(), records));
+        Representation representation = representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
+        return recordsF.map(representation::toListOfRecords);
     }
 
 
