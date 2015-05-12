@@ -18,6 +18,8 @@ import static play.mvc.Results.status;
 
 public class Representations {
 
+    public static final String REPRESENTATION = "_representation";
+
     enum Representation {
         HTML {
             @Override
@@ -61,17 +63,17 @@ public class Representations {
 
 
     public static Result toResponse(Http.RequestHeader requestHeader, int status, String message) {
-        Representation representation = representationFor(requestHeader.queryString());
+        Representation representation = representationFor(requestHeader.getQueryString(REPRESENTATION));
         return representation.toResponse(status, message);
     }
 
     public static Result toListOfRecords(Http.Request request, List<Record> records) throws JsonProcessingException {
-        Representation representation = representationFor(request.queryString());
+        Representation representation = representationFor(request.getQueryString(REPRESENTATION));
         return representation.toListOfRecords(records);
     }
 
     public static Result toRecord(Http.Request request, Optional<Record> recordO, List<RecordVersionInfo> history) {
-        Representation representation = representationFor(request.queryString());
+        Representation representation = representationFor(request.getQueryString(REPRESENTATION));
         return representation.toRecord(recordO, history);
     }
 
@@ -93,11 +95,7 @@ public class Representations {
         return status(statusCode, (JsonNode) new ObjectMapper().valueToTree(result));
     }
 
-    private static Representation representationFor(Map<String, String[]> queryString) {
-
-        String[] representations = queryString.getOrDefault("_representation", new String[]{"html"});
-        String representation = representations[0];
-
+    private static Representation representationFor(String representation) {
         if ("json".equalsIgnoreCase(representation)) {
             return Representation.JSON;
         } else {
