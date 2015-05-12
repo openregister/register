@@ -26,7 +26,10 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(body).contains("This register exists as an accurate list of all test entries");
         assertThat(body).contains("Search register entries");
 
-        assertThat(body).contains("name, key1, key2");
+        assertThat(body).contains("<a class=\"link_to_register\" href=\"http://localhost:8888/field/test-register\">test-register</a>, " +
+                "<a class=\"link_to_register\" href=\"http://localhost:8888/field/name\">name</a>, " +
+                "<a class=\"link_to_register\" href=\"http://localhost:8888/field/key1\">key1</a>, " +
+                "<a class=\"link_to_register\" href=\"http://localhost:8888/field/key2\">key2</a>");
 
     }
 

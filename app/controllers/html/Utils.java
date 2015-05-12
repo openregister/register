@@ -25,10 +25,10 @@ public class Utils {
         return Html.apply("<a class=\"link_to_register\" href=\"" + ApplicationConf.registerUrl(register, "/" + register + "/" + name) + "\">" + name + "</a>");
     }
 
-
     public static Html toValue(Field field, JsonNode value) {
         return Html.apply(toRawValue(field, value));
     }
+
     private static String toRawValue(Field field, JsonNode value) {
         if (value == null) {
             return "";
