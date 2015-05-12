@@ -94,7 +94,7 @@ public class PostgresqlStore implements Store {
 
                 int result = st.executeUpdate();
                 if (result == 0) {
-                    throw new DatabaseException("No record updated");
+                    throw new DatabaseException("Conflict-> Either this record is outdated or trying to update the primary key value.");
                 }
             }
 

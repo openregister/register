@@ -70,17 +70,8 @@ public class Application extends Controller {
 
         List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.fields()).validate(record);
         if (validationErrors.isEmpty()) {
-
-            try {
-                Register.instance.store().update(hash, record);
-                return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
-            } catch (DatabaseException e) {
-                dynamicForm.reject(e.getMessage());
-                return ok(views.html.updateEntry.render(
-                        Register.instance.fields(),
-                        dynamicForm,
-                        hash));
-            }
+            Register.instance.store().update(hash, record);
+            return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
         }
         validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
         return ok(views.html.updateEntry.render(
