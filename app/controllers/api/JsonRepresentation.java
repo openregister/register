@@ -1,7 +1,6 @@
 package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import play.mvc.Result;
@@ -36,15 +35,15 @@ public class JsonRepresentation implements Representation {
 
     @Override
     public Result toListOfRecords(List<Record> records) throws JsonProcessingException {
-        return ok(objectMapper.writeValueAsString(records)).as(contentType);
+        return ok(asString(records)).as(contentType);
     }
 
     @Override
     public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history) {
-        return recordO.map(record -> ok(recordAsString(record)).as(contentType)).orElse(toResponseWithErrors(404, "Entry not found", Collections.<ValidationError>emptyList()));
+        return recordO.map(record -> ok(asString(record)).as(contentType)).orElse(toResponseWithErrors(404, "Entry not found", Collections.<ValidationError>emptyList()));
     }
 
-    private String recordAsString(Record record) {
+    private String asString(Object record) {
         try {
             return objectMapper.writeValueAsString(record);
         } catch (JsonProcessingException e) {
@@ -58,7 +57,7 @@ public class JsonRepresentation implements Representation {
         result.put("message", message);
         result.put("errors", errors);
 
-        return status(statusCode, (JsonNode) objectMapper.valueToTree(result));
+        return status(statusCode, asString(result)).as(contentType);
     }
 
     public static JsonRepresentation instance = new JsonRepresentation();
