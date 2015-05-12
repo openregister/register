@@ -1,8 +1,9 @@
-package controllers;
+package controllers.html;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controllers.conf.Register;
+import controllers.App;
+import uk.gov.openregister.config.Register;
 import play.data.DynamicForm;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
@@ -17,74 +18,74 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Application extends Controller {
+public class UI extends Controller {
 
     private static DynamicForm dynamicForm = new DynamicForm();
 
 
     public static Result index() {
-        long count = Register.instance.store().count();
-        return ok(views.html.index.render(Register.instance.fields(), count));
+        long count = App.instance.register.store().count();
+        return ok(views.html.index.render(App.instance.register.fieldNames(), count));
     }
 
     public static Result renderNewEntryForm() {
-        return ok(views.html.newEntry.render(Register.instance.fields(), dynamicForm));
+        return ok(views.html.newEntry.render(App.instance.register.fieldNames(), dynamicForm));
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public static Result create() {
 
-        DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
+        DynamicForm dynamicForm = UI.dynamicForm.bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.fields()).validate(record);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(App.instance.register.name()), App.instance.register.fieldNames()).validate(record);
         if (validationErrors.isEmpty()) {
             try {
-                Register.instance.store().save(record);
+                App.instance.register.store().save(record);
                 return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
             } catch (DatabaseException e) {
                 dynamicForm.reject(e.getMessage());
-                return ok(views.html.newEntry.render(Register.instance.fields(), dynamicForm));
+                return ok(views.html.newEntry.render(App.instance.register.fieldNames(), dynamicForm));
             }
         }
         validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
 
-        return ok(views.html.newEntry.render(Register.instance.fields(), dynamicForm));
+        return ok(views.html.newEntry.render(App.instance.register.fieldNames(), dynamicForm));
     }
 
     @SuppressWarnings("unchecked")
     public static Result renderUpdateEntryForm(String hash) {
-        Record record = Register.instance.store().findByHash(hash).get();
+        Record record = App.instance.register.store().findByHash(hash).get();
 
         return ok(views.html.updateEntry.render(
-                        Register.instance.fields(),
-                        Application.dynamicForm.bind(new ObjectMapper().convertValue(record.getEntry(), Map.class)),
+                        App.instance.register.fieldNames(),
+                        UI.dynamicForm.bind(new ObjectMapper().convertValue(record.getEntry(), Map.class)),
                         hash)
         );
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public static Result update(String hash) {
-        DynamicForm dynamicForm = Application.dynamicForm.bindFromRequest(request());
+        DynamicForm dynamicForm = UI.dynamicForm.bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.fields()).validate(record);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(App.instance.register.name()), App.instance.register.fieldNames()).validate(record);
         if (validationErrors.isEmpty()) {
 
             try {
-                Register.instance.store().update(hash, record);
+                App.instance.register.store().update(hash, record);
                 return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
             } catch (DatabaseException e) {
                 dynamicForm.reject(e.getMessage());
                 return ok(views.html.updateEntry.render(
-                        Register.instance.fields(),
+                        App.instance.register.fieldNames(),
                         dynamicForm,
                         hash));
             }
         }
         validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
         return ok(views.html.updateEntry.render(
-                Register.instance.fields(),
+                App.instance.register.fieldNames(),
                 dynamicForm,
                 hash));
     }
@@ -94,7 +95,7 @@ public class Application extends Controller {
             Map<String, Object> jsonMap = new HashMap<>();
             //TODO: this will break when we have multiple values for a key, data parsing will be based on datatype
             formParameters.keySet().stream()
-                    .filter(Register.instance.fields()::contains)
+                    .filter(App.instance.register.fieldNames()::contains)
                     .forEach(key -> jsonMap.put(key, formParameters.get(key)));
 
             String json = new ObjectMapper().writeValueAsString(jsonMap);

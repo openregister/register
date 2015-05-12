@@ -3,7 +3,7 @@ package controllers.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controllers.conf.Register;
+import controllers.App;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -42,7 +42,7 @@ public class Representations {
             case JSON:
                 return ok(new ObjectMapper().writeValueAsString(records));
             case HTML:
-                return ok(views.html.entries.render(Register.instance.fields(), records));
+                return ok(views.html.entries.render(App.instance.register.fieldNames(), records));
             default:
                 return toJsonResponse(400, "Unsupported representation '" + representation + "'");
         }
@@ -54,7 +54,7 @@ public class Representations {
             case JSON:
                 return recordO.map(record -> ok(record.toString())).orElse(toJsonResponse(404, "Entry not found"));
             case HTML:
-                return recordO.map(record -> ok(views.html.entry.render(Register.instance.fields(), record)))
+                return recordO.map(record -> ok(views.html.entry.render(App.instance.register.fieldNames(), record)))
                         .orElse(toHtmlResponse(404, "Entry not found"));
             default:
                 return toJsonResponse(400, "Unsupported representation '" + representation + "'");

@@ -2,11 +2,11 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET         /                                           controllers.Application.index()
-GET         /ui/create                                  controllers.Application.renderNewEntryForm()
-POST        /ui/create                                  controllers.Application.create()
-GET         /ui/supersede/:hash                         controllers.Application.renderUpdateEntryForm(hash)
-POST        /ui/supersede/:hash                         controllers.Application.update(hash)
+GET         /                                           controllers.html.UI.index()
+GET         /ui/create                                  controllers.html.UI.renderNewEntryForm()
+POST        /ui/create                                  controllers.html.UI.create()
+GET         /ui/supersede/:hash                         controllers.html.UI.renderUpdateEntryForm(hash)
+POST        /ui/supersede/:hash                         controllers.html.UI.update(hash)
 
 GET         /load                                       controllers.api.ImportData.loadWithProgress()
 GET         /load/progress                              controllers.api.ImportData.progress()

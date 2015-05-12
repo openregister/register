@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import controllers.conf.Register;
+import controllers.App;
 import play.Routes;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -51,10 +51,10 @@ public class ImportData extends Controller {
                 long counter = 0;
 
                 notifyProgress("Dropping existing data", false, false, counter, out);
-                Register.instance.store().deleteAll();
+                App.instance.register.store().deleteAll();
                 while (it.hasNext()) {
                     JsonNode rowAsNode = it.next();
-                    Register.instance.store().save(new Record(rowAsNode));
+                    App.instance.register.store().save(new Record(rowAsNode));
                     counter++;
                     if (counter % 1000 == 0) {
                         notifyProgress("Importing... (" + counter + " records)", false, false, counter, out);

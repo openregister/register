@@ -12,6 +12,7 @@ public class TestSettings {
         map.put("store.uri", PostgresqlStoreForTesting.POSTGRESQL_URI);
         map.put("register.name", name);
         map.put("registers.service.url", "http://localhost:8888");
+        map.put("field.service.url", "http://localhost:8888");
         return map;
     }
 

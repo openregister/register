@@ -1,7 +1,7 @@
 package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import controllers.conf.Register;
+import controllers.App;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
@@ -24,11 +24,11 @@ public class Rest extends Controller {
     public static Result create() throws JsonProcessingException {
         Record r = new Record(request().body().asJson());
 
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.fields()).validate(r);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(App.instance.register.name()), App.instance.register.fieldNames()).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
-                Register.instance.store().save(r);
+                App.instance.register.store().save(r);
             } catch (DatabaseException e) {
                 return toJsonResponse(400, e.getMessage());
             }
@@ -44,11 +44,11 @@ public class Rest extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public static Result update(String hash) {
         Record r = new Record(request().body().asJson());
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.fields()).validate(r);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(App.instance.register.name()), App.instance.register.fieldNames()).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
-                Register.instance.store().update(hash, r);
+                App.instance.register.store().update(hash, r);
             } catch (DatabaseException e) {
                 return toJsonResponse(400, e.getMessage());
             }
@@ -59,12 +59,12 @@ public class Rest extends Controller {
     }
 
     public static F.Promise<Result> findByKey(String key, String value) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> Register.instance.store().findByKV(key, value));
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> App.instance.register.store().findByKV(key, value));
         return recordF.map(record -> Representations.toRecord(request(), record));
     }
 
     public static F.Promise<Result> findByHash(String hash) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> Register.instance.store().findByHash(hash));
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> App.instance.register.store().findByHash(hash));
         return recordF.map(record -> Representations.toRecord(request(), record));
     }
 
@@ -72,13 +72,13 @@ public class Rest extends Controller {
 
         F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {
-                return Register.instance.store().search(request().queryString().get("_query")[0]);
+                return App.instance.register.store().search(request().queryString().get("_query")[0]);
             } else {
                 HashMap<String, String> map = new HashMap<>();
                 request().queryString().entrySet().stream()
                         .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
                         .forEach(queryParameter -> map.put(queryParameter.getKey(), queryParameter.getValue()[0]));
-                return Register.instance.store().search(map);
+                return App.instance.register.store().search(map);
             }
         });
 

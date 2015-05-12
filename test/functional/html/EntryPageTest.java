@@ -36,7 +36,7 @@ public class EntryPageTest extends ApplicationTests {
         assertFalse(resultJson.contains("submit"));
     }
 
-@Test
+    @Test
     public void create_returnsErrorWhenTryToNewEntryWithDuplicatePrimaryKey() throws IOException {
         String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"value1\",\"key2\":\"value2\"}";
 
