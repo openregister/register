@@ -2,14 +2,31 @@ package helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.dbcp2.BasicDataSource;
 import uk.gov.openregister.domain.Metadata;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PostgresqlStoreForTesting {
-    public static final String POSTGRESQL_URI = "postgresql://localhost/testopenregister";
+    public static final String POSTGRESQL_URI = "jdbc:postgresql://localhost/testopenregister";
+
+    static DataSource dataSource() {
+        try {
+            BasicDataSource dataSource = new BasicDataSource();
+
+            dataSource.setDriverClassName("org.postgresql.Driver");
+            dataSource.setUrl(POSTGRESQL_URI);
+            dataSource.setInitialSize(1);
+            return dataSource;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static DataSource dataSource = dataSource();
 
     public static void createTables(String tableName) throws SQLException, ClassNotFoundException {
         try(Statement st = getStatement()){
@@ -57,7 +74,7 @@ public class PostgresqlStoreForTesting {
 
     private static Statement getStatement() throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
-        Connection conn = DriverManager.getConnection("jdbc:" + POSTGRESQL_URI);
+        Connection conn = DriverManager.getConnection(POSTGRESQL_URI);
         return conn.createStatement();
     }
 }

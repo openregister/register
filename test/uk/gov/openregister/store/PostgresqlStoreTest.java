@@ -8,8 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.openregister.domain.Record;
-import uk.gov.openregister.store.postgresql.PostgresqlStore;
 import uk.gov.openregister.store.postgresql.DBInfo;
+import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,7 +29,10 @@ public class PostgresqlStoreTest {
     @Before
     public void setUp() throws Exception {
         PostgresqlStoreForTesting.dropTables(TABLE_NAME);
-        store = new PostgresqlStore(PostgresqlStoreForTesting.POSTGRESQL_URI, new DBInfo(TABLE_NAME, TABLE_NAME.toLowerCase(), Arrays.asList("store_tests", "anotherKey")));
+        store = new PostgresqlStore(
+                new DBInfo(TABLE_NAME, TABLE_NAME.toLowerCase(), Arrays.asList("store_tests", "anotherKey")),
+                PostgresqlStoreForTesting.dataSource
+        );
     }
 
     @Test
@@ -159,6 +162,20 @@ public class PostgresqlStoreTest {
         JSONAssert.assertEquals(expected, record.get().toString(), true);
     }
 
+    @Test
+    public void findByHash_returnsRecordFromHistoryIfItDoesNotFindInPrimaryTable() {
+        String json = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        Record record1 = new Record(json);
+
+        store.save(record1);
+
+        Record record2 = new Record(json.replaceAll("anotherValue", "newValue"));
+        store.update(record1.getHash(), record2);
+
+        assertEquals(record2.getHash(), store.findByHash(record2.getHash()).get().getHash());
+        assertEquals(record1.getHash(), store.findByHash(record1.getHash()).get().getHash());
+
+    }
 
     @Test
     public void testSearch() throws JSONException {

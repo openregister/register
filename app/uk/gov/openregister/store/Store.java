@@ -8,12 +8,6 @@ import java.util.Optional;
 
 public abstract class Store {
 
-    public Store(String databaseURI) {
-        this.databaseURI = databaseURI;
-    }
-
-    protected String databaseURI;
-
     public abstract void save(Record s);
 
     public abstract void deleteAll();

@@ -1,14 +1,15 @@
 package controllers.conf;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import play.db.DB;
 import play.libs.F;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.store.Store;
-import uk.gov.openregister.store.postgresql.PostgresqlStore;
 import uk.gov.openregister.store.postgresql.DBInfo;
+import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
 import java.util.Arrays;
 import java.util.List;
@@ -50,9 +51,7 @@ public class Register {
 
         }
 
-        String uri = ApplicationConf.getString("store.uri");
-
-        store = new PostgresqlStore(uri, new DBInfo(name, name.toLowerCase(), fields));
+        store = new PostgresqlStore(new DBInfo(name, name.toLowerCase(), fields), DB.getDataSource());
     }
 
     public String friendlyName() {

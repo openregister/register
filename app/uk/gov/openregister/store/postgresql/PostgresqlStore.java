@@ -13,6 +13,7 @@ import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.Store;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,10 +27,9 @@ public class PostgresqlStore extends Store {
     private final DBInfo dbInfo;
     private Database database;
 
-    public PostgresqlStore(String databaseURI, DBInfo dbInfo) {
-        super(databaseURI);
+    public PostgresqlStore(DBInfo dbInfo, DataSource dataSource) {
         this.dbInfo = dbInfo;
-        database = new Database(databaseURI);
+        this.database = new Database(dataSource);
 
         createTables(dbInfo.tableName);
     }
@@ -84,7 +84,7 @@ public class PostgresqlStore extends Store {
             PGobject metadataObject = createPGObject(new Metadata(DateTime.now(), oldhash).normalise());
 
             try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, metadata) " +
-                            "( select ?,?,?  where exists ( select 1 from " + dbInfo.tableName + " where hash=? and entry @> ?))")) {
+                    "( select ?,?,?  where exists ( select 1 from " + dbInfo.tableName + " where hash=? and entry @> ?))")) {
                 st.setObject(1, newHash);
                 st.setObject(2, entryObject);
                 st.setObject(3, metadataObject);
@@ -97,7 +97,7 @@ public class PostgresqlStore extends Store {
                 }
             }
 
-            try(PreparedStatement st = connection.prepareStatement("DELETE FROM " + dbInfo.tableName + " where hash=?")){
+            try (PreparedStatement st = connection.prepareStatement("DELETE FROM " + dbInfo.tableName + " where hash=?")) {
                 st.setObject(1, oldhash);
                 st.executeUpdate();
             }
@@ -129,10 +129,7 @@ public class PostgresqlStore extends Store {
 
     @Override
     public Optional<Record> findByHash(String hash) {
-
-        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.tableName + " WHERE hash = ?", hash)
-                .andThen(this::toOptionalRecord);
-
+        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.historyTableName + " WHERE hash = ?", hash).andThen(this::toOptionalRecord);
     }
 
     @Override
