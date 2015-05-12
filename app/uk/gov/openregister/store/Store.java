@@ -1,32 +1,29 @@
 package uk.gov.openregister.store;
 
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.domain.RecordVersionInfo;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class Store {
+public interface Store {
 
-    public Store(String databaseURI) {
-        this.databaseURI = databaseURI;
-    }
+    void save(Record s);
 
-    protected String databaseURI;
+    void deleteAll();
 
-    public abstract void save(Record s);
+    Optional<Record> findByKV(String key, String value);
 
-    public abstract void deleteAll();
+    List<RecordVersionInfo> history(String key, String value);
 
-    public abstract Optional<Record> findByKV(String key, String value);
+    Optional<Record> findByHash(String hash);
 
-    public abstract Optional<Record> findByHash(String hash);
+    List<Record> search(Map<String, String> map);
 
-    public abstract List<Record> search(Map<String, String> map);
+    List<Record> search(String query);
 
-    public abstract List<Record> search(String query);
+    long count();
 
-    public abstract long count();
-
-    public abstract void update(String hash, Record record);
+    void update(String hash, Record record);
 }

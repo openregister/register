@@ -1,4 +1,4 @@
-@(fields: List[uk.gov.openregister.model.Field], record: uk.gov.openregister.domain.Record)
+@(fields: List[uk.gov.openregister.model.Field], record: uk.gov.openregister.domain.Record, history: List[uk.gov.openregister.domain.RecordVersionInfo])
 
 @main() {
 
@@ -36,6 +36,27 @@
 
 </div> <!-- /.row -->
 
+<div class="row">
+    <div class="small-12 large-12 columns">
+
+        <h2>History</h2>
+
+        <div class="panel entry">
+            <table>
+                <tbody>
+                <td>hash</td>
+                <td>timestamp</td>
+                </tbody>
+                @history.map{ entry =>
+                <tr>
+                    <td><a href="/hash/@entry.hash">@entry.hash</a></td>
+                    <td>@entry.timestamp</td>
+                </tr>
+                }
+            </table>
+        </div>
+    </div>
+</div>
 @license()
 
 }

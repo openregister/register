@@ -8,104 +8,148 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
 import uk.gov.openregister.JsonObjectMapper;
+import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.Store;
 
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PostgresqlStore extends Store {
+public class PostgresqlStore implements Store {
 
-    private final RegisterInfo registerInfo;
+    private final DBInfo dbInfo;
     private Database database;
 
-    public PostgresqlStore(String databaseURI, RegisterInfo registerInfo) {
-        super(databaseURI);
-        this.registerInfo = registerInfo;
-        database = new Database(databaseURI);
+    public PostgresqlStore(DBInfo dbInfo, DataSource dataSource) {
+        this.dbInfo = dbInfo;
+        this.database = new Database(dataSource);
 
-        createTable(registerInfo.tableName);
+        createTables(dbInfo.tableName);
     }
 
-    public void createTable(String tableName) {
+    public void createTables(String tableName) {
         database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb, metadata jsonb)");
+        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + "_history (hash varchar(40) primary key,entry jsonb, metadata jsonb)");
     }
 
     @Override
     public void save(Record record) {
 
-        String query = "INSERT INTO " + registerInfo.tableName + " (hash, entry, metadata) (" +
-                "select ?,?,? " +
-                "where not exists ( select 1 from " + registerInfo.tableName + " where entry @> ?)" +
-                ")";
+        String hash = record.getHash();
+        PGobject entryObject = createPGObject(record.getEntry().toString());
+        PGobject metadataObject = createPGObject(new Metadata(DateTime.now(), "").normalise());
 
-        int resultUpdated = database.executeUpdate(
-                query,
-                record.getHash(),
-                createPGObject(record.getEntry().toString()),
-                createPGObject(new Metadata(DateTime.now(), "").normalise()),
-                createPGObject(JsonObjectMapper.convertToString(mapOf(registerInfo.primaryKey, primaryKeyValue(record))))
-        );
-        if (resultUpdated == 0) {
-            throw new DatabaseException("No record inserted, a record with primary key value already exists");
+        try (Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, metadata) " +
+                    "( select ?,?,?  where not exists ( select 1 from " + dbInfo.tableName + " where entry @> ?))")) {
+                st.setObject(1, hash);
+                st.setObject(2, entryObject);
+                st.setObject(3, metadataObject);
+                st.setObject(4, createPGObject(JsonObjectMapper.convertToString(mapOf(dbInfo.primaryKey, primaryKeyValue(record)))));
+                int result = st.executeUpdate();
+                if (result == 0) {
+                    throw new DatabaseException("No record inserted, a record with primary key value already exists");
+                }
+            }
+
+            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry,metadata) VALUES(?, ?, ?)")) {
+                st.setObject(1, hash);
+                st.setObject(2, entryObject);
+                st.setObject(3, metadataObject);
+                st.executeUpdate();
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void update(String hash, Record record) {
-        synchronized (hash.intern()) {
+    public void update(String oldhash, Record record) {
+        try (Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
 
-            String query = "INSERT INTO " + registerInfo.tableName + "(hash, entry, metadata) ( " +
-                    "select ?,?,? " +
-                    "where not exists  ( select 1 from " + registerInfo.tableName + " where metadata @> ? ) " +
-                    "and exists ( select 1 from " + registerInfo.tableName + " where hash=? and entry @> ?)" +
-                    ")";
+            String newHash = record.getHash();
+            PGobject entryObject = createPGObject(record.getEntry().toString());
+            PGobject metadataObject = createPGObject(new Metadata(DateTime.now(), oldhash).normalise());
 
+            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, metadata) " +
+                    "( select ?,?,?  where exists ( select 1 from " + dbInfo.tableName + " where hash=? and entry @> ?))")) {
+                st.setObject(1, newHash);
+                st.setObject(2, entryObject);
+                st.setObject(3, metadataObject);
+                st.setObject(4, oldhash);
+                st.setObject(5, createPGObject(JsonObjectMapper.convertToString(mapOf(dbInfo.primaryKey, primaryKeyValue(record)))));
 
-            int resultUpdated = database.executeUpdate(
-                    query,
-                    record.getHash(),
-                    createPGObject(record.getEntry().toString()),
-                    createPGObject(new Metadata(DateTime.now(), hash).normalise()),
-                    createPGObject(JsonObjectMapper.convertToString(mapOf("previousEntryHash", hash))),
-                    hash,
-                    createPGObject(JsonObjectMapper.convertToString(mapOf(registerInfo.primaryKey, primaryKeyValue(record))))
-            );
-
-            if (resultUpdated == 0) {
-                throw new DatabaseException("No record updated");
+                int result = st.executeUpdate();
+                if (result == 0) {
+                    throw new DatabaseException("Conflict-> Either this record is outdated or trying to update the primary key value.");
+                }
             }
+
+            try (PreparedStatement st = connection.prepareStatement("DELETE FROM " + dbInfo.tableName + " where hash=?")) {
+                st.setObject(1, oldhash);
+                st.executeUpdate();
+            }
+
+            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry,metadata) VALUES(?, ?, ?)")) {
+                st.setObject(1, newHash);
+                st.setObject(2, entryObject);
+                st.setObject(3, metadataObject);
+                st.executeUpdate();
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public void deleteAll() {
-        database.execute("DROP TABLE IF EXISTS " + registerInfo.tableName);
-        createTable(registerInfo.tableName);
+        database.execute("DROP TABLE IF EXISTS " + dbInfo.tableName);
+        createTables(dbInfo.tableName);
     }
 
     @Override
     public Optional<Record> findByKV(String key, String value) {
-        return database.<Optional<Record>>select("SELECT * FROM " + registerInfo.tableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'")
+        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.tableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'")
                 .andThen(this::toOptionalRecord);
+    }
+
+    @Override
+    public List<RecordVersionInfo> history(String key, String value) {
+        return database.<List<RecordVersionInfo>>select("SELECT hash,metadata::json->>'creationTime' as creationTime FROM " + dbInfo.historyTableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }' limit 100")
+                .andThen((resultSet) -> {
+                    List<RecordVersionInfo> history = new ArrayList<>();
+                    while (resultSet.next()) {
+                        history.add(new RecordVersionInfo(resultSet.getString("hash"), DateTime.parse(resultSet.getString("creationTime"))));
+                    }
+                    Collections.sort(history);
+                    return history;
+                });
+
     }
 
     @Override
     public Optional<Record> findByHash(String hash) {
-
-        return database.<Optional<Record>>select("SELECT * FROM " + registerInfo.tableName + " WHERE hash = ?", hash)
-                .andThen(this::toOptionalRecord);
-
+        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.historyTableName + " WHERE hash = ?", hash).andThen(this::toOptionalRecord);
     }
 
     @Override
     public List<Record> search(Map<String, String> map) {
-        String sql = "SELECT * FROM " + registerInfo.tableName;
+        String sql = "SELECT * FROM " + dbInfo.tableName;
 
         if (!map.isEmpty()) {
             List<String> where = map.keySet().stream()
@@ -123,10 +167,10 @@ public class PostgresqlStore extends Store {
     @Override
     public List<Record> search(String query) {
 
-        String sql = "SELECT * FROM " + registerInfo.tableName;
+        String sql = "SELECT * FROM " + dbInfo.tableName;
 
-        if (!registerInfo.keys.isEmpty()) {
-            List<String> where = registerInfo.keys.stream()
+        if (!dbInfo.keys.isEmpty()) {
+            List<String> where = dbInfo.keys.stream()
                     .map(k -> "entry->>'" + k + "' ILIKE '%" + query + "%'")
                     .collect(Collectors.toList());
             sql += " WHERE " + StringUtils.join(where, " OR ");
@@ -139,13 +183,13 @@ public class PostgresqlStore extends Store {
 
     @Override
     public long count() {
-        return database.<Long>select("SELECT count(hash) FROM " + registerInfo.tableName + " AS count")
+        return database.<Long>select("SELECT count(hash) FROM " + dbInfo.tableName + " AS count")
                 .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
     }
 
     //TODO: this will be deleted when we know the datatype of primary key
     private Object primaryKeyValue(Record record) {
-        JsonNode jsonNode = record.getEntry().get(registerInfo.primaryKey);
+        JsonNode jsonNode = record.getEntry().get(dbInfo.primaryKey);
         if (jsonNode instanceof TextNode) {
             return jsonNode.textValue();
         } else if (jsonNode instanceof IntNode) {
@@ -188,11 +232,10 @@ public class PostgresqlStore extends Store {
         return result;
     }
 
-    private Map<String, Object> mapOf(String key, Object value){
+    private Map<String, Object> mapOf(String key, Object value) {
         Map<String, Object> map = new HashMap<>();
         map.put(key, value);
         return map;
     }
-
 }
 

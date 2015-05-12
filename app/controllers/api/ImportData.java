@@ -11,19 +11,24 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.store.Store;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ImportData extends Controller {
+    private final Store store;
 
+    public ImportData() {
+        store = App.instance.register.store();
+    }
 
-    public static Result loadWithProgress() {
+    public Result loadWithProgress() {
         return ok(views.html.load.render("Data import"));
     }
 
-    public static WebSocket<JsonNode> progress() {
+    public WebSocket<JsonNode> progress() {
         return WebSocket.whenReady((in, out) -> new Thread(() -> {
             in.onMessage(urlj -> {
                 JsonNode url = urlj.get("url");
@@ -34,7 +39,7 @@ public class ImportData extends Controller {
         }).start());
     }
 
-    private static void readAndSaveToDb(String url, WebSocket.Out<JsonNode> out) {
+    private void readAndSaveToDb(String url, WebSocket.Out<JsonNode> out) {
 
         new Thread(() -> {
 
@@ -51,10 +56,10 @@ public class ImportData extends Controller {
                 long counter = 0;
 
                 notifyProgress("Dropping existing data", false, false, counter, out);
-                App.instance.register.store().deleteAll();
+                store.deleteAll();
                 while (it.hasNext()) {
                     JsonNode rowAsNode = it.next();
-                    App.instance.register.store().save(new Record(rowAsNode));
+                    store.save(new Record(rowAsNode));
                     counter++;
                     if (counter % 1000 == 0) {
                         notifyProgress("Importing... (" + counter + " records)", false, false, counter, out);
@@ -81,7 +86,7 @@ public class ImportData extends Controller {
         out.write(Json.toJson(result));
     }
 
-    public static Result javascriptRoutes() {
+    public Result javascriptRoutes() {
         response().setContentType("text/javascript");
         return ok(
                 Routes.javascriptRouter("jsRoutes",

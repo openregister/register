@@ -1,9 +1,10 @@
 package uk.gov.openregister.config;
 
+import play.db.DB;
 import uk.gov.openregister.model.Field;
 import uk.gov.openregister.store.Store;
+import uk.gov.openregister.store.postgresql.DBInfo;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
-import uk.gov.openregister.store.postgresql.RegisterInfo;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,8 +16,7 @@ public abstract class Register {
 
     public final Store store() {
         if(store ==null){
-            String uri = ApplicationConf.getString("store.uri");
-            store = new PostgresqlStore(uri, new RegisterInfo(name(), name().toLowerCase(), fieldNames()));
+            store = new PostgresqlStore(new DBInfo(name(), name().toLowerCase(), fieldNames()), DB.getDataSource());
         }
         return store;
     }
