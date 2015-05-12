@@ -51,7 +51,7 @@ public class Rest extends Controller {
             return JsonRepresentation.instance.toResponse(202, "Record saved successfully");
         }
 
-        return JsonRepresentation.toResponseWithErrors(400, "", validationErrors);
+        return JsonRepresentation.instance.toResponseWithErrors(400, "", validationErrors);
 
     }
 
@@ -70,7 +70,7 @@ public class Rest extends Controller {
             return JsonRepresentation.instance.toResponse(202, "Record saved successfully");
         }
 
-        return JsonRepresentation.toResponseWithErrors(400, "", validationErrors);
+        return JsonRepresentation.instance.toResponseWithErrors(400, "", validationErrors);
     }
 
     public F.Promise<Result> findByKey(String key, String value) {

@@ -116,7 +116,7 @@ public class CreateRecordTest extends ApplicationTests {
         String updatedJson = "{\"test-register\":\"\",\"name\":\"entryName\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
         assertThat(response.getBody())
-                .isEqualTo("{\"message\":\"\",\"errors\":[{\"key\":\"test-register\",\"message\":\"Missing required key\"}],\"status\":400}");
+                .isEqualTo("{\"errors\":[{\"key\":\"test-register\",\"message\":\"Missing required key\"}],\"message\":\"\",\"status\":400}");
 
     }
 
@@ -125,7 +125,7 @@ public class CreateRecordTest extends ApplicationTests {
         String updatedJson = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/supersede/nonExistingHash", updatedJson);
         assertThat(response.getBody())
-                .isEqualTo("{\"message\":\"Conflict-> Either this record is outdated or trying to update the primary key value.\",\"errors\":[],\"status\":400}");
+                .isEqualTo("{\"errors\":[],\"message\":\"Conflict-> Either this record is outdated or trying to update the primary key value.\",\"status\":400}");
 
     }
 
@@ -138,7 +138,7 @@ public class CreateRecordTest extends ApplicationTests {
         String updatedJson = "{\"test-register\":\"new'PrimaryKey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
         assertThat(response.getBody())
-                .isEqualTo("{\"message\":\"Conflict-> Either this record is outdated or trying to update the primary key value.\",\"errors\":[],\"status\":400}");
+                .isEqualTo("{\"errors\":[],\"message\":\"Conflict-> Either this record is outdated or trying to update the primary key value.\",\"status\":400}");
 
     }
 }

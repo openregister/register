@@ -20,6 +20,7 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
   "org.mongodb" % "mongo-java-driver" % "3.0.0",
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-csv" % "2.5.2",
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.5.2",
   "org.apache.httpcomponents" % "httpclient" % "4.3.1",
   "org.apache.httpcomponents" % "httpcore" % "4.3.1",
 
