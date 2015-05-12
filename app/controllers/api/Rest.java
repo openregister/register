@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import static controllers.api.Representations.toJsonResponse;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -32,13 +31,13 @@ public class Rest extends Controller {
             try {
                 Register.instance.store().save(r);
             } catch (DatabaseException e) {
-                return toJsonResponse(400, e.getMessage());
+                return JsonRepresentation.instance.toResponse(400, e.getMessage());
             }
 
-            return toJsonResponse(202, "Record saved successfully");
+            return JsonRepresentation.instance.toResponse(202, "Record saved successfully");
         }
 
-        return toJsonResponse(400, "", validationErrors);
+        return JsonRepresentation.toResponseWithErrors(400, "", validationErrors);
 
     }
 
@@ -52,12 +51,12 @@ public class Rest extends Controller {
             try {
                 Register.instance.store().update(hash, r);
             } catch (DatabaseException e) {
-                return toJsonResponse(400, e.getMessage());
+                return JsonRepresentation.instance.toResponse(400, e.getMessage());
             }
-            return toJsonResponse(202, "Record saved successfully");
+            return JsonRepresentation.instance.toResponse(202, "Record saved successfully");
         }
 
-        return toJsonResponse(400, "", validationErrors);
+        return JsonRepresentation.toResponseWithErrors(400, "", validationErrors);
     }
 
     public static F.Promise<Result> findByKey(String key, String value) {
