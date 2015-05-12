@@ -22,6 +22,7 @@ import static play.mvc.Results.status;
 public class JsonRepresentation implements Representation {
 
     private final ObjectMapper objectMapper;
+    private final String contentType = "application/json; charset=utf-8";
 
     public JsonRepresentation() {
         objectMapper = new ObjectMapper();
@@ -35,12 +36,12 @@ public class JsonRepresentation implements Representation {
 
     @Override
     public Result toListOfRecords(List<Record> records) throws JsonProcessingException {
-        return ok(objectMapper.writeValueAsString(records));
+        return ok(objectMapper.writeValueAsString(records)).as(contentType);
     }
 
     @Override
     public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history) {
-        return recordO.map(record -> ok(recordAsString(record))).orElse(toResponseWithErrors(404, "Entry not found", Collections.<ValidationError>emptyList()));
+        return recordO.map(record -> ok(recordAsString(record)).as(contentType)).orElse(toResponseWithErrors(404, "Entry not found", Collections.<ValidationError>emptyList()));
     }
 
     private String recordAsString(Record record) {
