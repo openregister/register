@@ -18,47 +18,60 @@ import static play.mvc.Results.status;
 public class Representations {
 
     enum Representation {
-        HTML,
-        JSON
+        HTML {
+            @Override
+            public Result toResponse(int status, String message) {
+                return toHtmlResponse(status, message);
+            }
+
+            @Override
+            public Result toListOfRecords(List<Record> records) throws JsonProcessingException {
+                return ok(views.html.entries.render(Register.instance.fields(), records));
+            }
+
+            @Override
+            public Result toRecord(Optional<Record> recordO) {
+                return recordO.map(record ->
+                        ok(views.html.entry.render(Register.instance.fields(), record)))
+                        .orElse(toHtmlResponse(404, "Entry not found"));
+            }
+        },
+        JSON {
+            @Override
+            public Result toResponse(int status, String message) {
+                return toJsonResponse(status, message);
+            }
+
+            @Override
+            public Result toListOfRecords(List<Record> records) throws JsonProcessingException {
+                return ok(new ObjectMapper().writeValueAsString(records));
+            }
+
+            @Override
+            public Result toRecord(Optional<Record> recordO) {
+                return recordO.map(record -> ok(record.toString())).orElse(toJsonResponse(404, "Entry not found"));
+            }
+        };
+
+        abstract public Result toResponse(int status, String message);
+        abstract public Result toListOfRecords(List<Record> records) throws JsonProcessingException;
+        abstract public Result toRecord(Optional<Record> recordO);
     }
 
 
     public static Result toResponse(Http.RequestHeader requestHeader, int status, String message) {
         Representation representation = representationFor(requestHeader.queryString());
-        switch (representation) {
-            case JSON:
-                return toJsonResponse(status, message);
-            case HTML:
-                return toHtmlResponse(status, message);
-            default:
-                return toJsonResponse(400, "Unsupported representation '" + representation + "'");
-        }
+        return representation.toResponse(status, message);
     }
 
     public static Result toListOfRecords(Http.Request request, List<Record> records) throws JsonProcessingException {
-
         Representation representation = representationFor(request.queryString());
-        switch (representation) {
-            case JSON:
-                return ok(new ObjectMapper().writeValueAsString(records));
-            case HTML:
-                return ok(views.html.entries.render(Register.instance.fields(), records));
-            default:
-                return toJsonResponse(400, "Unsupported representation '" + representation + "'");
-        }
+        return representation.toListOfRecords(records);
     }
 
     public static Result toRecord(Http.Request request, Optional<Record> recordO) {
         Representation representation = representationFor(request.queryString());
-        switch (representation) {
-            case JSON:
-                return recordO.map(record -> ok(record.toString())).orElse(toJsonResponse(404, "Entry not found"));
-            case HTML:
-                return recordO.map(record -> ok(views.html.entry.render(Register.instance.fields(), record)))
-                        .orElse(toHtmlResponse(404, "Entry not found"));
-            default:
-                return toJsonResponse(400, "Unsupported representation '" + representation + "'");
-        }
+        return representation.toRecord(recordO);
     }
 
     public static Results.Status toHtmlResponse(int status, String message) {
