@@ -36,8 +36,7 @@ public class App {
             register = new DatatypeRegister();
         } else {
 
-            String registersServiceUri = ApplicationConf.getString("registers.service.url");
-            String rrUrl = registersServiceUri + "/register/" + name + "?_representation=json";
+            String rrUrl =  ApplicationConf.registerUrl("register", "/register/" + name + "?_representation=json");
             WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
 
             if (rr.getStatus() == 200 ) {
@@ -45,14 +44,12 @@ public class App {
 
                 List<String> fieldNames = StreamUtils.asStream(rEntry.get("fields").elements()).map(JsonNode::textValue).collect(Collectors.toList());
 
-                String fieldServiceUri = ApplicationConf.getString("field.service.url");
-
                 List<Field> fields = fieldNames.stream().map(field -> {
 
-                    String frUrl = fieldServiceUri + "/field/" + field + "?_representation=json";
+                    String frUrl = ApplicationConf.registerUrl("field", "/field/" + field + "?_representation=json");
                     WSResponse fr = WS.client().url(frUrl).execute().get(TIMEOUT);
 
-                    if(fr.getStatus() == 200) {
+                    if (fr.getStatus() == 200) {
                         JsonNode fEntry = fr.asJson().get("entry");
                         return new Field(fEntry);
                     } else {

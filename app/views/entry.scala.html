@@ -1,4 +1,4 @@
-@(fields: List[String], record: uk.gov.openregister.domain.Record)
+@(fields: List[uk.gov.openregister.config.Field], record: uk.gov.openregister.domain.Record)
 
 @main() {
 
@@ -21,9 +21,9 @@
             <dl>
                 <dt class="hash">hash</dt>
                 <dd class="hash">@record.getHash</dd>
-                @fields.map { key =>
-                <dt class="@key">@key</dt>
-                <dd class="@key">@entryValue(record.getEntry.get(key))</dd>
+                @fields.map { field =>
+                <dt class="@field.getName()">@controllers.html.Utils.toLink(field)</dt>
+                <dd class="@field.getName()">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</dd>
                 }
             </dl>
         </div> <!-- /.entry -->

@@ -15,7 +15,7 @@ public enum Cardinality {
     }
 
     public static Cardinality fromValue(String v) {
-        if (ONE.getValue().equals(v)) return ONE;
-        else return MANY;
+        if (MANY.getValue().equals(v)) return MANY;
+        else return ONE;
     }
 }
