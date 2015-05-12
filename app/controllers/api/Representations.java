@@ -6,6 +6,8 @@ public class Representations {
             return JsonRepresentation.instance;
         } else if ("yaml".equalsIgnoreCase(representation)) {
             return YamlRepresentation.instance;
+        } else if ("turtle".equalsIgnoreCase(representation)) {
+            return TurtleRepresentation.instance;
         } else {
             return HtmlRepresentation.instance;
         }
