@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PostgresqlStore extends Store {
+public class PostgresqlStore implements Store {
 
     private final DBInfo dbInfo;
     private Database database;
