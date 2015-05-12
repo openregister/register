@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.postgresql.DBInfo;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
@@ -46,7 +47,7 @@ public class PostgresqlStoreTest {
         assertThat(rows.size()).isEqualTo(1);
         assertThat(rows.get(0).hash).isEqualTo(expectedhash);
         JSONAssert.assertEquals(json, rows.get(0).entry.toString(), true);
-        assertNotNull(rows.get(0).metadata.creationtime);
+        assertNotNull(rows.get(0).metadata.creationTime);
         assertEquals("", rows.get(0).metadata.previousEntryHash);
 
         List<DataRow> historyRows = PostgresqlStoreForTesting.findAll(HISTORY_TABLE_NAME);
@@ -54,7 +55,7 @@ public class PostgresqlStoreTest {
         assertThat(historyRows.size()).isEqualTo(1);
         assertThat(historyRows.get(0).hash).isEqualTo(expectedhash);
         JSONAssert.assertEquals(json, historyRows.get(0).entry.toString(), true);
-        assertNotNull(historyRows.get(0).metadata.creationtime);
+        assertNotNull(historyRows.get(0).metadata.creationTime);
         assertEquals("", historyRows.get(0).metadata.previousEntryHash);
     }
 
@@ -175,6 +176,25 @@ public class PostgresqlStoreTest {
         assertEquals(record2.getHash(), store.findByHash(record2.getHash()).get().getHash());
         assertEquals(record1.getHash(), store.findByHash(record1.getHash()).get().getHash());
 
+    }
+
+    @Test
+    public void history_returnsAllHistoryForTheGivenKeyValueOrderedByLatest() {
+        String json = "{\"store_tests\":\"aValue\",\"key\":\"value1\"}";
+        Record record1 = new Record(json);
+        store.save(record1);
+        Record record2 = new Record(json.replace("value1", "value2"));
+        store.update(record1.getHash(), record2);
+        Record record3 = new Record(json.replace("value1", "value3"));
+        store.update(record2.getHash(), record3);
+
+        List<RecordVersionInfo> resultValues = store.history("store_tests", "aValue");
+
+        assertThat(resultValues.size()).isEqualTo(3);
+
+        assertThat(resultValues.get(0).hash).isEqualTo(record3.getHash());
+        assertThat(resultValues.get(1).hash).isEqualTo(record2.getHash());
+        assertThat(resultValues.get(2).hash).isEqualTo(record1.getHash());
     }
 
     @Test

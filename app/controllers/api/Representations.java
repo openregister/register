@@ -8,6 +8,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.validation.ValidationError;
 
 import java.util.*;
@@ -30,9 +31,9 @@ public class Representations {
             }
 
             @Override
-            public Result toRecord(Optional<Record> recordO) {
+            public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history) {
                 return recordO.map(record ->
-                        ok(views.html.entry.render(Register.instance.fields(), record)))
+                        ok(views.html.entry.render(Register.instance.fields(), record, history)))
                         .orElse(toHtmlResponse(404, "Entry not found"));
             }
         },
@@ -48,14 +49,14 @@ public class Representations {
             }
 
             @Override
-            public Result toRecord(Optional<Record> recordO) {
+            public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history) {
                 return recordO.map(record -> ok(record.toString())).orElse(toJsonResponse(404, "Entry not found"));
             }
         };
 
         abstract public Result toResponse(int status, String message);
         abstract public Result toListOfRecords(List<Record> records) throws JsonProcessingException;
-        abstract public Result toRecord(Optional<Record> recordO);
+        abstract public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history);
     }
 
 
@@ -69,9 +70,9 @@ public class Representations {
         return representation.toListOfRecords(records);
     }
 
-    public static Result toRecord(Http.Request request, Optional<Record> recordO) {
+    public static Result toRecord(Http.Request request, Optional<Record> recordO, List<RecordVersionInfo> history) {
         Representation representation = representationFor(request.queryString());
-        return representation.toRecord(recordO);
+        return representation.toRecord(recordO, history);
     }
 
     public static Results.Status toHtmlResponse(int status, String message) {

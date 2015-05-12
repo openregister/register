@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
 import uk.gov.openregister.JsonObjectMapper;
+import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.DatabaseException;
@@ -22,7 +23,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PostgresqlStore extends Store {
+public class PostgresqlStore implements Store {
 
     private final DBInfo dbInfo;
     private Database database;
@@ -128,6 +129,20 @@ public class PostgresqlStore extends Store {
     }
 
     @Override
+    public List<RecordVersionInfo> history(String key, String value) {
+        return database.<List<RecordVersionInfo>>select("SELECT hash,metadata::json->>'creationTime' as creationTime FROM " + dbInfo.historyTableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }' limit 100")
+                .andThen((resultSet) -> {
+                    List<RecordVersionInfo> history = new ArrayList<>();
+                    while (resultSet.next()) {
+                        history.add(new RecordVersionInfo(resultSet.getString("hash"), DateTime.parse(resultSet.getString("creationTime"))));
+                    }
+                    Collections.sort(history);
+                    return history;
+                });
+
+    }
+
+    @Override
     public Optional<Record> findByHash(String hash) {
         return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.historyTableName + " WHERE hash = ?", hash).andThen(this::toOptionalRecord);
     }
@@ -222,6 +237,5 @@ public class PostgresqlStore extends Store {
         map.put(key, value);
         return map;
     }
-
 }
 

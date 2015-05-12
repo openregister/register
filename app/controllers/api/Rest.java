@@ -8,15 +8,17 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.store.DatabaseException;
+import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import static controllers.api.Representations.toJsonResponse;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 public class Rest extends Controller {
 
@@ -24,7 +26,7 @@ public class Rest extends Controller {
     public static Result create() throws JsonProcessingException {
         Record r = new Record(request().body().asJson());
 
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.fields()).validate(r);
+        List<ValidationError> validationErrors = new Validator(singletonList(Register.instance.name()), Register.instance.fields()).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
@@ -44,7 +46,7 @@ public class Rest extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public static Result update(String hash) {
         Record r = new Record(request().body().asJson());
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(Register.instance.name()), Register.instance.fields()).validate(r);
+        List<ValidationError> validationErrors = new Validator(singletonList(Register.instance.name()), Register.instance.fields()).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
@@ -60,12 +62,20 @@ public class Rest extends Controller {
 
     public static F.Promise<Result> findByKey(String key, String value) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> Register.instance.store().findByKV(key, value));
-        return recordF.map(record -> Representations.toRecord(request(), record));
+        return recordF.map(record -> Representations.toRecord(request(), record, emptyList()));
     }
 
     public static F.Promise<Result> findByHash(String hash) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> Register.instance.store().findByHash(hash));
-        return recordF.map(record -> Representations.toRecord(request(), record));
+        Store store = Register.instance.store();
+        String primaryKey = Register.instance.name();
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
+        return recordF.map(record ->
+                        Representations.toRecord(
+                                request(),
+                                record,
+                                record.map(r -> store.history(primaryKey, r.getEntry().get(primaryKey).textValue())).orElse(emptyList())
+                        )
+        );
     }
 
     public static F.Promise<Result> search() {
@@ -84,7 +94,6 @@ public class Rest extends Controller {
 
         return recordsF.map(records -> Representations.toListOfRecords(request(), records));
     }
-
 
 
 }
