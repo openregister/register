@@ -2,7 +2,6 @@ package controllers.api;
 
 import controllers.App;
 import play.mvc.Result;
-import play.mvc.Results;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 
@@ -15,7 +14,7 @@ import static play.mvc.Results.status;
 public class HtmlRepresentation implements Representation {
     @Override
     public Result toResponse(int status, String message) {
-        return toHtmlResponse(status, message);
+        return status(status, views.html.error.render(message));
     }
 
     @Override
@@ -26,14 +25,9 @@ public class HtmlRepresentation implements Representation {
     @Override
     public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history) {
         return recordO.map(record ->
-                ok(views.html.entry.render(App.instance.register.fields(), record, history)))
-                .orElse(toHtmlResponse(404, "Entry not found"));
+                (Result) ok(views.html.entry.render(App.instance.register.fields(), record, history)))
+                .orElse(toResponse(404, "Entry not found"));
     }
-
-    private static Results.Status toHtmlResponse(int status, String message) {
-        return status(status, views.html.error.render(message));
-    }
-
 
     public static Representation instance = new HtmlRepresentation();
 }
