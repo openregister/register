@@ -11,7 +11,7 @@ public class RdfSanityTest extends ApplicationTests {
     public static final String TEST_JSON = "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
     public static final String EXPECTED_HASH = "4686f89b9c983f331c7deef476fda719148de4fb";
 
-    public static final String EXPECTED_TURTLE = "@prefix field: <http://fields.openregister.org/field/>\n" +
+    public static final String EXPECTED_TURTLE = "@prefix field: <http://fields.openregister.org/field/>.\n" +
             "\n" +
             "<http://test-register.openregister.org/hash/4686f89b9c983f331c7deef476fda719148de4fb>\n" +
             "  field:test-register \"testregisterkey\" ;\n" +

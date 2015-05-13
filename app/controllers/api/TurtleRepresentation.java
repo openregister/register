@@ -35,7 +35,7 @@ public class TurtleRepresentation implements Representation {
     }
 
     private String render(Record record, List<RecordVersionInfo> history) {
-        String header = "@prefix field: <http://fields.openregister.org/field/>\n" +
+        String header = "@prefix field: <http://fields.openregister.org/field/>.\n" +
                 "\n";
         String entity = String.format("<http://%s.openregister.org/hash/%s>\n", App.instance.register.name(), record.getHash());
         String fields = App.instance.register.fields().stream()
