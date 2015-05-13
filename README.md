@@ -29,7 +29,7 @@ To compile and run all tests:<br>
 ## Run
 
 Give the register a name:<br>
-Edit `conf/application.conf` and set `register.name` property. For example: `register.name=School`
+Edit `conf/application.conf` and set `register.name` property. For example: `register.name=school`
 
 Start the application:<br>
 `sbt run`<br>
@@ -39,4 +39,4 @@ Access the application at:<br>
 
 Load some data into the application:<br>
 Go to [`http://localhost:9000/load`](http://localhost:9000/load), provide a url to the raw csv or tsv data and click Import<br>
-For example, if your register name is `School`, use https://raw.githubusercontent.com/openregister/school.register/master/data/School/schools.tsv
+For example, if your register name is `school`, use https://raw.githubusercontent.com/openregister/school.register/master/data/school/schools.tsv
