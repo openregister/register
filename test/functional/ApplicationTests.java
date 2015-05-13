@@ -1,7 +1,7 @@
 package functional;
 
 import com.gargoylesoftware.htmlunit.WebClient;
-import controllers.conf.ApplicationGlobal;
+import controllers.global.ApplicationGlobal;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;

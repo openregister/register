@@ -1,6 +1,6 @@
 package controllers.api;
 
-import controllers.conf.Register;
+import controllers.App;
 import play.mvc.Result;
 import play.mvc.Results;
 import uk.gov.openregister.domain.Record;
@@ -20,13 +20,13 @@ public class HtmlRepresentation implements Representation {
 
     @Override
     public Result toListOfRecords(List<Record> records) {
-        return ok(views.html.entries.render(Register.instance.fields(), records));
+        return ok(views.html.entries.render(App.instance.register.fields(), records));
     }
 
     @Override
     public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history) {
         return recordO.map(record ->
-                ok(views.html.entry.render(Register.instance.fields(), record, history)))
+                ok(views.html.entry.render(App.instance.register.fields(), record, history)))
                 .orElse(toHtmlResponse(404, "Entry not found"));
     }
 

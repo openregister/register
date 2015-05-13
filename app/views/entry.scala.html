@@ -1,4 +1,4 @@
-@(fields: List[String], record: uk.gov.openregister.domain.Record, history: List[uk.gov.openregister.domain.RecordVersionInfo])
+@(fields: List[uk.gov.openregister.model.Field], record: uk.gov.openregister.domain.Record, history: List[uk.gov.openregister.domain.RecordVersionInfo])
 
 @main() {
 
@@ -13,7 +13,7 @@
         <h1 id="entry_name">@name.textValue</h1>
         }
 
-        <p>An entry in the <a href="/">@controllers.conf.Register.instance.friendlyName() register</a>.</p>
+        <p>An entry in the <a href="/">@controllers.App.instance.register.friendlyName() register</a>.</p>
 
         <h2>View fields</h2>
 
@@ -21,9 +21,9 @@
             <dl>
                 <dt class="hash">hash</dt>
                 <dd class="hash">@record.getHash</dd>
-                @fields.map { key =>
-                <dt class="@key">@key</dt>
-                <dd class="@key">@entryValue(record.getEntry.get(key))</dd>
+                @fields.map { field =>
+                <dt class="@field.getName()">@controllers.html.Utils.toLink(field)</dt>
+                <dd class="@field.getName()">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</dd>
                 }
             </dl>
         </div> <!-- /.entry -->

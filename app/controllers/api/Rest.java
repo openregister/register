@@ -1,12 +1,13 @@
 package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import controllers.conf.Register;
+import controllers.App;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.model.Field;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
@@ -25,20 +26,20 @@ public class Rest extends Controller {
     public static final String REPRESENTATION_QUERY_PARAM = "_representation";
 
     private final Store store;
-    private final List<String> fields;
+    private final List<String> fieldNames;
     private final String registerName;
 
     public Rest() {
-        store = Register.instance.store();
-        fields = Register.instance.fields();
-        registerName = Register.instance.name();
+        store = App.instance.register.store();
+        fieldNames = App.instance.register.fieldNames();
+        registerName = App.instance.register.name();
     }
 
     @BodyParser.Of(BodyParser.Json.class)
     public Result create() throws JsonProcessingException {
         Record r = new Record(request().body().asJson());
 
-        List<ValidationError> validationErrors = new Validator(singletonList(registerName), fields).validate(r);
+        List<ValidationError> validationErrors = new Validator(singletonList(registerName), fieldNames).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
@@ -58,7 +59,7 @@ public class Rest extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public Result update(String hash) {
         Record r = new Record(request().body().asJson());
-        List<ValidationError> validationErrors = new Validator(singletonList(registerName), fields).validate(r);
+        List<ValidationError> validationErrors = new Validator(singletonList(registerName), fieldNames).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {

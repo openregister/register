@@ -26,7 +26,10 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(body).contains("This register exists as an accurate list of all test entries");
         assertThat(body).contains("Search register entries");
 
-        assertThat(body).contains("name, key1, key2");
+        assertThat(body).contains("<a class=\"link_to_register\" href=\"http://localhost:8888/field/test-register\">test-register</a>, " +
+                "<a class=\"link_to_register\" href=\"http://localhost:8888/field/name\">name</a>, " +
+                "<a class=\"link_to_register\" href=\"http://localhost:8888/field/key1\">key1</a>, " +
+                "<a class=\"link_to_register\" href=\"http://localhost:8888/field/key2\">key2</a>");
 
     }
 
@@ -70,14 +73,14 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(td1.get(1).text()).isEqualTo("testregisterkey1");
         assertThat(td1.get(2).text()).isEqualTo("The Entry1");
         assertThat(td1.get(3).text()).isEqualTo("value1");
-        assertThat(td1.get(4).text()).isEqualTo("['A', 'B']");
+        assertThat(td1.get(4).text()).isEqualTo("[ A, B ]");
 
         Elements td2 = tr.get(2).select("td");
         assertThat(td2.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/9dd019eb60715299711418bc7a3542e93a466f58\">9dd019e</a>");
         assertThat(td2.get(1).text()).isEqualTo("testregisterkey3");
         assertThat(td2.get(2).text()).isEqualTo("The Entry3");
         assertThat(td2.get(3).text()).isEqualTo("value1");
-        assertThat(td2.get(4).text()).isEqualTo("['E', 'F']");
+        assertThat(td2.get(4).text()).isEqualTo("[ E, F ]");
     }
 
     @Test
@@ -111,7 +114,7 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(dd.get(3).text()).isEqualTo("value1");
 
         assertThat(dt.get(4).text()).isEqualTo("key2");
-        assertThat(dd.get(4).text()).isEqualTo("['A', 'B']");
+        assertThat(dd.get(4).text()).isEqualTo("[ A, B ]");
     }
 
 
@@ -128,7 +131,7 @@ public class SearchPagesTest extends ApplicationTests {
         Element key2 = html.getElementsByClass("key2").first();
         assertThat(key2).isNotNull();
 
-        assertThat(key2.text()).isEqualTo("['A', 'B']");
+        assertThat(key2.text()).isEqualTo("[ A, B ]");
 
     }
 

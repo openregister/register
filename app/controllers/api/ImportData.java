@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import controllers.conf.Register;
+import controllers.App;
 import play.Routes;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -21,7 +21,7 @@ public class ImportData extends Controller {
     private final Store store;
 
     public ImportData() {
-        store = Register.instance.store();
+        store = App.instance.register.store();
     }
 
     public Result loadWithProgress() {

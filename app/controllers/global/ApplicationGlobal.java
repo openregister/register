@@ -1,11 +1,15 @@
-package controllers.conf;
+package controllers.global;
 
+import controllers.App;
 import controllers.api.Representation;
 import play.Application;
 import play.GlobalSettings;
 import play.libs.F;
+import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
+
+import java.lang.reflect.Method;
 
 import static controllers.api.Representations.representationFor;
 
@@ -38,6 +42,20 @@ public class ApplicationGlobal extends GlobalSettings {
 
     @Override
     public void onStart(Application application) {
-        Register.instance.init();
+        App.instance.init();
+    }
+
+    @Override
+    public Action onRequest(Http.Request request, Method method) {
+        if(!App.instance.started()) {
+            return new Action.Simple(){
+
+                @Override
+                public F.Promise<Result> call(Http.Context context) throws Throwable {
+                    return F.Promise.pure(status(500, views.html.bootstrapError.render(App.instance.register.friendlyName() + " Register bootstrap failed", App.instance.getInitErrors())));
+                }
+            };
+        }
+        return super.onRequest(request, method);
     }
 }

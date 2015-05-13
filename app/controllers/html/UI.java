@@ -1,8 +1,8 @@
-package controllers;
+package controllers.html;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controllers.conf.Register;
+import controllers.App;
 import play.data.DynamicForm;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
@@ -18,25 +18,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Application extends Controller {
+public class UI extends Controller {
 
-    private final List<String> fields;
+    private final List<String> fieldNames;
     private final Store store;
     private final String registerName;
 
-    public Application() {
-        this.store = Register.instance.store();
-        this.fields = Register.instance.fields();
-        this.registerName = Register.instance.name();
+    public UI() {
+        this.store = App.instance.register.store();
+        this.fieldNames = App.instance.register.fieldNames();
+        this.registerName = App.instance.register.name();
     }
 
     public Result index() {
         long count = store.count();
-        return ok(views.html.index.render(fields, count));
+        return ok(views.html.index.render(fieldNames, count));
     }
 
     public Result renderNewEntryForm() {
-        return ok(views.html.newEntry.render(fields, new DynamicForm()));
+        return ok(views.html.newEntry.render(fieldNames, new DynamicForm()));
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
@@ -45,19 +45,19 @@ public class Application extends Controller {
         DynamicForm dynamicForm = new DynamicForm().bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(registerName), fields).validate(record);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(registerName), fieldNames).validate(record);
         if (validationErrors.isEmpty()) {
             try {
                 store.save(record);
                 return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
             } catch (DatabaseException e) {
                 dynamicForm.reject(e.getMessage());
-                return ok(views.html.newEntry.render(fields, dynamicForm));
+                return ok(views.html.newEntry.render(fieldNames, dynamicForm));
             }
         }
         validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
 
-        return ok(views.html.newEntry.render(fields, dynamicForm));
+        return ok(views.html.newEntry.render(fieldNames, dynamicForm));
     }
 
     @SuppressWarnings("unchecked")
@@ -65,7 +65,7 @@ public class Application extends Controller {
         Record record = store.findByHash(hash).get();
 
         return ok(views.html.updateEntry.render(
-                        fields,
+                        fieldNames,
                         new DynamicForm().bind(new ObjectMapper().convertValue(record.getEntry(), Map.class)),
                         hash)
         );
@@ -76,14 +76,14 @@ public class Application extends Controller {
         DynamicForm dynamicForm = new DynamicForm().bindFromRequest(request());
         Record record = createRecordFromParams(dynamicForm.data());
 
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(registerName), fields).validate(record);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(registerName), fieldNames).validate(record);
         if (validationErrors.isEmpty()) {
             store.update(hash, record);
             return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
         }
         validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
         return ok(views.html.updateEntry.render(
-                fields,
+                fieldNames,
                 dynamicForm,
                 hash));
     }
@@ -93,7 +93,7 @@ public class Application extends Controller {
             Map<String, Object> jsonMap = new HashMap<>();
             //TODO: this will break when we have multiple values for a key, data parsing will be based on datatype
             formParameters.keySet().stream()
-                    .filter(fields::contains)
+                    .filter(fieldNames::contains)
                     .forEach(key -> jsonMap.put(key, formParameters.get(key)));
 
             String json = new ObjectMapper().writeValueAsString(jsonMap);
