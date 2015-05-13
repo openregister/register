@@ -1,5 +1,9 @@
 package functional.html;
 
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import functional.ApplicationTests;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -8,7 +12,10 @@ import org.junit.Test;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.domain.Record;
 
+import java.io.IOException;
+
 import static org.fest.assertions.Assertions.assertThat;
+import static play.mvc.Http.Status.ACCEPTED;
 import static play.mvc.Http.Status.OK;
 
 public class SearchPagesTest extends ApplicationTests {
@@ -150,5 +157,37 @@ public class SearchPagesTest extends ApplicationTests {
         Element h1 = html.getElementById("entry_name");
         assertThat(h1).isNotNull();
         assertThat(h1.text()).isEqualTo("The Entry");
+    }
+
+    @Test
+    public void viewEntry_searchByKeyValueRendersTheHistory() throws IOException {
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String hash =new Record(json).getHash();
+        postJson("/create", json);
+
+        assertThat(postJson("/supersede/" + hash, json.replace("value1", "new_value")).getStatus()).isEqualTo(ACCEPTED);
+
+        HtmlPage page = webClient.getPage(BASE_URL + "/test-register/testregisterkey");
+
+        DomNodeList<HtmlElement> tables = page.getBody().getElementsByTagName("table");
+
+        assertThat(tables.size()).isEqualTo(1);
+        assertThat(((HtmlTable)tables.get(0)).getRows().size()).isEqualTo(3);
+    }
+
+    @Test
+    public void viewEntry_searchByHashRendersTheHistory() throws IOException {
+        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
+        String hash =new Record(json).getHash();
+        postJson("/create", json);
+
+        assertThat(postJson("/supersede/" + hash, json.replace("value1", "new_value")).getStatus()).isEqualTo(ACCEPTED);
+
+        HtmlPage page = webClient.getPage(BASE_URL + "/hash/" + hash);
+
+        DomNodeList<HtmlElement> tables = page.getBody().getElementsByTagName("table");
+
+        assertThat(tables.size()).isEqualTo(1);
+        assertThat(((HtmlTable)tables.get(0)).getRows().size()).isEqualTo(3);
     }
 }

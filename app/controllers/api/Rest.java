@@ -7,7 +7,7 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
-import uk.gov.openregister.model.Field;
+import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
@@ -55,7 +55,6 @@ public class Rest extends Controller {
 
     }
 
-    //TODO: do validation
     @BodyParser.Of(BodyParser.Json.class)
     public Result update(String hash) {
         Record r = new Record(request().body().asJson());
@@ -76,7 +75,8 @@ public class Rest extends Controller {
     public F.Promise<Result> findByKey(String key, String value) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
         Representation representation = representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
-        return recordF.map(record -> representation.toRecord(record, emptyList()));
+        return recordF.map(record -> representation.toRecord(record, record.map(this::getHistoryFor).orElse(emptyList())
+        ));
     }
 
     public F.Promise<Result> findByHash(String hash) {
@@ -85,7 +85,7 @@ public class Rest extends Controller {
         return recordF.map(record ->
                         representation.toRecord(
                                 record,
-                                record.map(r -> store.history(registerName, r.getEntry().get(registerName).textValue())).orElse(emptyList())
+                                record.map(this::getHistoryFor).orElse(emptyList())
                         )
         );
     }
@@ -106,6 +106,10 @@ public class Rest extends Controller {
 
         Representation representation = representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
         return recordsF.map(representation::toListOfRecords);
+    }
+
+    private List<RecordVersionInfo> getHistoryFor(Record r) {
+        return store.history(registerName, r.getEntry().get(registerName).textValue());
     }
 
 
