@@ -8,6 +8,7 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.model.Field;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
@@ -21,12 +22,14 @@ import java.util.Map;
 public class UI extends Controller {
 
     private final List<String> fieldNames;
+    private final List<Field> fields;
     private final Store store;
     private final String registerName;
 
     public UI() {
         this.store = App.instance.register.store();
         this.fieldNames = App.instance.register.fieldNames();
+        this.fields = App.instance.register.fields();
         this.registerName = App.instance.register.name();
     }
 
@@ -36,7 +39,7 @@ public class UI extends Controller {
     }
 
     public Result renderNewEntryForm() {
-        return ok(views.html.newEntry.render(fieldNames, new DynamicForm()));
+        return ok(views.html.newEntry.render(registerName, fields, new DynamicForm()));
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
@@ -52,20 +55,20 @@ public class UI extends Controller {
                 return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
             } catch (DatabaseException e) {
                 dynamicForm.reject(e.getMessage());
-                return ok(views.html.newEntry.render(fieldNames, dynamicForm));
+                return ok(views.html.newEntry.render(registerName, fields, dynamicForm));
             }
         }
         validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
 
-        return ok(views.html.newEntry.render(fieldNames, dynamicForm));
+        return ok(views.html.newEntry.render(registerName, fields, dynamicForm));
     }
 
     @SuppressWarnings("unchecked")
     public Result renderUpdateEntryForm(String hash) {
         Record record = store.findByHash(hash).get();
 
-        return ok(views.html.updateEntry.render(
-                        fieldNames,
+        return ok(views.html.updateEntry.render(registerName,
+                        fields,
                         new DynamicForm().bind(new ObjectMapper().convertValue(record.getEntry(), Map.class)),
                         hash)
         );
@@ -82,8 +85,8 @@ public class UI extends Controller {
             return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
         }
         validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
-        return ok(views.html.updateEntry.render(
-                fieldNames,
+        return ok(views.html.updateEntry.render(registerName,
+                fields,
                 dynamicForm,
                 hash));
     }

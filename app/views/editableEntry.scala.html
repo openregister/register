@@ -1,4 +1,4 @@
-@(fields: List[String], form: DynamicForm, formAction: play.api.mvc.Call, submitButtonValue: String)
+@(registerName: String, fields: List[uk.gov.openregister.model.Field], form: DynamicForm, formAction: play.api.mvc.Call, submitButtonValue: String)
 
 @main() {
 
@@ -14,9 +14,15 @@
 
 @helper.form(action = formAction) {
 
-@fields.map{ key =>
-@helper.inputText(form(key))
-}
+    @fields.map{ aField =>
+        @{
+            if(registerName.equals("register") && aField.getName().equals("fields"))
+                controllers.html.Utils.renderSelect(aField, form, aField.getAllowedValues.get);
+             else
+                helper.inputText(form(aField.getName));
+
+        }
+    }
 
     <input type="submit" name="submit" value="@submitButtonValue" class="button"/>
 }

@@ -3,15 +3,17 @@ package uk.gov.openregister.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.text.WordUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 public class Field {
 
-    String name;
-    String frendlyName;
-    Datatype datatype;
-    Cardinality cardinality;
-    Optional<String> register;
+    final String name;
+    final String frendlyName;
+    final Datatype datatype;
+    final Cardinality cardinality;
+    final Optional<String> register;
+    final Optional<List<String>> allowedValues;
 
     public Field(JsonNode node) {
 
@@ -20,6 +22,7 @@ public class Field {
         datatype = Optional.ofNullable(node.get("datatype")).map(d -> Datatype.of(d.asText())).orElse(Datatype.DEFAULT);
         cardinality = Optional.ofNullable(node.get("cardinality")).map(c -> Cardinality.fromValue(c.textValue())).orElse(Cardinality.ONE);
         register = Optional.ofNullable(node.get("register")).map(JsonNode::asText).filter(s -> !s.isEmpty() && !"null".equals(s));
+        this.allowedValues = Optional.empty();
     }
 
     public Field(String name) {
@@ -28,6 +31,7 @@ public class Field {
         this.datatype = Datatype.DEFAULT;
         this.cardinality = Cardinality.ONE;
         this.register = Optional.empty();
+        this.allowedValues = Optional.empty();
     }
 
     public Field(String name, Cardinality cardinality) {
@@ -36,6 +40,7 @@ public class Field {
         this.datatype = Datatype.DEFAULT;
         this.cardinality = cardinality;
         this.register = Optional.empty();
+        this.allowedValues = Optional.empty();
     }
 
     public Field(String name, String frendlyName, Datatype datatype, Cardinality cardinality, Optional<String> register) {
@@ -44,6 +49,16 @@ public class Field {
         this.datatype = datatype;
         this.cardinality = cardinality;
         this.register = register;
+        this.allowedValues = Optional.empty();
+    }
+
+    public Field(String name, String frendlyName, Datatype datatype, Cardinality cardinality, Optional<String> register, Optional<List<String>> allowedValues) {
+        this.name = name;
+        this.frendlyName = frendlyName;
+        this.datatype = datatype;
+        this.cardinality = cardinality;
+        this.register = register;
+        this.allowedValues = allowedValues;
     }
 
     public String getName() {
@@ -65,4 +80,9 @@ public class Field {
     public Optional<String> getRegister() {
         return register;
     }
+
+    public Optional<List<String>> getAllowedValues() {
+        return allowedValues;
+    }
+
 }
