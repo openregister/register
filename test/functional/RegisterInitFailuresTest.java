@@ -55,7 +55,7 @@ public class RegisterInitFailuresTest {
     }
 
     public WSResponse get(String path) {
-        return WS.url(BASE_URL + path).get().get(1000);
+        return WS.url(BASE_URL + path).setFollowRedirects(false).get().get(1000);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class RegisterInitFailuresTest {
     public void testShowErrorWhenFieldsAreNotFound() throws Exception {
         running(testServer(3334, fakeApplication("test-register-with-fields-that-dont-exist")), () -> {
             String body = get("/").getBody();
-            assertThat(body).contains("Test-register-with-fields-that-dont-exist Register bootstrap failed");
+            assertThat(body).contains("Test Register With Unknown Fields Register bootstrap failed");
             assertThat(body).contains("Field register returned 404 calling http://localhost:8888/field/unknown?_representation=json");
         });
     }
@@ -104,6 +104,13 @@ public class RegisterInitFailuresTest {
     public void testKnownDatatypeRegisterWorks() throws Exception {
         running(testServer(3334, fakeApplication("datatype")), () -> {
             assertThat(get("/").getStatus()).isEqualTo(200);
+        });
+    }
+
+    @Test
+    public void test_initTriggersAnotherBootstrap() throws Exception {
+        running(testServer(3334, fakeApplication("datatype")), () -> {
+            assertThat(get("/?_init=true").getStatus()).isEqualTo(303);
         });
     }
 

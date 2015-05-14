@@ -8,6 +8,7 @@ import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.model.Datatype;
 import uk.gov.openregister.model.Field;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -29,11 +30,19 @@ public class Utils {
         return Html.apply(toRawValue(field, value));
     }
 
+    public static Html joinHtml(List<Html> list) {
+        return Html.apply(join(list.stream().map(Html::text).collect(Collectors.toList())));
+    }
+
+    public static String join(List<String> list) {
+        return "[ " + StringUtils.join(list, ", ")+ " ]";
+    }
+
     private static String toRawValue(Field field, JsonNode value) {
         if (value == null) {
             return "";
         } else if (value.isArray()) {
-            return "[ " + StringUtils.join(StreamUtils.asStream(value.elements()).map(e -> toRawValue(field, e)).collect(Collectors.toList()), ", ")+ " ]";
+            return join(StreamUtils.asStream(value.elements()).map(e -> toRawValue(field, e)).collect(Collectors.toList()));
         } else if (field.getRegister().isPresent()) return toLink(field.getRegister().get(), value.textValue()).text();
         else return value.textValue();
     }

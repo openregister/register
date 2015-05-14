@@ -14,6 +14,11 @@ public class RegisterRegister extends Register {
             new Field("fields", "Fields", Datatype.of("list"), Cardinality.MANY, Optional.of("field")), new Field("text"));
 
     @Override
+    public InitResult init() {
+        return InitResult.OK;
+    }
+
+    @Override
     public String friendlyName() {
         return "Register";
     }
@@ -28,8 +33,4 @@ public class RegisterRegister extends Register {
         return FIELDS;
     }
 
-    @Override
-    public boolean isStarted() {
-        return true;
-    }
 }
