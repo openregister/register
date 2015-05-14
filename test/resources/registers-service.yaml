@@ -13,6 +13,20 @@
 
 - request:
     method: GET
+    url: /search
+    query:
+        _query:
+        _representation: json
+
+  response:
+    status: 200
+    headers:
+      content-type: application/json
+    body: >
+      [{"hash":"804e5c8a17187b3400d1ae026f492e080f18b6c0","entry":{"register": "test-register","name": "Test Register", "fields":["test-register", "name","key1","key2"]}}, {"hash":"5b5bb9d909d561a5edca7a526ed2ee0ea1668a25","entry":{"register": "test-register-2","name": "Test Register 2", "fields":["test-register-2", "name","key1"]}}]
+
+- request:
+    method: GET
     url: /register/test-register-with-fields-that-dont-exist
     query:
         _representation: json
