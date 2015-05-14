@@ -87,7 +87,7 @@ public class Rest extends Controller {
     }
 
     private Result getResponse(Optional<Record> recordO) {
-        return recordO.map(record -> representation().toRecord(record, getHistoryFor(record)))
+        return recordO.map(record -> representation().toRecord(record, getHistoryFor(record), representationsMap(representationsBaseUri())))
                 .orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 
@@ -105,8 +105,7 @@ public class Rest extends Controller {
             }
         });
 
-        Representation representation = representation();
-        return recordsF.map(representation::toListOfRecords);
+        return recordsF.map( rs -> representation().toListOfRecords(rs, representationsMap(representationsBaseUri())));
     }
 
     private List<RecordVersionInfo> getHistoryFor(Record r) {

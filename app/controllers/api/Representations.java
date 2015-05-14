@@ -2,24 +2,29 @@ package controllers.api;
 
 public class Representations {
     public enum Format {
-        Json("json"),
-        Yaml("yaml");
+        json("json", JsonRepresentation.instance),
+        turtle("turtle", TurtleRepresentation.instance),
+        yaml("yaml", YamlRepresentation.instance),
+        html("html", HtmlRepresentation.instance);
 
         public final String identifier;
-        private Format(final String theIdentifier){
+        public final Representation representation;
+
+        private Format(final String theIdentifier, Representation representation) {
             identifier = theIdentifier;
+            this.representation = representation;
         }
     }
 
     public static Representation representationFor(String representation) {
-        if (Format.Json.identifier.equalsIgnoreCase(representation)) {
-            return JsonRepresentation.instance;
-        } else if (Format.Yaml.identifier.equalsIgnoreCase(representation)) {
-            return YamlRepresentation.instance;
-        } else if ("turtle".equalsIgnoreCase(representation)) {
-            return TurtleRepresentation.instance;
-        } else {
-            return HtmlRepresentation.instance;
+        return getFormat(representation).representation;
+    }
+
+    private static Format getFormat(String representation) {
+        try {
+            return Format.valueOf(representation);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return Format.html;
         }
     }
 }
