@@ -9,7 +9,6 @@ import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.model.Field;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -24,12 +23,6 @@ public class TurtleRepresentation implements Representation {
     public static final String TEXT_TURTLE = "text/turtle; charset=utf-8";
 
     @Override
-    public Result toResponse(int status, String message) {
-        // don't care about this for the moment
-        return null;
-    }
-
-    @Override
     public Result toListOfRecords(List<Record> records) throws Exception {
         return ok(records.stream()
                         .map(this::renderRecord)
@@ -38,9 +31,8 @@ public class TurtleRepresentation implements Representation {
     }
 
     @Override
-    public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history) {
-        return recordO.map(record -> (Result) ok(TURTLE_HEADER + renderRecord(record)).as(TEXT_TURTLE))
-                .orElse(toResponse(404, "Not found"));
+    public Result toRecord(Record record, List<RecordVersionInfo> history) {
+        return ok(TURTLE_HEADER + renderRecord(record)).as(TEXT_TURTLE);
     }
 
     private String renderRecord(Record record) {
