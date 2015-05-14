@@ -1,14 +1,9 @@
-@(registerName: String, fields: List[uk.gov.openregister.model.Field], form: DynamicForm, formAction: play.api.mvc.Call, submitButtonValue: String)
+@(registerName: String, fields: List[uk.gov.openregister.model.Field], requestParam: Map[String, List[String]], errors: Map[String,String], formAction: play.api.mvc.Call, submitButtonValue: String)
 
 @main() {
 
 @header()
 
-<div class="row">
-@form.globalErrors.map { error =>
-<div class="error">@error.message</div><br/>
-}
-</div>
 
 <div class="row">
 
@@ -17,9 +12,9 @@
     @fields.map{ aField =>
         @{
             if(registerName.equals("register") && aField.getName().equals("fields"))
-                controllers.html.Utils.renderSelect(aField, form, aField.getAllowedValues.get);
+                controllers.html.Utils.checkbox(aField, requestParam.get(aField.getName), aField.getAllowedValues.get);
              else
-                helper.inputText(form(aField.getName));
+                controllers.html.Utils.inputText(aField.getName, requestParam.get(aField.getName), errors.get(aField.getName));
 
         }
     }

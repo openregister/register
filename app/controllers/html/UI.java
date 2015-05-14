@@ -3,10 +3,10 @@ package controllers.html;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.App;
-import play.data.DynamicForm;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
+import uk.gov.openregister.JsonObjectMapper;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.model.Field;
 import uk.gov.openregister.store.DatabaseException;
@@ -14,10 +14,8 @@ import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class UI extends Controller {
 
@@ -39,14 +37,15 @@ public class UI extends Controller {
     }
 
     public Result renderNewEntryForm() {
-        return ok(views.html.newEntry.render(registerName, fields, new DynamicForm()));
+        return ok(views.html.newEntry.render(registerName, fields, Collections.emptyMap(), Collections.emptyMap()));
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public Result create() {
 
-        DynamicForm dynamicForm = new DynamicForm().bindFromRequest(request());
-        Record record = createRecordFromParams(dynamicForm.data());
+        Map<String, String[]> requestParams = request().body().asFormUrlEncoded();
+
+        Record record = createRecordFromQueryParams(requestParams);
 
         List<ValidationError> validationErrors = new Validator(Collections.singletonList(registerName), fieldNames).validate(record);
         if (validationErrors.isEmpty()) {
@@ -54,54 +53,74 @@ public class UI extends Controller {
                 store.save(record);
                 return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
             } catch (DatabaseException e) {
-                dynamicForm.reject(e.getMessage());
-                return ok(views.html.newEntry.render(registerName, fields, dynamicForm));
+
+                return ok(views.html.newEntry.render(registerName, fields, convertToMapOfListValues(requestParams), Collections.singletonMap("globalError", e.getMessage())));
             }
         }
-        validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
+        Map<String, String> errors = validationErrors.stream().collect(Collectors.toMap(error -> error.key, error -> error.message));
 
-        return ok(views.html.newEntry.render(registerName, fields, dynamicForm));
+        return ok(views.html.newEntry.render(registerName, fields, convertToMapOfListValues(requestParams), errors));
     }
 
     @SuppressWarnings("unchecked")
     public Result renderUpdateEntryForm(String hash) {
         Record record = store.findByHash(hash).get();
 
+        Map params = JsonObjectMapper.convert(record.getEntry().toString(), Map.class);
+
         return ok(views.html.updateEntry.render(registerName,
                         fields,
-                        new DynamicForm().bind(new ObjectMapper().convertValue(record.getEntry(), Map.class)),
+                        convertToMapOfListValues(params),
+                        Collections.emptyMap(),
                         hash)
         );
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public Result update(String hash) {
-        DynamicForm dynamicForm = new DynamicForm().bindFromRequest(request());
-        Record record = createRecordFromParams(dynamicForm.data());
+        Map<String, String[]> requestParams = request().body().asFormUrlEncoded();
+
+        Record record = createRecordFromQueryParams(requestParams);
 
         List<ValidationError> validationErrors = new Validator(Collections.singletonList(registerName), fieldNames).validate(record);
         if (validationErrors.isEmpty()) {
             store.update(hash, record);
             return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
         }
-        validationErrors.stream().forEach(error -> dynamicForm.reject(error.key, "error.required"));
+        Map<String, String> errors = validationErrors.stream().collect(Collectors.toMap(error -> error.key, error -> error.message));
         return ok(views.html.updateEntry.render(registerName,
                 fields,
-                dynamicForm,
+                convertToMapOfListValues(requestParams),
+                errors,
                 hash));
     }
 
-    private  Record createRecordFromParams(Map<String, String> formParameters) {
+    private Map<String, List<String>> convertToMapOfListValues(Map<String, ?> requestParams) {
+        Map<String, List<String>> stringListHashMap = new HashMap<>();
+        for (String key : requestParams.keySet()) {
+            if (requestParams.get(key) instanceof String[]) {
+                stringListHashMap.put(key, Arrays.asList((String[]) requestParams.get(key)));
+            }else if (requestParams.get(key) instanceof List) {
+                stringListHashMap.put(key, (List)requestParams.get(key));
+            } else {
+                stringListHashMap.put(key, Arrays.asList((String) requestParams.get(key)));
+            }
+        }
+        return stringListHashMap;
+    }
+
+    private Record createRecordFromQueryParams(Map<String, String[]> formParameters) {
         try {
             Map<String, Object> jsonMap = new HashMap<>();
-            //TODO: this will break when we have multiple values for a key, data parsing will be based on datatype
-            formParameters.keySet().stream()
-                    .filter(fieldNames::contains)
-                    .forEach(key -> jsonMap.put(key, formParameters.get(key)));
+            formParameters.keySet().stream().filter(fieldNames::contains).forEach(key -> {
+                if (registerName.equals("register") && key.equals("fields")) {
+                    jsonMap.put(key, formParameters.get(key));
+                } else {
+                    jsonMap.put(key, formParameters.get(key)[0]);
+                }
+            });
 
-            String json = new ObjectMapper().writeValueAsString(jsonMap);
-
-            return new Record(json);
+            return new Record(new ObjectMapper().writeValueAsString(jsonMap));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("TODO: json parsing exception, we need to address this when TODO above is done");
         }
