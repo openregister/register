@@ -16,7 +16,7 @@ public class FieldTest {
 
         Field f = new Field(node);
         assertThat(f.getName()).isEqualTo("address");
-        assertThat(f.getFrendlyName()).isEqualTo("Address");
+        assertThat(f.getFriendlyName()).isEqualTo("Address");
         assertThat(f.getDatatype().getName()).isEqualTo("string");
         assertThat(f.getRegister()).isEqualTo(Optional.of("address"));
         assertThat(f.getCardinality()).isEqualTo(Cardinality.ONE);
@@ -28,7 +28,7 @@ public class FieldTest {
 
         Field f = new Field(node);
         assertThat(f.getName()).isEqualTo("address");
-        assertThat(f.getFrendlyName()).isEqualTo("Address");
+        assertThat(f.getFriendlyName()).isEqualTo("Address");
         assertThat(f.getDatatype().getName()).isEqualTo("string");
         assertThat(f.getRegister().isPresent()).isEqualTo(false);
     }
