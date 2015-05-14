@@ -33,6 +33,12 @@ public class Field {
         this.cardinality = cardinality;
     }
 
+    public Field(String name, Optional<String> register) {
+        this.name = name;
+        this.friendlyName = WordUtils.capitalize(name);
+        this.register = register;
+    }
+
     public Field(String name, String friendlyName, Datatype datatype, Cardinality cardinality, Optional<String> register) {
         this.name = name;
         this.friendlyName = friendlyName;
