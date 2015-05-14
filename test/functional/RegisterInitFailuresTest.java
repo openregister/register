@@ -55,7 +55,7 @@ public class RegisterInitFailuresTest {
     }
 
     public WSResponse get(String path) {
-        return WS.url(BASE_URL + path).get().get(1000);
+        return WS.url(BASE_URL + path).setFollowRedirects(false).get().get(1000);
     }
 
     @Test
@@ -104,6 +104,13 @@ public class RegisterInitFailuresTest {
     public void testKnownDatatypeRegisterWorks() throws Exception {
         running(testServer(3334, fakeApplication("datatype")), () -> {
             assertThat(get("/").getStatus()).isEqualTo(200);
+        });
+    }
+
+    @Test
+    public void test_initTriggersAnotherBootstrap() throws Exception {
+        running(testServer(3334, fakeApplication("datatype")), () -> {
+            assertThat(get("/?_init=true").getStatus()).isEqualTo(303);
         });
     }
 

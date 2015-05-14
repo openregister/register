@@ -12,6 +12,8 @@ import play.mvc.Result;
 import java.lang.reflect.Method;
 
 import static controllers.api.Representations.representationFor;
+import static play.mvc.Results.redirect;
+import static play.mvc.Results.status;
 
 public class ApplicationGlobal extends GlobalSettings {
     public static final String REPRESENTATION_QUERY_PARAM = "_representation";
@@ -47,15 +49,26 @@ public class ApplicationGlobal extends GlobalSettings {
 
     @Override
     public Action onRequest(Http.Request request, Method method) {
-        if(!App.instance.started()) {
-            return new Action.Simple(){
-
-                @Override
-                public F.Promise<Result> call(Http.Context context) throws Throwable {
-                    return F.Promise.pure(status(500, views.html.bootstrapError.render(App.instance.register.friendlyName() + " Register bootstrap failed", App.instance.getInitErrors())));
-                }
-            };
+        if(request.queryString().containsKey("_init")) {
+            App.instance.init();
+            return toAction(redirect("/"));
         }
-        return super.onRequest(request, method);
+
+        if(!App.instance.started()) {
+            return toAction(status(500, views.html.bootstrapError.render(App.instance.register.friendlyName() + " Register bootstrap failed", App.instance.getInitErrors())));
+
+        } else {
+            return super.onRequest(request, method);
+        }
+    }
+
+    private Action toAction(Result r) {
+        return new Action.Simple(){
+
+            @Override
+            public F.Promise<Result> call(Http.Context context) throws Throwable {
+                return F.Promise.pure(r);
+            }
+        };
     }
 }
