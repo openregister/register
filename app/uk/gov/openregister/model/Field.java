@@ -8,15 +8,15 @@ import java.util.Optional;
 public class Field {
 
     String name;
-    String frendlyName;
-    Datatype datatype;
-    Cardinality cardinality;
-    Optional<String> register;
+    String friendlyName;
+    Datatype datatype = Datatype.DEFAULT;
+    Cardinality cardinality = Cardinality.ONE;
+    Optional<String> register = Optional.empty();
 
     public Field(JsonNode node) {
 
         name = Optional.of(node.get("field")).map(JsonNode::asText).get();
-        frendlyName = Optional.ofNullable(node.get("name")).map(JsonNode::asText).orElse(WordUtils.capitalize(name));
+        friendlyName = Optional.ofNullable(node.get("name")).map(JsonNode::asText).orElse(WordUtils.capitalize(name));
         datatype = Optional.ofNullable(node.get("datatype")).map(d -> Datatype.of(d.asText())).orElse(Datatype.DEFAULT);
         cardinality = Optional.ofNullable(node.get("cardinality")).map(c -> Cardinality.fromValue(c.textValue())).orElse(Cardinality.ONE);
         register = Optional.ofNullable(node.get("register")).map(JsonNode::asText).filter(s -> !s.isEmpty() && !"null".equals(s));
@@ -24,23 +24,24 @@ public class Field {
 
     public Field(String name) {
         this.name = name;
-        this.frendlyName = WordUtils.capitalize(name);
-        this.datatype = Datatype.DEFAULT;
-        this.cardinality = Cardinality.ONE;
-        this.register = Optional.empty();
+        this.friendlyName = WordUtils.capitalize(name);
     }
 
     public Field(String name, Cardinality cardinality) {
         this.name = name;
-        this.frendlyName = WordUtils.capitalize(name);
-        this.datatype = Datatype.DEFAULT;
+        this.friendlyName = WordUtils.capitalize(name);
         this.cardinality = cardinality;
-        this.register = Optional.empty();
     }
 
-    public Field(String name, String frendlyName, Datatype datatype, Cardinality cardinality, Optional<String> register) {
+    public Field(String name, Optional<String> register) {
         this.name = name;
-        this.frendlyName = frendlyName;
+        this.friendlyName = WordUtils.capitalize(name);
+        this.register = register;
+    }
+
+    public Field(String name, String friendlyName, Datatype datatype, Cardinality cardinality, Optional<String> register) {
+        this.name = name;
+        this.friendlyName = friendlyName;
         this.datatype = datatype;
         this.cardinality = cardinality;
         this.register = register;
@@ -50,8 +51,8 @@ public class Field {
         return name;
     }
 
-    public String getFrendlyName() {
-        return frendlyName;
+    public String getFriendlyName() {
+        return friendlyName;
     }
 
     public Datatype getDatatype() {
