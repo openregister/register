@@ -9,6 +9,7 @@ import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.model.Field;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -23,7 +24,7 @@ public class TurtleRepresentation implements Representation {
     public static final String TEXT_TURTLE = "text/turtle; charset=utf-8";
 
     @Override
-    public Result toListOfRecords(List<Record> records) throws Exception {
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) throws Exception {
         return ok(records.stream()
                         .map(this::renderRecord)
                         .collect(Collectors.joining("\n", TURTLE_HEADER, ""))
@@ -31,7 +32,7 @@ public class TurtleRepresentation implements Representation {
     }
 
     @Override
-    public Result toRecord(Record record, List<RecordVersionInfo> history) {
+    public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap) {
         return ok(TURTLE_HEADER + renderRecord(record)).as(TEXT_TURTLE);
     }
 

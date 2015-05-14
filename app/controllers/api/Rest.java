@@ -15,6 +15,7 @@ import uk.gov.openregister.validation.Validator;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static controllers.api.Representations.representationFor;
@@ -86,7 +87,7 @@ public class Rest extends Controller {
     }
 
     private Result getResponse(Optional<Record> recordO) {
-        return recordO.map(record -> representation().toRecord(record, getHistoryFor(record)))
+        return recordO.map(record -> representation().toRecord(record, getHistoryFor(record), representationsMap(representationsBaseUri())))
                 .orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 
@@ -104,13 +105,32 @@ public class Rest extends Controller {
             }
         });
 
-        Representation representation = representation();
-        return recordsF.map(representation::toListOfRecords);
+        return recordsF.map( rs -> representation().toListOfRecords(rs, representationsMap(representationsBaseUri())));
     }
 
     private List<RecordVersionInfo> getHistoryFor(Record r) {
         return store.history(registerName, r.getEntry().get(registerName).textValue());
     }
 
+    private Map<String, String> representationsMap(String representationsBaseUri) {
+        final Map<String, String> representationMap = new HashMap<>();
+        for(Representations.Format format : Representations.Format.values()) {
+            representationMap.put(format.name(), representationsBaseUri + format.identifier);
+        }
 
+        return representationMap;
+    }
+
+    private String representationsBaseUri() {
+        String rawRepresentationUri = request().uri();
+        StringBuilder representationUri = new StringBuilder(rawRepresentationUri);
+
+        if(!rawRepresentationUri.contains("?")) {
+            representationUri.append("?" + REPRESENTATION_QUERY_PARAM + "=");
+        } else {
+            representationUri.append("&" + REPRESENTATION_QUERY_PARAM + "=");
+        }
+
+        return representationUri.toString();
+    }
 }

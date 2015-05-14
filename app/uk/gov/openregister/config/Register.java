@@ -14,6 +14,8 @@ public abstract class Register {
 
     private Store store;
 
+    public abstract InitResult init();
+
     public final Store store() {
         if(store ==null){
             store = new PostgresqlStore(new DBInfo(name(), name().toLowerCase(), fieldNames()), DB.getDataSource());
@@ -30,7 +32,5 @@ public abstract class Register {
     public List<String> fieldNames() {
         return fields().stream().map(Field::getName).collect(Collectors.toList());
     }
-
-    public abstract boolean isStarted();
 
 }

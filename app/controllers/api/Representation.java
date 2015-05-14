@@ -5,9 +5,10 @@ import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface Representation {
-    Result toListOfRecords(List<Record> records) throws Exception;
+    Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) throws Exception;
 
-    Result toRecord(Record record, List<RecordVersionInfo> history);
+    Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap);
 }
