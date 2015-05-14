@@ -167,7 +167,7 @@ input.postfix {
 }
 
 .homepage-field-labels {
-  font-family: monospace; 
+  font-family: monospace;
 }
 
 h2 {
@@ -200,11 +200,6 @@ h2 {
   border-top: dotted 1px #DDDDDD;
   padding-top: 1rem;
   font-size: 1rem;
-}
-
-.entry dt a {
-  font-weight: normal;
-  color: #333333;
 }
 
 .entry dt a:hover,
@@ -399,5 +394,5 @@ pre.panel {
   .intro p {
     margin-bottom: 4px;
   }
- 
+
 }
