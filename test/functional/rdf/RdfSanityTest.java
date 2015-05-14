@@ -14,7 +14,7 @@ public class RdfSanityTest extends ApplicationTests {
     public static final String EXPECTED_TURTLE = "@prefix field: <http://fields.openregister.org/field/>.\n" +
             "\n" +
             "<http://test-register.openregister.org/hash/4686f89b9c983f331c7deef476fda719148de4fb>\n" +
-            "  field:test-register \"testregisterkey\" ;\n" +
+            "  field:test-register <http://test-register.openregister.org/test-register/testregisterkey> ;\n" +
             "  field:name \"The Entry\" ;\n" +
             "  field:key1 \"value1\" ;\n" +
             "  field:key2 \"A\", \"B\" .\n";

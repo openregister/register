@@ -16,6 +16,8 @@ import java.util.stream.StreamSupport;
 
 import static play.mvc.Results.ok;
 
+// XXX this is a hacky hacky class to prove a point. It's subject to all sorts of
+// data injection problems.
 public class TurtleRepresentation implements Representation {
     @Override
     public Result toResponse(int status, String message) {
@@ -51,18 +53,26 @@ public class TurtleRepresentation implements Representation {
         }
         switch (field.getCardinality()) {
             case ONE:
-                return jsonNode.toString();
+                return renderScalar(field, jsonNode);
             case MANY:
-                return renderList(jsonNode);
+                return renderList(field, jsonNode);
             default:
                 throw new IllegalStateException("Invalid Cardinality: " + field.getCardinality());
         }
     }
 
-    private String renderList(JsonNode jsonNode) {
+    private String renderScalar(Field field, JsonNode jsonNode) {
+        if (field.getRegister().isPresent()) {
+            String register = field.getRegister().get();
+            return String.format("<http://%s.openregister.org/%s/%s>", register, register, jsonNode.asText());
+        }
+        return jsonNode.toString();
+    }
+
+    private String renderList(Field field, JsonNode jsonNode) {
         ArrayNode arrayNode = (ArrayNode) jsonNode;
         return StreamSupport.stream(arrayNode.spliterator(),false)
-                .map(Object::toString)
+                .map(val -> renderScalar(field, val))
                 .collect(Collectors.joining(", "));
 
     }
