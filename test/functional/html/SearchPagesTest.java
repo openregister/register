@@ -28,8 +28,6 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(response.getStatus()).isEqualTo(OK);
         String body = response.getBody();
         assertThat(body).contains("The official register of test entries throughout the UK");
-        assertThat(body).contains("Part of");
-        assertThat(body).contains("Test registry");
         assertThat(body).contains("This register exists as an accurate list of all test entries");
         assertThat(body).contains("Search register entries");
 
