@@ -49,7 +49,7 @@
     headers:
       content-type: application/json
     body: >
-      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"field": "test-register","name": "Test Field", "datatype": "string"}}
+      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"field": "test-register", "register": "test-register", "name": "Test Field", "datatype": "string"}}
 
 - request:
     method: GET

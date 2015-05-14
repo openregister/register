@@ -1,7 +1,8 @@
 package controllers.global;
 
 import controllers.App;
-import controllers.api.Representation;
+import controllers.api.HtmlRepresentation;
+import controllers.api.JsonRepresentation;
 import play.Application;
 import play.GlobalSettings;
 import play.libs.F;
@@ -16,29 +17,24 @@ import static play.mvc.Results.redirect;
 import static play.mvc.Results.status;
 
 public class ApplicationGlobal extends GlobalSettings {
-    public static final String REPRESENTATION_QUERY_PARAM = "_representation";
-
     @Override
     public F.Promise<Result> onError(Http.RequestHeader requestHeader, Throwable throwable) {
-        Representation representation = representationFor(requestHeader.getQueryString(REPRESENTATION_QUERY_PARAM));
         return F.Promise.pure(
-                representation.toResponse(500, throwable.getMessage())
+                HtmlRepresentation.instance.toResponse(500, throwable.getMessage())
         );
     }
 
     @Override
     public F.Promise<Result> onHandlerNotFound(Http.RequestHeader requestHeader) {
-        Representation representation = representationFor(requestHeader.getQueryString(REPRESENTATION_QUERY_PARAM));
         return F.Promise.pure(
-                representation.toResponse(404, "Page not found")
+                HtmlRepresentation.instance.toResponse(404, "Page not found")
         );
     }
 
     @Override
     public F.Promise<Result> onBadRequest(Http.RequestHeader requestHeader, String s) {
-        Representation representation = representationFor(requestHeader.getQueryString(REPRESENTATION_QUERY_PARAM));
         return F.Promise.pure(
-                representation.toResponse(400, s)
+                JsonRepresentation.instance.toResponse(400, s)
         );
     }
 

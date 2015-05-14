@@ -10,11 +10,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class FieldRegister extends Register {
 
     public static final int TIMEOUT = 30000;
-    public static final List<Field> FIELDS = Arrays.asList(new Field("field"), new Field("name"), new Field("datatype"), new Field("register"), new Field("cardinality"), new Field("text"));
+    public static final List<Field> FIELDS = Arrays.asList(new Field("field"), new Field("name"), new Field("datatype"), new Field("register", Optional.of("register")), new Field("cardinality"), new Field("text"));
 
     private List<Record> registers = new ArrayList<>();
 
