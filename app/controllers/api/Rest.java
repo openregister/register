@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static controllers.api.Representations.representationFor;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class Rest extends Controller {
@@ -74,20 +73,21 @@ public class Rest extends Controller {
 
     public F.Promise<Result> findByKey(String key, String value) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
-        Representation representation = representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
-        return recordF.map(record -> representation.toRecord(record, record.map(this::getHistoryFor).orElse(emptyList())
-        ));
+        return recordF.map(this::getResponse);
     }
 
     public F.Promise<Result> findByHash(String hash) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
-        Representation representation = representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
-        return recordF.map(record ->
-                        representation.toRecord(
-                                record,
-                                record.map(this::getHistoryFor).orElse(emptyList())
-                        )
-        );
+        return recordF.map(this::getResponse);
+    }
+
+    private Representation representation() {
+        return representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
+    }
+
+    private Result getResponse(Optional<Record> recordO) {
+        return recordO.map(record -> representation().toRecord(record, getHistoryFor(record)))
+                .orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 
     public F.Promise<Result> search() {
@@ -104,7 +104,7 @@ public class Rest extends Controller {
             }
         });
 
-        Representation representation = representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
+        Representation representation = representation();
         return recordsF.map(representation::toListOfRecords);
     }
 

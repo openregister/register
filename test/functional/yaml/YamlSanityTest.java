@@ -41,16 +41,4 @@ public class YamlSanityTest extends ApplicationTests {
         assertThat(response.getHeader("Content-type")).isEqualTo("text/yaml; charset=utf-8");
         assertThat(response.getBody()).isEqualTo(EXPECTED_YAML);
     }
-
-
-    @Test
-    public void test404ErrorResponse() throws Exception {
-        WSResponse response = get("/idonotexist?_representation=yaml");
-        assertThat(response.getStatus()).isEqualTo(404);
-        assertThat(response.getBody()).isEqualTo(
-                "---\n" +
-                        "message: \"Page not found\"\n" +
-                        "errors: []\n" +
-                        "status: 404\n");
-    }
 }

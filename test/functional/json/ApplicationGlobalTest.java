@@ -10,9 +10,8 @@ public class ApplicationGlobalTest extends ApplicationTests {
 
     @Test
     public void test404ErrorResponse() throws Exception {
-        WSResponse response = postJson("/idonotexist?_representation=json", "{}");
+        WSResponse response = postJson("/idonotexist", "{}");
         assertThat(response.getStatus()).isEqualTo(404);
-        assertThat(response.getBody()).isEqualTo("{\"errors\":[],\"message\":\"Page not found\",\"status\":404}");
     }
 
     @Test

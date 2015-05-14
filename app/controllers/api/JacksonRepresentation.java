@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static play.mvc.Results.ok;
 import static play.mvc.Results.status;
@@ -26,7 +25,6 @@ public class JacksonRepresentation implements Representation {
         this.contentType = contentType;
     }
 
-    @Override
     public Result toResponse(int status, String message) {
         return toResponseWithErrors(status, message, Collections.<ValidationError>emptyList());
     }
@@ -37,8 +35,8 @@ public class JacksonRepresentation implements Representation {
     }
 
     @Override
-    public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history) {
-        return recordO.map(record -> ok(asString(record)).as(contentType)).orElse(toResponseWithErrors(404, "Entry not found", Collections.<ValidationError>emptyList()));
+    public Result toRecord(Record record, List<RecordVersionInfo> history) {
+        return ok(asString(record)).as(contentType);
     }
 
     private String asString(Object record) {
