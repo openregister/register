@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import controllers.App;
 import play.mvc.Result;
-import scala.NotImplementedError;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.model.Field;
@@ -19,6 +18,11 @@ import static play.mvc.Results.ok;
 // XXX this is a hacky hacky class to prove a point. It's subject to all sorts of
 // data injection problems.
 public class TurtleRepresentation implements Representation {
+
+    public static final String TURTLE_HEADER = "@prefix field: <http://fields.openregister.org/field/>.\n" +
+            "\n";
+    public static final String TEXT_TURTLE = "text/turtle; charset=utf-8";
+
     @Override
     public Result toResponse(int status, String message) {
         // don't care about this for the moment
@@ -27,23 +31,23 @@ public class TurtleRepresentation implements Representation {
 
     @Override
     public Result toListOfRecords(List<Record> records) throws Exception {
-        throw new NotImplementedError();
+        return ok(records.stream()
+                        .map(this::renderRecord)
+                        .collect(Collectors.joining("\n", TURTLE_HEADER, ""))
+        ).as(TEXT_TURTLE);
     }
 
     @Override
     public Result toRecord(Optional<Record> recordO, List<RecordVersionInfo> history) {
-        return recordO.map(record -> (Result) ok(render(record, history)).as("text/turtle; charset=utf-8"))
+        return recordO.map(record -> (Result) ok(TURTLE_HEADER + renderRecord(record)).as(TEXT_TURTLE))
                 .orElse(toResponse(404, "Not found"));
     }
 
-    private String render(Record record, List<RecordVersionInfo> history) {
-        String header = "@prefix field: <http://fields.openregister.org/field/>.\n" +
-                "\n";
+    private String renderRecord(Record record) {
         String entity = String.format("<http://%s.openregister.org/hash/%s>\n", App.instance.register.name(), record.getHash());
-        String fields = App.instance.register.fields().stream()
+        return App.instance.register.fields().stream()
                 .map(field -> String.format("  field:%s %s", field.getName(), renderValue(record, field)))
-                .collect(Collectors.joining(" ;\n", "", " .\n"));
-        return header + entity + fields;
+                .collect(Collectors.joining(" ;\n", entity, " .\n"));
     }
 
     private String renderValue(Record record, Field field) {
