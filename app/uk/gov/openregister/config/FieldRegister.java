@@ -9,6 +9,10 @@ public class FieldRegister extends Register {
 
     public static final List<Field> FIELDS = Arrays.asList(new Field("field"), new Field("name"), new Field("datatype"), new Field("register"), new Field("cardinality"), new Field("text"));
 
+    @Override
+    public InitResult init() {
+        return InitResult.OK;
+    }
 
     @Override
     public String friendlyName() {
@@ -23,10 +27,5 @@ public class FieldRegister extends Register {
     @Override
     public List<Field> fields() {
         return FIELDS;
-    }
-
-    @Override
-    public boolean isStarted() {
-        return true;
     }
 }

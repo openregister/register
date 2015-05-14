@@ -22,7 +22,7 @@
     headers:
       content-type: application/json
     body: >
-      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"register": "test-register-with-fields-that-dont-exist","name": "Test Register", "fields":["test-register-with-fields-that-dont-exist", "unknown"]}}
+      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"register": "test-register-with-fields-that-dont-exist","name": "Test Register With Unknown Fields", "fields":["test-register-with-fields-that-dont-exist", "unknown"]}}
 
 - request:
     method: GET

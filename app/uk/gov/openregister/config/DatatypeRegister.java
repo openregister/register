@@ -10,6 +10,11 @@ public class DatatypeRegister extends Register {
     public static final List<Field> FIELDS = Arrays.asList(new Field("datatype"), new Field("text"));
 
     @Override
+    public InitResult init() {
+        return InitResult.OK;
+    }
+
+    @Override
     public String friendlyName() {
         return "Datatype";
     }
@@ -24,8 +29,4 @@ public class DatatypeRegister extends Register {
         return FIELDS;
     }
 
-    @Override
-    public boolean isStarted() {
-        return true;
-    }
 }
