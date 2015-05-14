@@ -9,9 +9,9 @@ public class Field {
 
     String name;
     String friendlyName;
-    Datatype datatype;
-    Cardinality cardinality;
-    Optional<String> register;
+    Datatype datatype = Datatype.DEFAULT;
+    Cardinality cardinality = Cardinality.ONE;
+    Optional<String> register = Optional.empty();
 
     public Field(JsonNode node) {
 
@@ -25,17 +25,12 @@ public class Field {
     public Field(String name) {
         this.name = name;
         this.friendlyName = WordUtils.capitalize(name);
-        this.datatype = Datatype.DEFAULT;
-        this.cardinality = Cardinality.ONE;
-        this.register = Optional.empty();
     }
 
     public Field(String name, Cardinality cardinality) {
         this.name = name;
         this.friendlyName = WordUtils.capitalize(name);
-        this.datatype = Datatype.DEFAULT;
         this.cardinality = cardinality;
-        this.register = Optional.empty();
     }
 
     public Field(String name, String friendlyName, Datatype datatype, Cardinality cardinality, Optional<String> register) {
