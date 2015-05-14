@@ -7,7 +7,7 @@ import java.util.List;
 
 public class DatatypeRegister extends Register {
 
-    public static final List<Field> FIELDS = Arrays.asList(new Field("datatype"), new Field("text"));
+    public static final List<Field> FIELDS = Arrays.asList(new Field("datatype"), new Field("name"), new Field("text"));
 
     @Override
     public String friendlyName() {
