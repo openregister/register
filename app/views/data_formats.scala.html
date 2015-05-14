@@ -1,0 +1,10 @@
+@(representationsMap: Map[String, String])
+<div>
+        <h3>Get the data</h3>
+    <span>
+        <h4>Download all entries:</h4>
+        @representationsMap.map { representation =>
+            <a href=@representation._2>@representation._1</a>
+        }
+    </span>
+</div>

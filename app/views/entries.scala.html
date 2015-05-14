@@ -1,4 +1,4 @@
-@(fields: List[uk.gov.openregister.model.Field], records: List[uk.gov.openregister.domain.Record])
+@(fields: List[uk.gov.openregister.model.Field], records: List[uk.gov.openregister.domain.Record], representationsMap: Map[String, String])
 
 @main() {
 
@@ -72,8 +72,11 @@
 
     </div> <!-- /.columns -->
 
+    @data_formats(representationsMap)
+
 </div> <!-- ./row -->
 
-@license()
+
+    @license()
 
 }

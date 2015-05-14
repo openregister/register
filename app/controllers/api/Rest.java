@@ -15,6 +15,7 @@ import uk.gov.openregister.validation.Validator;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static controllers.api.Representations.representationFor;
@@ -112,5 +113,25 @@ public class Rest extends Controller {
         return store.history(registerName, r.getEntry().get(registerName).textValue());
     }
 
+    private Map<String, String> representationsMap(String representationsBaseUri) {
+        final Map<String, String> representationMap = new HashMap<>();
+        for(Representations.Format format : Representations.Format.values()) {
+            representationMap.put(format.name(), representationsBaseUri + format.identifier);
+        }
 
+        return representationMap;
+    }
+
+    private String representationsBaseUri() {
+        String rawRepresentationUri = request().uri();
+        StringBuilder representationUri = new StringBuilder(rawRepresentationUri);
+
+        if(!rawRepresentationUri.contains("?")) {
+            representationUri.append("?" + REPRESENTATION_QUERY_PARAM + "=");
+        } else {
+            representationUri.append("&" + REPRESENTATION_QUERY_PARAM + "=");
+        }
+
+        return representationUri.toString();
+    }
 }

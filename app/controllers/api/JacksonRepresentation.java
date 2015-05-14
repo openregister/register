@@ -7,6 +7,7 @@ import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 
 import java.util.List;
+import java.util.Map;
 
 import static play.mvc.Results.ok;
 
@@ -20,12 +21,12 @@ public class JacksonRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records) throws JsonProcessingException {
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) throws JsonProcessingException {
         return ok(asString(records)).as(contentType);
     }
 
     @Override
-    public Result toRecord(Record record, List<RecordVersionInfo> history) {
+    public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap) {
         return ok(asString(record)).as(contentType);
     }
 

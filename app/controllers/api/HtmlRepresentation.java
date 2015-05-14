@@ -6,6 +6,7 @@ import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 
 import java.util.List;
+import java.util.Map;
 
 import static play.mvc.Results.ok;
 import static play.mvc.Results.status;
@@ -16,13 +17,13 @@ public class HtmlRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records) {
-        return ok(views.html.entries.render(App.instance.register.fields(), records));
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) {
+        return ok(views.html.entries.render(App.instance.register.fields(), records, representationsMap));
     }
 
     @Override
-    public Result toRecord(Record record, List<RecordVersionInfo> history) {
-        return ok(views.html.entry.render(App.instance.register.fields(), record, history));
+    public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap) {
+        return ok(views.html.entry.render(App.instance.register.fields(), record, history, representationsMap));
     }
 
     public static HtmlRepresentation instance = new HtmlRepresentation();
