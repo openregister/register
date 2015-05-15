@@ -4,10 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import controllers.App;
 import play.mvc.Result;
+import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
+import uk.gov.openregister.linking.Curie;
+import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.model.Field;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,6 +26,11 @@ public class TurtleRepresentation implements Representation {
     public static final String TURTLE_HEADER = "@prefix field: <http://fields.openregister.org/field/>.\n" +
             "\n";
     public static final String TEXT_TURTLE = "text/turtle; charset=utf-8";
+    private final CurieResolver curieResolver;
+
+    public TurtleRepresentation() {
+        curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
+    }
 
     @Override
     public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) throws Exception {
@@ -37,7 +46,8 @@ public class TurtleRepresentation implements Representation {
     }
 
     private String renderRecord(Record record) {
-        String entity = String.format("<http://%s.openregister.org/hash/%s>\n", App.instance.register.name(), record.getHash());
+        URI hashUri = curieResolver.resolve(new Curie(App.instance.register.name() + "_hash", record.getHash()));
+        String entity = String.format("<%s>\n", hashUri);
         return App.instance.register.fields().stream()
                 .map(field -> String.format("  field:%s %s", field.getName(), renderValue(record, field)))
                 .collect(Collectors.joining(" ;\n", entity, " .\n"));
@@ -60,8 +70,8 @@ public class TurtleRepresentation implements Representation {
 
     private String renderScalar(Field field, JsonNode jsonNode) {
         if (field.getRegister().isPresent()) {
-            String register = field.getRegister().get();
-            return String.format("<http://%s.openregister.org/%s/%s>", register, register, jsonNode.asText());
+            Curie curie = new Curie(field.getRegister().get(), jsonNode.asText());
+            return String.format("<%s>", curieResolver.resolve(curie));
         }
         return jsonNode.toString();
     }
