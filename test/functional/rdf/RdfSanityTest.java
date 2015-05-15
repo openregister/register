@@ -13,8 +13,8 @@ public class RdfSanityTest extends ApplicationTests {
 
     public static final String EXPECTED_TURTLE = "@prefix field: <http://fields.openregister.org/field/>.\n" +
             "\n" +
-            "<http://test-register.openregister.org/hash/4686f89b9c983f331c7deef476fda719148de4fb>\n" +
-            "  field:test-register <http://test-register.openregister.org/test-register/testregisterkey> ;\n" +
+            "<http://localhost:8888/hash/4686f89b9c983f331c7deef476fda719148de4fb>\n" +
+            "  field:test-register <http://localhost:8888/test-register/testregisterkey> ;\n" +
             "  field:name \"The Entry\" ;\n" +
             "  field:key1 \"value1\" ;\n" +
             "  field:key2 \"A\", \"B\" .\n";
@@ -43,14 +43,14 @@ public class RdfSanityTest extends ApplicationTests {
 
     public static final String EXPECTED_TURTLE_LIST = "@prefix field: <http://fields.openregister.org/field/>.\n" +
             "\n" +
-            "<http://test-register.openregister.org/hash/39837068f586ab19bcb2b5f2408b024438e75c43>\n" +
-            "  field:test-register <http://test-register.openregister.org/test-register/testregisterkey1> ;\n" +
+            "<http://localhost:8888/hash/39837068f586ab19bcb2b5f2408b024438e75c43>\n" +
+            "  field:test-register <http://localhost:8888/test-register/testregisterkey1> ;\n" +
             "  field:name \"The Entry1\" ;\n" +
             "  field:key1 \"value1\" ;\n" +
             "  field:key2 \"A\", \"B\" .\n" +
             "\n" +
-            "<http://test-register.openregister.org/hash/b0c762fd934019b14a3ec88d775c6a037a09a74e>\n" +
-            "  field:test-register <http://test-register.openregister.org/test-register/testregisterkey2> ;\n" +
+            "<http://localhost:8888/hash/b0c762fd934019b14a3ec88d775c6a037a09a74e>\n" +
+            "  field:test-register <http://localhost:8888/test-register/testregisterkey2> ;\n" +
             "  field:name \"The Entry2\" ;\n" +
             "  field:key1 \"value2\" ;\n" +
             "  field:key2 \"C\", \"D\" .\n";
