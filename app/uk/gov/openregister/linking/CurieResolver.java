@@ -15,7 +15,7 @@ public class CurieResolver {
         URI baseUri = URI.create(urlTemplate.replace(REGISTER_TOKEN, curie.register));
         String path = String.format("/%s/%s", curie.register, curie.identifier);
         try {
-            return new URI(baseUri.getScheme(), baseUri.getHost(), path, null);
+            return new URI(baseUri.getScheme(), baseUri.getAuthority(), path, null, null);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
