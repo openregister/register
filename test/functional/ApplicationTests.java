@@ -1,6 +1,7 @@
 package functional;
 
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import controllers.global.ApplicationGlobal;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -27,7 +28,7 @@ public class ApplicationTests {
 
     private static TestServer server;
 
-    public WebClient webClient = new WebClient();
+    public WebClient webClient = new WebClient(BrowserVersion.CHROME);
 
     public WSResponse postJson(String path, String json) {
         return WS.url(BASE_URL + path)

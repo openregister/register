@@ -4,34 +4,23 @@
 
 @header()
 
-<div class="row">
-
-    <div class="small-12 columns">
-
-        <div class="row intro">
-
-            <div class="medium-9 small-12 columns">
-                <h1>@controllers.App.instance.register.friendlyName() Register</h1>
-                <p>A register of @controllers.App.instance.register.friendlyName() entries.</p>
-            </div>
-
-            <div class="medium-3 small-12 columns metadata">
-                <span class="big-number">@{ if(records.size < 100){ records.size } else { s"${records.size}+" }}</span>
-                <h4 class="subheader"><small>Total entries</small></h4>
-            </div>
-
+    <div class="row intro">
+        <div class="medium-9 small-12 columns">
+            <h1>@controllers.App.instance.register.friendlyName() Register</h1>
+            <p>A register of @controllers.App.instance.register.friendlyName() entries.</p>
         </div>
+        <div class="medium-3 small-12 columns metadata">
+            <span class="big-number">@{ if(records.size < 100){ records.size } else { s"${records.size}+" }}</span>
+            <h4 class="subheader"><small>Total entries</small></h4>
+        </div>
+    </div>
 
-        @if(records.size > 0){
-        <h2>View entries</h2>
+    <div class="row entry-row">
 
-        <div class="panel entry" id="entries">
+        <div class="large-12 columns">
+            @if(records.size > 0){
 
-
-            <div id="table-outer">
-
-                <table id="entries-table" class="entries">
-
+                <table id="entry-list" class="entries responsive">
                     <thead>
                     <tr>
                         <th>hash</th>
@@ -41,40 +30,28 @@
                     </tr>
                     </thead>
 
-                    <tbody class="list">
+                    <tbody>
 
                     @records.map { record =>
                     <tr>
                         <td class="hash"><a href="/hash/@record.getHash">@record.getHash.take(7)</a></td>
                         @fields.map { field =>
-                        <td class="@field.getName()">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</td>
+                        <td class="@field.getName() wrapword">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</td>
                         }
                     </tr>
                     }
-
                     </tbody>
-
                 </table>
 
-            </div>
+            } else {
+            <h3>No entries found</h3>
+            }
+        </div>
+    </div>
 
-            <!--{% include "meta.html" %}-->
-
-        </div><!-- /.panel -->
-        } else {
-        <h3>No entries found</h3>
-        }
-
-
-        <!--<h2>Get the data</h2>-->
-
-        <!--{% include "representations.html" %}-->
-
-    </div> <!-- /.columns -->
-
-    @data_formats(representationsMap)
-
-</div> <!-- ./row -->
+    <div class="row">
+        @data_formats(representationsMap)
+    </div>
 
 
     @license()
