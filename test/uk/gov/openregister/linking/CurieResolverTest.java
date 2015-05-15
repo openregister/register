@@ -25,4 +25,13 @@ public class CurieResolverTest {
         assertThat(widgetUri).isEqualTo(URI.create("http://widget.register.elbonia:5555/widget/1234"));
     }
 
+    @Test
+    public void shouldEscapeSpacesInCurieValue() throws Exception {
+        CurieResolver resolver = new CurieResolver("http://__REGISTER__.register.elbonia");
+
+        URI widgetUri = resolver.resolve(new Curie("widget", "ABC DEF"));
+
+        assertThat(widgetUri).isEqualTo(URI.create("http://widget.register.elbonia/widget/ABC%20DEF"));
+    }
+
 }
