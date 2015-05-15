@@ -5,9 +5,12 @@ import org.apache.commons.lang3.StringUtils;
 import play.twirl.api.Html;
 import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.config.ApplicationConf;
+import uk.gov.openregister.linking.Curie;
+import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.model.Datatype;
 import uk.gov.openregister.model.Field;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +26,9 @@ public class Utils {
     }
 
     public static Html toLink(String register, String name) {
-        return Html.apply("<a class=\"link_to_register\" href=\"" + ApplicationConf.registerUrl(register, "/" + register + "/" + name) + "\">" + name + "</a>");
+        CurieResolver curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
+        URI uri = curieResolver.resolve(new Curie(register, name));
+        return Html.apply("<a class=\"link_to_register\" href=\"" + uri + "\">" + name + "</a>");
     }
 
     public static Html checkbox(Field field, List<String> checkedElements, List<String> options) {
