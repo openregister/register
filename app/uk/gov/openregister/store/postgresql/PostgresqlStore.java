@@ -119,6 +119,7 @@ public class PostgresqlStore implements Store {
     @Override
     public void deleteAll() {
         database.execute("DROP TABLE IF EXISTS " + dbInfo.tableName);
+        database.execute("DROP TABLE IF EXISTS " + dbInfo.historyTableName);
         createTables(dbInfo.tableName);
     }
 
