@@ -34,4 +34,12 @@ public class CurieResolverTest {
         assertThat(widgetUri).isEqualTo(URI.create("http://widget.register.elbonia/widget/ABC%20DEF"));
     }
 
+    @Test
+    public void shouldResolveHashBasedCurie() throws Exception {
+        CurieResolver resolver = new CurieResolver("http://__REGISTER__.register.elbonia");
+
+        URI widgetHashUri = resolver.resolve(new Curie("widget_hash", "abcdef123456"));
+
+        assertThat(widgetHashUri).isEqualTo(URI.create("http://widget.register.elbonia/hash/abcdef123456"));
+    }
 }

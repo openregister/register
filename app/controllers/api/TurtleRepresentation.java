@@ -11,6 +11,7 @@ import uk.gov.openregister.linking.Curie;
 import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.model.Field;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,7 +46,8 @@ public class TurtleRepresentation implements Representation {
     }
 
     private String renderRecord(Record record) {
-        String entity = String.format("<http://%s.openregister.org/hash/%s>\n", App.instance.register.name(), record.getHash());
+        URI hashUri = curieResolver.resolve(new Curie(App.instance.register.name() + "_hash", record.getHash()));
+        String entity = String.format("<%s>\n", hashUri);
         return App.instance.register.fields().stream()
                 .map(field -> String.format("  field:%s %s", field.getName(), renderValue(record, field)))
                 .collect(Collectors.joining(" ;\n", entity, " .\n"));
