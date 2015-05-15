@@ -51,7 +51,7 @@ public class UI extends Controller {
         if (validationErrors.isEmpty()) {
             try {
                 store.save(record);
-                return redirect(controllers.api.routes.Rest.findByHash("hash.html", record.getHash()));
+                return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
             } catch (DatabaseException e) {
 
                 return ok(views.html.newEntry.render(registerName, fields, convertToMapOfListValues(requestParams), Collections.singletonMap("globalError", e.getMessage())));
@@ -85,7 +85,7 @@ public class UI extends Controller {
         List<ValidationError> validationErrors = new Validator(Collections.singletonList(registerName), fieldNames).validate(record);
         if (validationErrors.isEmpty()) {
             store.update(hash, record);
-            return redirect(controllers.api.routes.Rest.findByHash("hash.html", record.getHash()));
+            return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
         }
         Map<String, String> errors = validationErrors.stream().collect(Collectors.toMap(error -> error.key, error -> error.message));
         return ok(views.html.updateEntry.render(registerName,
