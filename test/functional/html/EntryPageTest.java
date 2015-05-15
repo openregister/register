@@ -71,7 +71,7 @@ public class EntryPageTest extends ApplicationTests {
 
         htmlForm = resultPage.getForms().get(0);
 
-        assertThat(htmlForm.getElementsByAttribute("dl", "id", "test-register_field").get(0).getElementsByAttribute("dd", "class", "error").get(0).asText()).isEqualTo("This field is required");
+        assertThat(htmlForm.getElementsByAttribute("label", "for", "test-register_error").get(0).asText()).isEqualTo("Missing required key");
         assertThat(htmlForm.getInputByName("name").getValueAttribute()).isEqualTo("some name");
         assertThat(htmlForm.getInputByName("key1").getValueAttribute()).isEqualTo("Some key1");
         assertThat(htmlForm.getInputByName("key2").getValueAttribute()).isEqualTo("some key2");
@@ -131,7 +131,7 @@ public class EntryPageTest extends ApplicationTests {
 
         assertThat(form.getInputByName("name").getValueAttribute()).isEqualTo("entryName");
         assertThat(form.getInputByName("key1").getValueAttribute()).isEqualTo("");
-        assertThat(form.getElementsByAttribute("dl", "id", "test-register_field").get(0).getElementsByAttribute("dd", "class", "error").get(0).asText()).isEqualTo("This field is required");
+        assertThat(form.getElementsByAttribute("label", "for", "test-register_error").get(0).asText()).isEqualTo("Missing required key");
         assertThat(form.getInputByName("key2").getValueAttribute()).isEqualTo("updated key2");
 
     }

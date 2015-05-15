@@ -26,6 +26,24 @@ public class Utils {
         return Html.apply("<a class=\"link_to_register\" href=\"" + ApplicationConf.registerUrl(register, "/" + register + "/" + name) + "\">" + name + "</a>");
     }
 
+    public static Html checkbox(Field field, List<String> checkedElements, List<String> options) {
+        String html = String.format("<label for=\"%s\">%s</label>", field.getName(), field.getName());
+        for (String option : options) {
+            String checked = (checkedElements == null) ? "" : (checkedElements.contains(option) ? "checked" : "");
+            html += String.format("<input type=\"checkbox\" name=\"%s\", value=\"%s\" %s>%s<br/>", field.getName(), option, checked, option);
+        }
+        return Html.apply(html);
+    }
+
+    public static Html inputText(String name, List<String> value, String error) {
+        String html = String.format("<label for=\"%s\">%s</label>", name, name);
+        html += String.format("<input type=\"text\" name=\"%s\", value=\"%s\">", name, (value == null || value.isEmpty()) ? "" : value.get(0));
+        if (!StringUtils.isEmpty(error)) {
+            html += String.format("<label for=\"%s\">%s</label>", name + "_error", error);
+        }
+        return Html.apply(html);
+    }
+
     public static Html toValue(Field field, JsonNode value) {
         return Html.apply(toRawValue(field, value));
     }

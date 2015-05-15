@@ -1,22 +1,23 @@
-@(fields: List[String], form: DynamicForm, formAction: play.api.mvc.Call, submitButtonValue: String)
+@(registerName: String, fields: List[uk.gov.openregister.model.Field], requestParam: Map[String, List[String]], errors: Map[String,String], formAction: play.api.mvc.Call, submitButtonValue: String)
 
 @main() {
 
 @header()
 
-<div class="row">
-@form.globalErrors.map { error =>
-<div class="error">@error.message</div><br/>
-}
-</div>
 
 <div class="row">
 
 @helper.form(action = formAction) {
 
-@fields.map{ key =>
-@helper.inputText(form(key))
-}
+    @fields.map{ aField =>
+        @{
+            if(registerName.equals("register") && aField.getName().equals("fields"))
+                controllers.html.Utils.checkbox(aField, requestParam.get(aField.getName), aField.getAllowedValues.get);
+             else
+                controllers.html.Utils.inputText(aField.getName, requestParam.get(aField.getName), errors.get(aField.getName));
+
+        }
+    }
 
     <input type="submit" name="submit" value="@submitButtonValue" class="button"/>
 }
