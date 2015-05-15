@@ -87,8 +87,11 @@ public class Field {
         return register;
     }
 
+    public void setAllowedValues(Optional<List<String>> allowedValues) {
+        this.allowedValues = allowedValues;
+    }
+
     public Optional<List<String>> getAllowedValues() {
         return allowedValues;
     }
-
 }
