@@ -8,6 +8,8 @@ import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.model.Field;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -61,7 +63,13 @@ public class TurtleRepresentation implements Representation {
     private String renderScalar(Field field, JsonNode jsonNode) {
         if (field.getRegister().isPresent()) {
             String register = field.getRegister().get();
-            return String.format("<http://%s.openregister.org/%s/%s>", register, register, jsonNode.asText());
+            URI uri;
+            try {
+                uri = new URI("https", register + ".openregister.org", String.format("/%s/%s", register, jsonNode.asText()), null);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+            return String.format("<%s>", uri);
         }
         return jsonNode.toString();
     }
