@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 public abstract class Register {
 
+    public static final int TIMEOUT = 30000;
     private Store store;
 
     public abstract InitResult init();
