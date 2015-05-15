@@ -2,6 +2,8 @@ package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import controllers.App;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
@@ -15,16 +17,11 @@ import uk.gov.openregister.validation.Validator;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import static controllers.api.Representations.representationFor;
 import static java.util.Collections.singletonList;
 
 public class Rest extends Controller {
-
-    public static final String REPRESENTATION_QUERY_PARAM = "_representation";
-
     private final Store store;
     private final List<String> fieldNames;
     private final String registerName;
@@ -72,26 +69,41 @@ public class Rest extends Controller {
         return JsonRepresentation.instance.toResponseWithErrors(400, "", validationErrors);
     }
 
+    private Pair<String, Representations.Format> parseKeyAndFormat(final String keyAndFormat) {
+        String[] keyAndFormatParts = keyAndFormat.split("\\.");
+        if(keyAndFormatParts.length == 2) {
+            return new ImmutablePair<>(keyAndFormatParts[0], Representations.Format.getFormat(keyAndFormatParts[1]));
+        } else {
+            return new ImmutablePair<>(keyAndFormat, Representations.Format.html);
+        }
+    }
+
     public F.Promise<Result> findByKey(String key, String value) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
-        return recordF.map(this::getResponse);
+        Pair<String, Representations.Format> keyAndFormat = parseKeyAndFormat(key);
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(keyAndFormat.getLeft(), value));
+        return recordF.map(recordO -> getResponse(recordO, keyAndFormat.getRight().representation));
     }
 
-    public F.Promise<Result> findByHash(String hash) {
+    public F.Promise<Result> findByHash(String hashType, String hash) {
+        Pair<String, Representations.Format> keyAndFormat = parseKeyAndFormat(hashType);
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
-        return recordF.map(this::getResponse);
+        return recordF.map(recordO -> getResponse(recordO, keyAndFormat.getRight().representation));
     }
 
-    private Representation representation() {
-        return representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
-    }
-
-    private Result getResponse(Optional<Record> recordO) {
-        return recordO.map(record -> representation().toRecord(record, getHistoryFor(record), representationsMap(representationsBaseUri())))
+    private Result getResponse(Optional<Record> recordO, Representation representation) {
+        return recordO.map(record -> representation.toRecord(record, getHistoryFor(record), new RepresentationParser().linksMap(request().uri())))
                 .orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 
-    public F.Promise<Result> search() {
+    public F.Promise<Result> search(String search) {
+        Representations.Format pathFormat = parseKeyAndFormat(search).getRight();
+        Optional<Representations.Format> queryParamFormatOption = new RepresentationParser().formatForQuery(request().uri());
+        Representations.Format format;
+        if(queryParamFormatOption.isPresent()){
+            format = queryParamFormatOption.get();
+        } else {
+            format = pathFormat;
+        }
 
         F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {
@@ -105,32 +117,10 @@ public class Rest extends Controller {
             }
         });
 
-        return recordsF.map( rs -> representation().toListOfRecords(rs, representationsMap(representationsBaseUri())));
+        return recordsF.map(rs -> format.representation.toListOfRecords(rs, new RepresentationParser().linksMap(request().uri())));
     }
 
     private List<RecordVersionInfo> getHistoryFor(Record r) {
         return store.history(registerName, r.getEntry().get(registerName).textValue());
-    }
-
-    private Map<String, String> representationsMap(String representationsBaseUri) {
-        final Map<String, String> representationMap = new HashMap<>();
-        for(Representations.Format format : Representations.Format.values()) {
-            representationMap.put(format.name(), representationsBaseUri + format.identifier);
-        }
-
-        return representationMap;
-    }
-
-    private String representationsBaseUri() {
-        String rawRepresentationUri = request().uri();
-        StringBuilder representationUri = new StringBuilder(rawRepresentationUri);
-
-        if(!rawRepresentationUri.contains("?")) {
-            representationUri.append("?" + REPRESENTATION_QUERY_PARAM + "=");
-        } else {
-            representationUri.append("&" + REPRESENTATION_QUERY_PARAM + "=");
-        }
-
-        return representationUri.toString();
     }
 }

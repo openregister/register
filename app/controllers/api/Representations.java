@@ -10,22 +10,22 @@ public class Representations {
         public final String identifier;
         public final Representation representation;
 
-        private Format(final String theIdentifier, Representation representation) {
+        Format(final String theIdentifier, Representation representation) {
             identifier = theIdentifier;
             this.representation = representation;
+        }
+
+        public static Format getFormat(String representation) {
+            try {
+                return Format.valueOf(representation);
+            } catch (IllegalArgumentException | NullPointerException e) {
+                return Format.html;
+            }
         }
     }
 
     public static Representation representationFor(String representation) {
-        return getFormat(representation).representation;
-    }
-
-    private static Format getFormat(String representation) {
-        try {
-            return Format.valueOf(representation);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            return Format.html;
-        }
+        return Format.getFormat(representation).representation;
     }
 }
 
