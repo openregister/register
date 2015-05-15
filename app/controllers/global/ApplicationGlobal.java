@@ -5,6 +5,7 @@ import controllers.api.HtmlRepresentation;
 import controllers.api.JsonRepresentation;
 import play.Application;
 import play.GlobalSettings;
+import play.Logger;
 import play.libs.F;
 import play.mvc.Action;
 import play.mvc.Http;
@@ -12,13 +13,13 @@ import play.mvc.Result;
 
 import java.lang.reflect.Method;
 
-import static controllers.api.Representations.representationFor;
 import static play.mvc.Results.redirect;
 import static play.mvc.Results.status;
 
 public class ApplicationGlobal extends GlobalSettings {
     @Override
     public F.Promise<Result> onError(Http.RequestHeader requestHeader, Throwable throwable) {
+        Logger.error("", throwable);
         return F.Promise.pure(
                 HtmlRepresentation.instance.toResponse(500, throwable.getMessage())
         );
