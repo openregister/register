@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import controllers.App;
 import play.mvc.Result;
+import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
+import uk.gov.openregister.linking.Curie;
+import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.model.Field;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,6 +25,11 @@ public class TurtleRepresentation implements Representation {
     public static final String TURTLE_HEADER = "@prefix field: <http://fields.openregister.org/field/>.\n" +
             "\n";
     public static final String TEXT_TURTLE = "text/turtle; charset=utf-8";
+    private final CurieResolver curieResolver;
+
+    public TurtleRepresentation() {
+        curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
+    }
 
     @Override
     public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) throws Exception {
@@ -62,14 +68,8 @@ public class TurtleRepresentation implements Representation {
 
     private String renderScalar(Field field, JsonNode jsonNode) {
         if (field.getRegister().isPresent()) {
-            String register = field.getRegister().get();
-            URI uri;
-            try {
-                uri = new URI("https", register + ".openregister.org", String.format("/%s/%s", register, jsonNode.asText()), null);
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-            return String.format("<%s>", uri);
+            Curie curie = new Curie(field.getRegister().get(), jsonNode.asText());
+            return String.format("<%s>", curieResolver.resolve(curie));
         }
         return jsonNode.toString();
     }
