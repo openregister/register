@@ -63,7 +63,7 @@ public class SearchPagesTest extends ApplicationTests {
 
         org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
 
-        Element table = html.getElementById("entries-table");
+        Element table = html.getElementById("entries");
         assertThat(table).isNotNull();
         Elements tr = table.select("tr");
         Elements th = tr.first().select("th");
