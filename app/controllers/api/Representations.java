@@ -14,14 +14,14 @@ public class Representations {
         }
     }
 
-    public static Representation representationFor(String representation) {
+    public static Representation representationFor(String representation) throws IllegalArgumentException {
         return getFormat(representation).representation;
     }
 
     private static Format getFormat(String representation) {
         try {
             return Format.valueOf(representation);
-        } catch (IllegalArgumentException | NullPointerException e) {
+        } catch (NullPointerException e) {
             return Format.html;
         }
     }
