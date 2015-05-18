@@ -24,6 +24,18 @@ public class CurieResolver {
         }
     }
 
+    public URI resolveWithFormat(Curie curie, String format) {
+        String register = getRegister(curie.namespace);
+        String field = getField(curie.namespace);
+        URI baseUri = URI.create(urlTemplate.replace(REGISTER_TOKEN, register));
+        String path = String.format("/%s.%s/%s", field, format, curie.identifier);
+        try {
+            return new URI(baseUri.getScheme(), baseUri.getAuthority(), path, null, null);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String getRegister(String namespace) {
         return namespace.split(NAMESPACE_SEPARATOR)[0];
     }
