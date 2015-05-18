@@ -13,7 +13,6 @@ import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -130,7 +129,7 @@ public class Rest extends Controller {
             }
         });
 
-        return recordsF.map(rs -> representation.toListOfRecords(rs, representationsMap(representationsBaseUri())));
+        return recordsF.map(rs -> representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat)));
     }
 
     private Result formatNotRecognisedResponse(String format) {
@@ -148,25 +147,8 @@ public class Rest extends Controller {
                         routeForFormat));
     }
 
-    private Map<String, String> representationsMap(String representationsBaseUri) {
-        final Map<String, String> representationMap = new HashMap<>();
-        for (Representations.Format format : Representations.Format.values()) {
-            representationMap.put(format.name(), representationsBaseUri + format.name());
-        }
-
-        return representationMap;
-    }
-
-    private String representationsBaseUri() {
-        String rawRepresentationUri = request().uri();
-        StringBuilder representationUri = new StringBuilder(rawRepresentationUri);
-
-        if (!rawRepresentationUri.contains("?")) {
-            representationUri.append("?" + REPRESENTATION_QUERY_PARAM + "=");
-        } else {
-            representationUri.append("&" + REPRESENTATION_QUERY_PARAM + "=");
-        }
-
-        return representationUri.toString();
+    private String searchUriForFormat(String format) {
+        // makes assumptions about the structure of the uri
+        return request().uri() + "&" + REPRESENTATION_QUERY_PARAM + "=" + format;
     }
 }
