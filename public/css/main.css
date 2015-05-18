@@ -56,7 +56,7 @@ p.total {
 input.postfix {
   position: absolute;
   z-index: 4;
-  right: -20;
+  right: -20px;
   top: 0;
   width: 35px;
   height: 37px;
@@ -218,47 +218,11 @@ dl dd {
   line-height: 1.4;
 }
 
-/* table */
-#table-outer {
-  overflow-x: scroll;
-  max-height: 600px;
-  clear: both;
-  margin-bottom: 1rem;
-}
-
-table.entries {
-  width: 100%;
-  font-family:monospace;
-  border: none;
-  background: #ccc;
-}
-
-table.entries tbody {
-    overflow-y: scroll;
-}
-
-table.entries tr {
-  background: #eceded;
-}
-
-table.entries tr.even {
-  background: #eceded;
-}
-
-table.entries th,
-table.entries td {
-  text-align: left;
-  border: none;
-  vertical-align: top;
-  min-width: 180px;
-}
-
 /* fields */
 .hash {
   word-wrap: break-word;
 }
 
-/* table sorting and filtering */
 .search {
   padding-bottom: 10px;
   visibility: hidden;
@@ -269,45 +233,6 @@ table.entries td {
   font-family:monospace;
   height: 1.2rem;
   border-radius: 0.3rem;
-}
-
-.sort {
-  padding: 1px 10px;
-  border-radius: 2px;
-  border: none;
-  background-color: #FAFAFA;
-  display: inline-block;
-  cursor: pointer;
-  font-size: 12px;
-  min-width: 50px;
-  display: none;
-}
-
-.sort:hover, .sort.asc, .sort.desc {
-  background-color: #ccc;
-}
-
-.sort:after {
-  display: inline-block;
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  content: "";
-  position: relative;
-  top:-10px;
-  right:-5px;
-}
-
-.sort.asc:after {
-  border-top: 5px solid black;
-  top:4px;
-}
-
-.sort.desc:after {
-  border-bottom: 5px solid black;
-  top:0px;
 }
 
 /* representations */
@@ -389,6 +314,78 @@ pre.panel {
 .docs ul {
   list-style: none;
 }
+
+/* entries  table */
+table#entries {
+  font-family: monospace;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 1px;
+}
+table#entries td,
+table#entries th  {
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+
+.entries-col {
+  overflow-x: scroll;
+}
+
+.row {
+  max-width: 90%;
+}
+
+span.field-name {
+  display: none
+}
+
+/* Styles for responsive entries table */
+/* see https://techblog.livingsocial.com/blog/2015/04/06/responsive-tables-in-pure-css */
+@media screen and (max-width: 1100px) {
+
+  table {
+    width: 90%;
+    border: 1px solid #9B9595;
+  }
+
+  table thead {
+    display: none;
+  }
+
+  table tr {
+    display: block !important;
+    border-bottom: 1px solid #9B9595;
+  }
+
+  table td {
+    display: block !important;
+    text-align: right;
+    font-size: 0.9rem;
+    border-bottom: 1px dotted #ccc;
+    min-height: 35px;
+  }
+
+   table td:first-child {
+    padding-top: 10px;
+  }
+
+  table td:last-child {
+    border-bottom: 0;
+    padding-bottom: 10px;
+  }
+
+  span.field-name {
+    display: block;
+    float: left;
+    font-weight: bold;
+  }
+
+}
+/* end styles responsive entries table */
+
 /* responsive styles */
 @media only screen and (max-width: 40em) {
   .intro p {
@@ -396,3 +393,4 @@ pre.panel {
   }
 
 }
+
