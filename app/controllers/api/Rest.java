@@ -78,8 +78,7 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByHash(String hash) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
-        return recordF.map(record -> getResponse(record, representation()));
+        return findByHashWithFormat(hash, representationQueryString());
     }
 
     public F.Promise<Result> findByHashWithFormat(String hash, String format) {
@@ -88,7 +87,11 @@ public class Rest extends Controller {
     }
 
     private Representation representation() {
-        return representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
+        return representationFor(representationQueryString());
+    }
+
+    private String representationQueryString() {
+        return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
     private Result getResponse(Optional<Record> recordO, Representation representation) {
