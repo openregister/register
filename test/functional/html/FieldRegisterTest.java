@@ -23,7 +23,6 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -102,8 +101,8 @@ public class FieldRegisterTest {
             Element usage = html.getElementById("field-usage");
             assertThat(usage).isNotNull();
 
-            assertThat(usage.toString()).contains("<a class=\"link_to_register\" href=\"http://localhost:8888/register/test-register\">test-register</a>");
-            assertThat(usage.toString()).contains("<a class=\"link_to_register\" href=\"http://localhost:8888/register/test-register-2\">test-register-2</a>");
+            assertThat(usage.toString()).contains("<a class=\"link_to_register\" href=\"http://localhost:8888\">test-register</a>");
+            assertThat(usage.toString()).contains("<a class=\"link_to_register\" href=\"http://localhost:8888\">test-register-2</a>");
 
         });
     }
