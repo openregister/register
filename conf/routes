@@ -14,7 +14,8 @@ GET         /load/progress                                   @controllers.api.Im
 GET         /hash/$hash<[A-Fa-f0-9]+>                        @controllers.api.Rest.findByHash(hash)
 GET         /hash/$hash<[A-Fa-f0-9]+>.$format<[a-z]+>        @controllers.api.Rest.findByHashWithFormat(hash, format)
 GET         /search                                          @controllers.api.Rest.search()
-GET         /:key/:value                                     @controllers.api.Rest.findByKey(key, value)
+GET         /:key/$value<[^./]+>                             @controllers.api.Rest.findByKey(key, value)
+GET         /:key/$value<[^./]+>.$format<[a-z]+>             @controllers.api.Rest.findByKeyWithFormat(key, value, format)
 POST        /create                                          @controllers.api.Rest.create()
 POST        /supersede/:hash                                 @controllers.api.Rest.update(hash)
 

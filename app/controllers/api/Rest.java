@@ -74,8 +74,12 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByKey(String key, String value) {
+        return findByKeyWithFormat(key, value, representationQueryString());
+    }
+
+    public F.Promise<Result> findByKeyWithFormat(String key, String value, String format) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
-        return recordF.map(record -> getResponse(record, representationQueryString()));
+        return recordF.map(record -> getResponse(record, format));
     }
 
     public F.Promise<Result> findByHash(String hash) {
