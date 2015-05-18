@@ -23,16 +23,19 @@
                     <tr>
                         <th>hash</th>
                         @fields.map { field =>
-                        <th>@controllers.html.Utils.toLink(field)</th>
+                        <th>
+                            <span class="field-name">@controllers.html.Utils.toLink(field)</span><span class="field-value">@controllers.html.Utils.toLink(field)</span>
+                        </th>
                         }
                     </tr>
                     </thead>
                     <tbody>
                     @records.map { record =>
                     <tr>
-                        <td class="hash" data-label="hash"><a href="/hash/@record.getHash">@record.getHash.take(7)</a></td>
+                        <td class="hash"><span class="field-name">hash</span><span class="field-value"><a href="/hash/@record.getHash">@record.getHash.take(7)</a></span></td>
+
                         @fields.map { field =>
-                        <td class="@field.getName()" data-label="@field.getName()">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</td>
+                            <td class="@field.getName()"><span class="field-name">@controllers.html.Utils.toLink(field)</span><span class="field-value">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</span></td>
                         }
                     </tr>
                     }

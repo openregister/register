@@ -338,6 +338,9 @@ table#entries th  {
   max-width: 90%;
 }
 
+span.field-name {
+  display: none
+}
 
 /* Styles for responsive entries table */
 /* see https://techblog.livingsocial.com/blog/2015/04/06/responsive-tables-in-pure-css */
@@ -374,11 +377,12 @@ table#entries th  {
     padding-bottom: 10px;
   }
 
-  table td:before {
-    content: attr(data-label);
+  span.field-name {
+    display: block;
     float: left;
     font-weight: bold;
   }
+
 }
 /* end styles responsive entries table */
 
