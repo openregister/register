@@ -1,6 +1,8 @@
 - request:
     method: GET
-    url: /register.json/test-register
+    url: /register/test-register
+    query:
+        _representation: json
 
   response:
     status: 200
@@ -25,7 +27,9 @@
 
 - request:
     method: GET
-    url: /register.json/test-register-with-fields-that-dont-exist
+    url: /register/test-register-with-fields-that-dont-exist
+    query:
+        _representation: json
 
   response:
     status: 200
@@ -36,7 +40,9 @@
 
 - request:
     method: GET
-    url: /field.json/test-register
+    url: /field/test-register
+    query:
+        _representation: json
 
   response:
     status: 200
@@ -47,7 +53,9 @@
 
 - request:
     method: GET
-    url: /field.json/name
+    url: /field/name
+    query:
+        _representation: json
 
   response:
     status: 200
@@ -58,7 +66,9 @@
 
 - request:
     method: GET
-    url: /field.json/key1
+    url: /field/key1
+    query:
+        _representation: json
 
   response:
     status: 200
@@ -69,7 +79,9 @@
 
 - request:
     method: GET
-    url: /field.json/key2
+    url: /field/key2
+    query:
+        _representation: json
 
   response:
     status: 200

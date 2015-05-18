@@ -16,7 +16,7 @@ public class ApplicationGlobalTest extends ApplicationTests {
 
     @Test
     public void test400ErrorResponse() throws Exception {
-        WSResponse response = postJson("/create", "{");
+        WSResponse response = postJson("/create?_representation=json", "{");
         assertThat(response.getStatus()).isEqualTo(400);
         assertThat(response.getBody()).isEqualTo("{\"errors\":[],\"message\":\"Invalid Json\",\"status\":400}");
     }
