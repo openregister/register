@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static controllers.api.Representations.representationFor;
 import static java.util.Collections.singletonList;
@@ -79,7 +81,8 @@ public class Rest extends Controller {
 
     public F.Promise<Result> findByKeyWithFormat(String key, String value, String format) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
-        return recordF.map(record -> getResponse(record, format));
+        return recordF.map(record -> getResponse(record, format,
+                anyFormat -> controllers.api.routes.Rest.findByKeyWithFormat(key, value, anyFormat).url()));
     }
 
     public F.Promise<Result> findByHash(String hash) {
@@ -88,22 +91,24 @@ public class Rest extends Controller {
 
     public F.Promise<Result> findByHashWithFormat(String hash, String format) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
-        return recordF.map(record -> getResponse(record, format));
+        return recordF.map(record -> getResponse(record, format,
+                anyFormat -> controllers.api.routes.Rest.findByHashWithFormat(hash, anyFormat).url()));
     }
 
     private String representationQueryString() {
         return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
-    private Result getResponse(Optional<Record> recordO, String format) {
+    private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat) {
         final Representation representation;
         try {
             representation = representationFor(format);
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return formatNotRecognisedResponse(format);
         }
-        return recordO.map(record -> representation.toRecord(record, getHistoryFor(record), representationsMap(representationsBaseUri())))
-                .orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
+        return recordO.map(record ->
+                        representation.toRecord(record, getHistoryFor(record), representationsMap(routeForFormat))
+        ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 
     public F.Promise<Result> search() {
@@ -136,9 +141,16 @@ public class Rest extends Controller {
         return store.history(registerName, r.getEntry().get(registerName).textValue());
     }
 
+    private Map<String, String> representationsMap(Function<String, String> routeForFormat) {
+        return Stream.of(Representations.Format.values())
+                .map(Representations.Format::name)
+                .collect(toMap(Function.<String>identity(),
+                        routeForFormat));
+    }
+
     private Map<String, String> representationsMap(String representationsBaseUri) {
         final Map<String, String> representationMap = new HashMap<>();
-        for(Representations.Format format : Representations.Format.values()) {
+        for (Representations.Format format : Representations.Format.values()) {
             representationMap.put(format.name(), representationsBaseUri + format.name());
         }
 
@@ -149,7 +161,7 @@ public class Rest extends Controller {
         String rawRepresentationUri = request().uri();
         StringBuilder representationUri = new StringBuilder(rawRepresentationUri);
 
-        if(!rawRepresentationUri.contains("?")) {
+        if (!rawRepresentationUri.contains("?")) {
             representationUri.append("?" + REPRESENTATION_QUERY_PARAM + "=");
         } else {
             representationUri.append("&" + REPRESENTATION_QUERY_PARAM + "=");
