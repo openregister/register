@@ -60,7 +60,7 @@ public class RdfSanityTest extends ApplicationTests {
         postJson("/create", "{\"test-register\":\"testregisterkey1\",\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
         postJson("/create", "{\"test-register\":\"testregisterkey2\",\"name\":\"The Entry2\",\"key1\": \"value2\",\"key2\": [\"C\",\"D\"]}");
 
-        WSResponse response = get("/search?_query=&_representation=turtle");
+        WSResponse response = get("/search.turtle?_query=");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getHeader("Content-type")).isEqualTo(TEXT_TURTLE);
         assertThat(response.getBody()).isEqualTo(EXPECTED_TURTLE_LIST);

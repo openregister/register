@@ -35,15 +35,15 @@ public class ApplicationTests {
     }
 
     public WSResponse getByKV(String key, String value, String representation) {
-        return get("/" + key + "/" + value + "?_representation=" + representation);
+        return get("/" + key + "." + representation + "/" + value);
     }
 
     public WSResponse getByHash(String hash, String representation) {
-        return get("/hash/" + hash + "?_representation=" + representation);
+        return get("/hash." + representation + "/" + hash);
     }
 
     public WSResponse search(String key, String value, String representation) {
-        return get("/search?_representation=" + representation + "&" + key + "=" + value);
+        return get("/search." + representation + "?" + key + "=" + value);
     }
 
     public WSResponse get(String path) {
