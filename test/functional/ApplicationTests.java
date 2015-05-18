@@ -39,7 +39,7 @@ public class ApplicationTests {
     }
 
     public WSResponse getByHash(String hash, String representation) {
-        return get("/hash/" + hash + "?_representation=" + representation);
+        return get("/hash/" + hash + "." + representation);
     }
 
     public WSResponse search(String key, String value, String representation) {
