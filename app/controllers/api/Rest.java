@@ -74,7 +74,7 @@ public class Rest extends Controller {
 
     public F.Promise<Result> findByKey(String key, String value) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
-        return recordF.map(record -> getResponse(record, representation()));
+        return recordF.map(record -> getResponse(record, representationQueryString()));
     }
 
     public F.Promise<Result> findByHash(String hash) {
@@ -83,23 +83,31 @@ public class Rest extends Controller {
 
     public F.Promise<Result> findByHashWithFormat(String hash, String format) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
-        return recordF.map(record -> getResponse(record, representationFor(format)));
-    }
-
-    private Representation representation() {
-        return representationFor(representationQueryString());
+        return recordF.map(record -> getResponse(record, format));
     }
 
     private String representationQueryString() {
         return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
-    private Result getResponse(Optional<Record> recordO, Representation representation) {
+    private Result getResponse(Optional<Record> recordO, String format) {
+        final Representation representation;
+        try {
+            representation = representationFor(format);
+        } catch(IllegalArgumentException e) {
+            return formatNotRecognisedResponse(format);
+        }
         return recordO.map(record -> representation.toRecord(record, getHistoryFor(record), representationsMap(representationsBaseUri())))
                 .orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 
     public F.Promise<Result> search() {
+        Representation representation;
+        try {
+            representation = representationFor(representationQueryString());
+        } catch (IllegalArgumentException e) {
+            return F.Promise.pure(formatNotRecognisedResponse(representationQueryString()));
+        }
 
         F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {
@@ -113,7 +121,11 @@ public class Rest extends Controller {
             }
         });
 
-        return recordsF.map( rs -> representation().toListOfRecords(rs, representationsMap(representationsBaseUri())));
+        return recordsF.map(rs -> representation.toListOfRecords(rs, representationsMap(representationsBaseUri())));
+    }
+
+    private Result formatNotRecognisedResponse(String format) {
+        return HtmlRepresentation.instance.toResponse(400, "Format '" + format + "' not recognised");
     }
 
     private List<RecordVersionInfo> getHistoryFor(Record r) {
