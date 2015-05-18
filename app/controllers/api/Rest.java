@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static controllers.api.Representations.representationFor;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toMap;
 
 public class Rest extends Controller {
 
@@ -113,10 +114,9 @@ public class Rest extends Controller {
             if (request().queryString().containsKey("_query")) {
                 return store.search(request().queryString().get("_query")[0]);
             } else {
-                HashMap<String, String> map = new HashMap<>();
-                request().queryString().entrySet().stream()
+                Map<String, String> map = request().queryString().entrySet().stream()
                         .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
-                        .forEach(queryParameter -> map.put(queryParameter.getKey(), queryParameter.getValue()[0]));
+                        .collect(toMap(Map.Entry::getKey, queryParamEntry -> queryParamEntry.getValue()[0]));
                 return store.search(map);
             }
         });
