@@ -31,6 +31,12 @@ public class Utils {
         return Html.apply("<a class=\"link_to_register\" href=\"" + uri + "\">" + name + "</a>");
     }
 
+    public static Html toRegisterLink(String registerName){
+        String registerUri = ApplicationConf.getString("registers.service.template.url").replace("__REGISTER__", registerName);
+        return Html.apply("<a class=\"link_to_register\" href=\"" + registerUri + "\">" + registerName + "</a>");
+    }
+
+
     public static Html checkbox(Field field, List<String> checkedElements, List<String> options) {
         String html = String.format("<label for=\"%s\">%s</label>", field.getName(), field.getName());
         for (String option : options) {
@@ -51,10 +57,6 @@ public class Utils {
 
     public static Html toValue(Field field, JsonNode value) {
         return Html.apply(toRawValue(field, value));
-    }
-
-    public static Html joinHtml(List<Html> list) {
-        return Html.apply(join(list.stream().map(Html::text).collect(Collectors.toList())));
     }
 
     public static String join(List<String> list) {

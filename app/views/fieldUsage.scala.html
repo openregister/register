@@ -1,12 +1,14 @@
 @(fr: uk.gov.openregister.config.FieldRegister, fieldName: String)
 <div id="field-usage" class="small-12 large-12 columns">
 
-    <h2>Field Usage</h2>
+    <h2>This field appears in the following registers: </h2>
+
 
     <div class="panel entry">
-        @{controllers.html.Utils.joinHtml(
-                fr.getRegisterNamesFor(fieldName)
-                .map{ register => controllers.html.Utils.toLink("register", register)})
-        }
+        <ul>
+            @fr.getRegisterNamesFor(fieldName).map{ registerName =>
+                <li>@controllers.html.Utils.toRegisterLink(registerName)</li>
+            }
+        </ul>
     </div>
 </div>

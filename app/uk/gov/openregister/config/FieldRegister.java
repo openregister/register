@@ -61,11 +61,7 @@ public class FieldRegister extends Register {
 
     public List<String> getRegisterNamesFor(String fieldName) {
         return registers.stream().map(Record::getEntry)
-                .filter(e -> e.has("fields") &&
-                        StreamUtils.asStream(e.get("fields").elements())
-                                .filter(f -> f.textValue().equals(fieldName))
-                                .findFirst()
-                                .isPresent())
+                .filter(e -> e.has("fields") && StreamUtils.asStream(e.get("fields").elements()).anyMatch(f -> f.textValue().equals(fieldName)))
                 .map(e -> e.get("register").textValue())
                 .collect(Collectors.toList());
     }
