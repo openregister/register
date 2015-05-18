@@ -55,7 +55,7 @@ public class GenericRegister extends Register {
 
             }).collect(Collectors.toList());
 
-            friendlyName = rEntry.get("name").textValue();
+            friendlyName = WordUtils.capitalize(rEntry.get("name").textValue());
             if(result.errors.isEmpty()) result.started = true;
 
         } else {
