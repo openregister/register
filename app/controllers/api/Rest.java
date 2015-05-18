@@ -123,7 +123,7 @@ public class Rest extends Controller {
     private Map<String, String> representationsMap(String representationsBaseUri) {
         final Map<String, String> representationMap = new HashMap<>();
         for(Representations.Format format : Representations.Format.values()) {
-            representationMap.put(format.name(), representationsBaseUri + format.identifier);
+            representationMap.put(format.name(), representationsBaseUri + format.name());
         }
 
         return representationMap;
