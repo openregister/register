@@ -74,20 +74,25 @@ public class Rest extends Controller {
 
     public F.Promise<Result> findByKey(String key, String value) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
-        return recordF.map(this::getResponse);
+        return recordF.map(record -> getResponse(record, representation()));
     }
 
     public F.Promise<Result> findByHash(String hash) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
-        return recordF.map(this::getResponse);
+        return recordF.map(record -> getResponse(record, representation()));
+    }
+
+    public F.Promise<Result> findByHashWithFormat(String hash, String format) {
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
+        return recordF.map(record -> getResponse(record, representationFor(format)));
     }
 
     private Representation representation() {
         return representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
     }
 
-    private Result getResponse(Optional<Record> recordO) {
-        return recordO.map(record -> representation().toRecord(record, getHistoryFor(record), representationsMap(representationsBaseUri())))
+    private Result getResponse(Optional<Record> recordO, Representation representation) {
+        return recordO.map(record -> representation.toRecord(record, getHistoryFor(record), representationsMap(representationsBaseUri())))
                 .orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 

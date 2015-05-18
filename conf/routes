@@ -2,22 +2,23 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET         /                                           @controllers.html.UI.index()
-GET         /ui/create                                  @controllers.html.UI.renderNewEntryForm()
-POST        /ui/create                                  @controllers.html.UI.create()
-GET         /ui/supersede/:hash                         @controllers.html.UI.renderUpdateEntryForm(hash)
-POST        /ui/supersede/:hash                         @controllers.html.UI.update(hash)
+GET         /                                                @controllers.html.UI.index()
+GET         /ui/create                                       @controllers.html.UI.renderNewEntryForm()
+POST        /ui/create                                       @controllers.html.UI.create()
+GET         /ui/supersede/:hash                              @controllers.html.UI.renderUpdateEntryForm(hash)
+POST        /ui/supersede/:hash                              @controllers.html.UI.update(hash)
 
-GET         /load                                       @controllers.api.ImportData.loadWithProgress()
-GET         /load/progress                              @controllers.api.ImportData.progress()
+GET         /load                                            @controllers.api.ImportData.loadWithProgress()
+GET         /load/progress                                   @controllers.api.ImportData.progress()
 
-GET         /hash/:hash                                 @controllers.api.Rest.findByHash(hash)
-GET         /search                                     @controllers.api.Rest.search()
-GET         /:key/:value                                @controllers.api.Rest.findByKey(key, value)
-POST        /create                                     @controllers.api.Rest.create()
-POST        /supersede/:hash                            @controllers.api.Rest.update(hash)
+GET         /hash/$hash<[A-Fa-f0-9]+>                        @controllers.api.Rest.findByHash(hash)
+GET         /hash/$hash<[A-Fa-f0-9]+>.$format<[a-z]+>        @controllers.api.Rest.findByHashWithFormat(hash, format)
+GET         /search                                          @controllers.api.Rest.search()
+GET         /:key/:value                                     @controllers.api.Rest.findByKey(key, value)
+POST        /create                                          @controllers.api.Rest.create()
+POST        /supersede/:hash                                 @controllers.api.Rest.update(hash)
 
-GET         /assets/javascripts/routes                  @controllers.api.ImportData.javascriptRoutes()
+GET         /assets/javascripts/routes                       @controllers.api.ImportData.javascriptRoutes()
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file                  controllers.Assets.at(path="/public", file)
+GET         /assets/*file                                    controllers.Assets.at(path="/public", file)
