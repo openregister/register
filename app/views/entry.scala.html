@@ -43,16 +43,20 @@
 
         <div class="panel entry">
             <table>
+                <thead>
+                    <tr>
+                        <td>hash</td>
+                        <td>timestamp</td>
+                    </tr>
+                </thead>
                 <tbody>
-                <td>hash</td>
-                <td>timestamp</td>
-                </tbody>
                 @history.map{ entry =>
                 <tr>
-                    <td><a href="/hash/@entry.hash">@entry.hash</a></td>
-                    <td>@entry.timestamp</td>
+                    <td><span class="field-name">hash</span><span class="field-value"><a href="/hash/@entry.hash">@entry.hash</a></span></td>
+                    <td><span class="field-name">timestamp</span><span class="field-value">@entry.timestamp</span></td>
                 </tr>
                 }
+                </tbody>
             </table>
         </div>
     </div>
