@@ -7,8 +7,9 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-import uk.gov.openregister.domain.RecordVersionInfo;
+import uk.gov.openregister.domain.DbRecord;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.postgresql.DBInfo;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
@@ -148,8 +149,8 @@ public class PostgresqlStoreTest {
 
         store.save(new Record(json));
 
-        Optional<Record> record = store.findByKV("store_tests", "aValue");
-        JSONAssert.assertEquals(expected, record.get().toString(), true);
+        Optional<DbRecord> record = store.findByKV("store_tests", "aValue");
+        JSONAssert.assertEquals(expected, record.get().getRecord().toString(), true);
     }
 
     @Test
@@ -159,8 +160,8 @@ public class PostgresqlStoreTest {
 
         store.save(new Record(json));
 
-        Optional<Record> record = store.findByHash("0b5f9e93b101ba410da10279229b6e0aa1411b85");
-        JSONAssert.assertEquals(expected, record.get().toString(), true);
+        Optional<DbRecord> record = store.findByHash("0b5f9e93b101ba410da10279229b6e0aa1411b85");
+        JSONAssert.assertEquals(expected, record.get().getRecord().toString(), true);
     }
 
     @Test
@@ -173,8 +174,8 @@ public class PostgresqlStoreTest {
         Record record2 = new Record(json.replaceAll("anotherValue", "newValue"));
         store.update(record1.getHash(), record2);
 
-        assertEquals(record2.getHash(), store.findByHash(record2.getHash()).get().getHash());
-        assertEquals(record1.getHash(), store.findByHash(record1.getHash()).get().getHash());
+        assertEquals(record2.getHash(), store.findByHash(record2.getHash()).get().getRecord().getHash());
+        assertEquals(record1.getHash(), store.findByHash(record1.getHash()).get().getRecord().getHash());
 
     }
 
@@ -209,9 +210,9 @@ public class PostgresqlStoreTest {
         HashMap<String, String> q = new HashMap<>();
 
         q.put("store_tests", "aV");
-        List<Record> records = store.search(q);
+        List<DbRecord> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        JSONAssert.assertEquals(expected, records.get(0).toString(), true);
+        JSONAssert.assertEquals(expected, records.get(0).getRecord().toString(), true);
     }
 
     @Test
@@ -226,9 +227,9 @@ public class PostgresqlStoreTest {
         HashMap<String, String> q = new HashMap<>();
 
         q.put("store_tests", "Val");
-        List<Record> records = store.search(q);
+        List<DbRecord> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        JSONAssert.assertEquals(expected, records.get(0).toString(), true);
+        JSONAssert.assertEquals(expected, records.get(0).getRecord().toString(), true);
     }
 
     @Test
@@ -243,9 +244,9 @@ public class PostgresqlStoreTest {
         HashMap<String, String> q = new HashMap<>();
 
         q.put("store_tests", "aval");
-        List<Record> records = store.search(q);
+        List<DbRecord> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        JSONAssert.assertEquals(expected, records.get(0).toString(), true);
+        JSONAssert.assertEquals(expected, records.get(0).getRecord().toString(), true);
     }
 
     @Test
@@ -261,9 +262,9 @@ public class PostgresqlStoreTest {
 
         q.put("store_tests", "aval");
         q.put("anotherKey", "anotherValue");
-        List<Record> records = store.search(q);
+        List<DbRecord> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        JSONAssert.assertEquals(expected, records.get(0).toString(), true);
+        JSONAssert.assertEquals(expected, records.get(0).getRecord().toString(), true);
     }
 
     @Test
@@ -276,7 +277,7 @@ public class PostgresqlStoreTest {
 
         HashMap<String, String> q = new HashMap<>();
 
-        List<Record> records = store.search(q);
+        List<DbRecord> records = store.search(q);
         assertThat(records.size()).isEqualTo(2);
     }
 
@@ -288,7 +289,7 @@ public class PostgresqlStoreTest {
         store.save(new Record(json1));
         store.save(new Record(json2));
 
-        List<Record> records = store.search("value");
+        List<DbRecord> records = store.search("value");
         assertThat(records.size()).isEqualTo(2);
     }
 

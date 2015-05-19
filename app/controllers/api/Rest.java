@@ -6,6 +6,7 @@ import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
+import uk.gov.openregister.domain.DbRecord;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseException;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static controllers.api.Representations.representationFor;
@@ -79,7 +81,8 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByKeyWithFormat(String key, String value, String format) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value)
+                .map(DbRecord::getRecord));
         return recordF.map(record -> getResponse(record, format,
                 anyFormat -> controllers.api.routes.Rest.findByKeyWithFormat(key, value, anyFormat).url()));
     }
@@ -89,7 +92,8 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByHashWithFormat(String hash, String format) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash)
+        .map(DbRecord::getRecord));
         return recordF.map(record -> getResponse(record, format,
                 anyFormat -> controllers.api.routes.Rest.findByHashWithFormat(hash, anyFormat).url()));
     }
@@ -119,14 +123,16 @@ public class Rest extends Controller {
         }
 
         F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
+            List<DbRecord> records;
             if (request().queryString().containsKey("_query")) {
-                return store.search(request().queryString().get("_query")[0]);
+                records = store.search(request().queryString().get("_query")[0]);
             } else {
                 Map<String, String> map = request().queryString().entrySet().stream()
                         .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
                         .collect(toMap(Map.Entry::getKey, queryParamEntry -> queryParamEntry.getValue()[0]));
-                return store.search(map);
+                records = store.search(map);
             }
+            return records.stream().map(DbRecord::getRecord).collect(Collectors.toList());
         });
 
         return recordsF.map(rs -> representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat)));

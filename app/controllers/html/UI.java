@@ -7,6 +7,7 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.JsonObjectMapper;
+import uk.gov.openregister.domain.DbRecord;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.model.Field;
 import uk.gov.openregister.store.DatabaseException;
@@ -64,7 +65,9 @@ public class UI extends Controller {
 
     @SuppressWarnings("unchecked")
     public Result renderUpdateEntryForm(String hash) {
-        Record record = store.findByHash(hash).get();
+        Record record = store.findByHash(hash).get().getRecord(
+                
+        );
 
         Map params = JsonObjectMapper.convert(record.getEntry().toString(), Map.class);
 

@@ -1,5 +1,6 @@
 package uk.gov.openregister.store;
 
+import uk.gov.openregister.domain.DbRecord;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 
@@ -13,15 +14,15 @@ public interface Store {
 
     void deleteAll();
 
-    Optional<Record> findByKV(String key, String value);
+    Optional<DbRecord> findByKV(String key, String value);
 
     List<RecordVersionInfo> history(String key, String value);
 
-    Optional<Record> findByHash(String hash);
+    Optional<DbRecord> findByHash(String hash);
 
-    List<Record> search(Map<String, String> map);
+    List<DbRecord> search(Map<String, String> map);
 
-    List<Record> search(String query);
+    List<DbRecord> search(String query);
 
     long count();
 
