@@ -11,21 +11,23 @@
 </div>
 
 <div class="row">
+	<div class="small-12 large-12 columns">
+	@helper.form(action = formAction) {
 
-@helper.form(action = formAction) {
+	    @fields.map{ aField =>
+	        @{
+	            if(registerName.equals("register") && aField.getName().equals("fields"))
+	                controllers.html.Utils.checkbox(aField, requestParam.get(aField.getName), aField.getAllowedValues.get);
+	             else
+	                controllers.html.Utils.inputText(aField.getName, requestParam.get(aField.getName), errors.get(aField.getName));
 
-    @fields.map{ aField =>
-        @{
-            if(registerName.equals("register") && aField.getName().equals("fields"))
-                controllers.html.Utils.checkbox(aField, requestParam.get(aField.getName), aField.getAllowedValues.get);
-             else
-                controllers.html.Utils.inputText(aField.getName, requestParam.get(aField.getName), errors.get(aField.getName));
+	        }
+	    }
 
-        }
-    }
 
-    <input type="submit" name="submit" value="@submitButtonValue" class="button"/>
-}
+	    <input type="submit" name="submit" value="@submitButtonValue" class="button"/>
+	}
+	</div>
 </div>
 
 @license()
