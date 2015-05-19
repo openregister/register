@@ -39,6 +39,13 @@
         }}
 
         <h2>History</h2>
+        <h3>Latest version:</h3>
+        @defining({
+            val registerName = controllers.App.instance.register.name;
+            controllers.html.Utils.toUri(registerName, record.getEntry.get(registerName).textValue)
+        }) { latestVersionUrl =>
+        <p><a href="@latestVersionUrl">@latestVersionUrl</a></p>
+        }
         <table>
             <thead>
                 <tr>

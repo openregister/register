@@ -25,10 +25,14 @@ public class Utils {
         return toLink("datatype", datatype.getName());
     }
 
-    public static Html toLink(String register, String name) {
+    public static Html toLink(String register, String value) {
+        URI uri = toUri(register, value);
+        return Html.apply("<a class=\"link_to_register\" href=\"" + uri + "\">" + value + "</a>");
+    }
+
+    public static URI toUri(String register, String value) {
         CurieResolver curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
-        URI uri = curieResolver.resolve(new Curie(register, name));
-        return Html.apply("<a class=\"link_to_register\" href=\"" + uri + "\">" + name + "</a>");
+        return curieResolver.resolve(new Curie(register, value));
     }
 
     public static Html toRegisterLink(String registerName){
