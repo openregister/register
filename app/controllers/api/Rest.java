@@ -14,6 +14,8 @@ import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -81,10 +83,10 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByKeyWithFormat(String key, String value, String format) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value)
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, URLDecoder.decode(value, "utf-8"))
                 .map(DbRecord::getRecord));
         return recordF.map(record -> getResponse(record, format,
-                anyFormat -> controllers.api.routes.Rest.findByKeyWithFormat(key, value, anyFormat).url()));
+                anyFormat -> routes.Rest.findByKeyWithFormat(key, value, anyFormat).url()));
     }
 
     public F.Promise<Result> findByHash(String hash) {

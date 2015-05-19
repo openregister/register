@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import play.libs.Json;
+import play.libs.ws.WSResponse;
 import uk.gov.openregister.domain.Record;
 
 import java.io.IOException;
@@ -34,6 +35,10 @@ public class EntryPageTest extends ApplicationTests {
 
         String resultJson = webClient.getPage(resultPage.getUrl() + ".json").getWebResponse().getContentAsString();
         assertFalse(resultJson.contains("submit"));
+
+        // ensure we can get from a URL with spaces in it
+        WSResponse response = getByKV("test-register", "Testregister key", "json");
+        assertThat(response.getStatus()).isEqualTo(200);
     }
 
     @Test

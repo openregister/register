@@ -13,7 +13,9 @@ import play.test.TestServer;
 import helper.PostgresqlStoreForTesting;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import static play.test.Helpers.testServer;
@@ -35,7 +37,11 @@ public class ApplicationTests {
     }
 
     public WSResponse getByKV(String key, String value, String representation) {
-        return get("/" + key + "/" + value + "." + representation);
+        try {
+            return get("/" + key + "/" + URLEncoder.encode(value, "utf-8") + "." + representation);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public WSResponse getByHash(String hash, String representation) {
