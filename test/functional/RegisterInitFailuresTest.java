@@ -52,7 +52,7 @@ public class RegisterInitFailuresTest {
     }
 
     public WSResponse get(String path) {
-        return WS.url(BASE_URL + path).setFollowRedirects(false).get().get(1000);
+        return WS.url(BASE_URL + path).setFollowRedirects(false).get().get(ApplicationTests.TIMEOUT);
     }
 
     @Test
@@ -83,7 +83,6 @@ public class RegisterInitFailuresTest {
         });
     }
 
-    @Ignore
     @Test
     public void testKnownRegisterRegisterWorks() throws Exception {
         running(testServer(3334, fakeApplication("register")), () -> {

@@ -3,6 +3,7 @@ package functional.html;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.App;
 import controllers.global.ApplicationGlobal;
+import functional.ApplicationTests;
 import functional.RegisterService;
 import functional.TestSettings;
 import org.jsoup.Jsoup;
@@ -64,12 +65,12 @@ public class FieldRegisterTest {
     }
 
     public WSResponse get(String path) {
-        return WS.url(BASE_URL + path).setFollowRedirects(false).get().get(1000);
+        return WS.url(BASE_URL + path).setFollowRedirects(false).get().get(ApplicationTests.TIMEOUT);
     }
 
     public WSResponse postJson(String path, String json) {
         return WS.url(BASE_URL + path)
-                .setHeader("Content-Type", "application/json").post(json).get(1000);
+                .setHeader("Content-Type", "application/json").post(json).get(ApplicationTests.TIMEOUT);
     }
 
     @Test
