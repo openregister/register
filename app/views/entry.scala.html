@@ -1,4 +1,6 @@
-@(fields: List[uk.gov.openregister.model.Field], record: uk.gov.openregister.domain.Record, history: List[uk.gov.openregister.domain.RecordVersionInfo], representationsMap: Map[String, String])
+@(fields: List[uk.gov.openregister.model.Field], dbRecord: uk.gov.openregister.domain.DbRecord, history: List[uk.gov.openregister.domain.RecordVersionInfo], representationsMap: Map[String, String])
+
+@defining((dbRecord.getRecord, dbRecord.getMetadata)) {case (record,metadata) =>
 
 @main() {
 
@@ -38,6 +40,7 @@
             case _ => {}
         }}
 
+        @defining(org.joda.time.format.DateTimeFormat.forPattern("dd MMMM yyyy HH:mm:ss z")) { timeFormat =>
         <h2>History</h2>
         <h3>Latest version:</h3>
         @defining({
@@ -46,6 +49,8 @@
         }) { latestVersionUrl =>
         <p><a href="@latestVersionUrl">@latestVersionUrl</a></p>
         }
+        <h3>This version:</h3>
+        <p><a href="/hash/@{record.getHash}">@{record.getHash}</a> @{timeFormat.print(metadata.creationTime)}</p>
         <table>
             <thead>
                 <tr>
@@ -62,6 +67,7 @@
             }
             </tbody>
         </table>
+        }
     </div>
 </div>
 
@@ -72,4 +78,5 @@
 </div>
 @license()
 
+}
 }

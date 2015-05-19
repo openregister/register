@@ -14,7 +14,6 @@ import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
@@ -83,9 +82,8 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByKeyWithFormat(String key, String value, String format) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, URLDecoder.decode(value, "utf-8"))
-                .map(DbRecord::getRecord));
-        return recordF.map(record -> getResponse(record, format,
+        F.Promise<Optional<DbRecord>> dbRecordO = F.Promise.promise(() -> store.findByKV(key, URLDecoder.decode(value, "utf-8")));
+        return dbRecordO.map(dbRecord -> getResponse(dbRecord, format,
                 anyFormat -> routes.Rest.findByKeyWithFormat(key, value, anyFormat).url()));
     }
 
@@ -94,9 +92,8 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByHashWithFormat(String hash, String format) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash)
-        .map(DbRecord::getRecord));
-        return recordF.map(record -> getResponse(record, format,
+        F.Promise<Optional<DbRecord>> recordF = F.Promise.promise(() -> store.findByHash(hash));
+        return recordF.map(dbRecord -> getResponse(dbRecord, format,
                 anyFormat -> controllers.api.routes.Rest.findByHashWithFormat(hash, anyFormat).url()));
     }
 
@@ -104,15 +101,15 @@ public class Rest extends Controller {
         return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
-    private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat) {
+    private Result getResponse(Optional<DbRecord> dbRecordO, String format, Function<String, String> routeForFormat) {
         final Representation representation;
         try {
             representation = representationFor(format);
         } catch (IllegalArgumentException e) {
             return formatNotRecognisedResponse(format);
         }
-        return recordO.map(record ->
-                        representation.toRecord(record, getHistoryFor(record), representationsMap(routeForFormat))
+        return dbRecordO.map(dbRecord ->
+                        representation.toRecord(dbRecord, getHistoryFor(dbRecord.getRecord()), representationsMap(routeForFormat))
         ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 
