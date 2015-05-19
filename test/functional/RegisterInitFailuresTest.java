@@ -2,10 +2,7 @@ package functional;
 
 import controllers.App;
 import controllers.global.ApplicationGlobal;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 import play.test.FakeApplication;
@@ -86,6 +83,7 @@ public class RegisterInitFailuresTest {
         });
     }
 
+    @Ignore
     @Test
     public void testKnownRegisterRegisterWorks() throws Exception {
         running(testServer(3334, fakeApplication("register")), () -> {
