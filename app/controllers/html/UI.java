@@ -3,12 +3,18 @@ package controllers.html;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.App;
+import org.joda.time.DateTime;
+import play.libs.ws.WS;
+import play.libs.ws.WSResponse;
 import controllers.api.HtmlRepresentation;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.JsonObjectMapper;
+import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.linking.Curie;
+import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.model.Field;
 import uk.gov.openregister.store.DatabaseConflictException;
 import uk.gov.openregister.store.DatabaseException;
@@ -35,7 +41,20 @@ public class UI extends Controller {
 
     public Result index() {
         long count = store.count();
-        return ok(views.html.index.render(fieldNames, count));
+        String lastUpdatedUI = "";
+        try {
+            CurieResolver curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
+            String rrUrl = curieResolver.resolve(new Curie("register", registerName)) + "?_representation=json";
+
+            final WSResponse wsResponse = WS.client().url(rrUrl).execute().get(30000L);
+            final String lastUpdatedStr = wsResponse.asJson().get("lastUpdated").textValue();
+            final DateTime lastUpdated = DateTime.parse(lastUpdatedStr);
+            lastUpdatedUI = lastUpdated.toString("dd MMM yyyy");
+        } catch (Exception e) {
+            //ignore
+        }
+
+        return ok(views.html.index.render(fieldNames, count, lastUpdatedUI));
     }
 
     public Result renderNewEntryForm() {
@@ -67,7 +86,7 @@ public class UI extends Controller {
     @SuppressWarnings("unchecked")
     public Result renderUpdateEntryForm(String hash) {
         Record record = store.findByHash(hash).get().getRecord(
-
+                
         );
 
         Map params = JsonObjectMapper.convert(record.getEntry().toString(), Map.class);
@@ -108,8 +127,8 @@ public class UI extends Controller {
         for (String key : requestParams.keySet()) {
             if (requestParams.get(key) instanceof String[]) {
                 stringListHashMap.put(key, Arrays.asList((String[]) requestParams.get(key)));
-            }else if (requestParams.get(key) instanceof List) {
-                stringListHashMap.put(key, (List)requestParams.get(key));
+            } else if (requestParams.get(key) instanceof List) {
+                stringListHashMap.put(key, (List) requestParams.get(key));
             } else {
                 stringListHashMap.put(key, Arrays.asList((String) requestParams.get(key)));
             }

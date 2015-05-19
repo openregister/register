@@ -30,5 +30,4 @@ public class RecordTest {
                 .isEqualTo("{\"a\":\"value\",\"b\":\"another\"}");
 
     }
-
 }

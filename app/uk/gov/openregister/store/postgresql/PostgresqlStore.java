@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
 import uk.gov.openregister.JsonObjectMapper;
-import uk.gov.openregister.domain.DbRecord;
 import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
@@ -126,8 +125,8 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public Optional<DbRecord> findByKV(String key, String value) {
-        return database.<Optional<DbRecord>>select("SELECT * FROM " + dbInfo.tableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'")
+    public Optional<Record> findByKV(String key, String value) {
+        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.tableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'")
                 .andThen(this::toOptionalRecord);
     }
 
@@ -146,12 +145,12 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public Optional<DbRecord> findByHash(String hash) {
-        return database.<Optional<DbRecord>>select("SELECT * FROM " + dbInfo.historyTableName + " WHERE hash = ?", hash).andThen(this::toOptionalRecord);
+    public Optional<Record> findByHash(String hash) {
+        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.historyTableName + " WHERE hash = ?", hash).andThen(this::toOptionalRecord);
     }
 
     @Override
-    public List<DbRecord> search(Map<String, String> map) {
+    public List<Record> search(Map<String, String> map) {
         String sql = "SELECT * FROM " + dbInfo.tableName;
 
         if (!map.isEmpty()) {
@@ -163,12 +162,12 @@ public class PostgresqlStore implements Store {
 
         sql += " LIMIT 100";
 
-        return database.<List<DbRecord>>select(sql).andThen(this::getRecords);
+        return database.<List<Record>>select(sql).andThen(this::getRecords);
 
     }
 
     @Override
-    public List<DbRecord> search(String query) {
+    public List<Record> search(String query) {
 
         String sql = "SELECT * FROM " + dbInfo.tableName;
 
@@ -181,7 +180,7 @@ public class PostgresqlStore implements Store {
 
         sql += " LIMIT 100";
 
-        return database.<List<DbRecord>>select(sql).andThen(this::getRecords);
+        return database.<List<Record>>select(sql).andThen(this::getRecords);
     }
 
     @Override
@@ -213,7 +212,7 @@ public class PostgresqlStore implements Store {
         return pgo;
     }
 
-    private Optional<DbRecord> toOptionalRecord(ResultSet resultSet) throws IOException, SQLException {
+    private Optional<Record> toOptionalRecord(ResultSet resultSet) throws IOException, SQLException {
         if (resultSet != null && resultSet.next()) {
             return Optional.of(toRecord(resultSet));
         } else {
@@ -221,19 +220,19 @@ public class PostgresqlStore implements Store {
         }
     }
 
-    private DbRecord toRecord(ResultSet resultSet) throws SQLException, IOException {
+    private Record toRecord(ResultSet resultSet) throws SQLException, IOException {
         final String entry = resultSet.getString("entry");
         final String metadataStr = resultSet.getString("metadata");
 
-        final Record record = new Record(new ObjectMapper().readValue(entry, JsonNode.class));
         final Metadata metadata = Metadata.from(metadataStr);
+        final Record record = new Record(new ObjectMapper().readValue(entry, JsonNode.class), Optional.of(metadata));
 
-        return new DbRecord(record, metadata);
+        return record;
     }
 
-    private List<DbRecord> getRecords(ResultSet resultSet) throws SQLException, IOException {
+    private List<Record> getRecords(ResultSet resultSet) throws SQLException, IOException {
 
-        List<DbRecord> result = new ArrayList<>();
+        List<Record> result = new ArrayList<>();
         while (resultSet.next()) {
             result.add(toRecord(resultSet));
         }

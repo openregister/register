@@ -1,5 +1,7 @@
 package uk.gov.openregister.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,11 +10,17 @@ import play.Logger;
 import play.libs.Json;
 import uk.gov.openregister.crypto.Digest;
 
-public class Record {
+import java.util.Optional;
 
+public class Record {
     public Record(JsonNode json) {
+        this(json, Optional.empty());
+    }
+
+    public Record(JsonNode json, Optional<Metadata> metadata) {
         this.entry = json;
         this.hash = Digest.shasum(normalise());
+        this.metadata = metadata;
     }
 
     public Record(String jsonString) {
@@ -22,6 +30,9 @@ public class Record {
     private String hash;
     private JsonNode entry;
 
+    @JsonIgnore
+    private Optional<Metadata> metadata;
+
     public String getHash() {
         return hash;
     }
@@ -29,6 +40,11 @@ public class Record {
     @SuppressWarnings("unused")
     public JsonNode getEntry() {
         return entry;
+    }
+
+    @JsonProperty("lastUpdated")
+    public String getLastUpdated() {
+        return metadata.map(m -> m.creationTime.toString()).orElse("");
     }
 
     private static final ObjectMapper SORTED_MAPPER = new ObjectMapper();
