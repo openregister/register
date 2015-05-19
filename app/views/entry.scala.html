@@ -5,9 +5,7 @@
 @header()
 
 <div class="row">
-
     <div class="small-12 large-12 columns">
-
 
         @Option(record.getEntry.get("name")).map { name =>
             <h1 id="entry_name">@name.textValue</h1>
@@ -29,18 +27,18 @@
         </div> <!-- /.entry -->
 
     </div> <!-- /.columns -->
+</div> <!-- /.row -->
 
-    <!-- Little hack to show registers using a field, on field register only-->
-    @{controllers.App.instance.register match {
-        case fr: uk.gov.openregister.config.FieldRegister =>
-            fieldUsage(fr, record.getEntry.get("field").textValue)
-        case _ => {}
-    }}
-
+<div class="row">
     <div class="small-12 large-12 columns">
+        <!-- Little hack to show registers using a field, on field register only-->
+        @{controllers.App.instance.register match {
+            case fr: uk.gov.openregister.config.FieldRegister =>
+                fieldUsage(fr, record.getEntry.get("field").textValue)
+            case _ => {}
+        }}
 
         <h2>History</h2>
-
         <div class="panel entry">
             <table>
                 <thead>
@@ -60,12 +58,13 @@
             </table>
         </div>
     </div>
-
-    @data_formats(representationsMap)
-
 </div>
 
-
+<div class="row">
+    <div class="large-6 columns">
+        @data_formats(representationsMap)
+    </div>
+</div>
 @license()
 
 }
