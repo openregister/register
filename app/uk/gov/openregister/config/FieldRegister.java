@@ -28,15 +28,17 @@ public class FieldRegister extends Register {
     @Override
     public InitResult init() {
 
-        String rrUrl =  ApplicationConf.registerUrl("register", "/search?_query=&_representation=json");
-        WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
+        String rrUrl = ApplicationConf.registerUrl("register", "/search?_query=&_representation=json");
+        try {
+            WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
 
-        if (rr.getStatus() == 200 ) {
             registers = rr.asJson().findValues("entry").stream()
                     .map(Record::new)
                     .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Ignore all exceptions.
+            // Circular dependency with the register register. This register must always start.
         }
-        // Circular dependency with the register register. This register must always start.
         return InitResult.OK;
     }
 
