@@ -13,13 +13,15 @@ import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static controllers.api.Representations.representationFor;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toMap;
 
 public class Rest extends Controller {
 
@@ -73,64 +75,80 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByKey(String key, String value) {
+        return findByKeyWithFormat(key, value, representationQueryString());
+    }
+
+    public F.Promise<Result> findByKeyWithFormat(String key, String value, String format) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
-        return recordF.map(this::getResponse);
+        return recordF.map(record -> getResponse(record, format,
+                anyFormat -> controllers.api.routes.Rest.findByKeyWithFormat(key, value, anyFormat).url()));
     }
 
     public F.Promise<Result> findByHash(String hash) {
+        return findByHashWithFormat(hash, representationQueryString());
+    }
+
+    public F.Promise<Result> findByHashWithFormat(String hash, String format) {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
-        return recordF.map(this::getResponse);
+        return recordF.map(record -> getResponse(record, format,
+                anyFormat -> controllers.api.routes.Rest.findByHashWithFormat(hash, anyFormat).url()));
     }
 
-    private Representation representation() {
-        return representationFor(request().getQueryString(REPRESENTATION_QUERY_PARAM));
+    private String representationQueryString() {
+        return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
-    private Result getResponse(Optional<Record> recordO) {
-        return recordO.map(record -> representation().toRecord(record, getHistoryFor(record), representationsMap(representationsBaseUri())))
-                .orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
+    private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat) {
+        final Representation representation;
+        try {
+            representation = representationFor(format);
+        } catch (IllegalArgumentException e) {
+            return formatNotRecognisedResponse(format);
+        }
+        return recordO.map(record ->
+                        representation.toRecord(record, getHistoryFor(record), representationsMap(routeForFormat))
+        ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 
     public F.Promise<Result> search() {
+        Representation representation;
+        try {
+            representation = representationFor(representationQueryString());
+        } catch (IllegalArgumentException e) {
+            return F.Promise.pure(formatNotRecognisedResponse(representationQueryString()));
+        }
 
         F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {
                 return store.search(request().queryString().get("_query")[0]);
             } else {
-                HashMap<String, String> map = new HashMap<>();
-                request().queryString().entrySet().stream()
+                Map<String, String> map = request().queryString().entrySet().stream()
                         .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
-                        .forEach(queryParameter -> map.put(queryParameter.getKey(), queryParameter.getValue()[0]));
+                        .collect(toMap(Map.Entry::getKey, queryParamEntry -> queryParamEntry.getValue()[0]));
                 return store.search(map);
             }
         });
 
-        return recordsF.map( rs -> representation().toListOfRecords(rs, representationsMap(representationsBaseUri())));
+        return recordsF.map(rs -> representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat)));
+    }
+
+    private Result formatNotRecognisedResponse(String format) {
+        return HtmlRepresentation.instance.toResponse(400, "Format '" + format + "' not recognised");
     }
 
     private List<RecordVersionInfo> getHistoryFor(Record r) {
         return store.history(registerName, r.getEntry().get(registerName).textValue());
     }
 
-    private Map<String, String> representationsMap(String representationsBaseUri) {
-        final Map<String, String> representationMap = new HashMap<>();
-        for(Representations.Format format : Representations.Format.values()) {
-            representationMap.put(format.name(), representationsBaseUri + format.identifier);
-        }
-
-        return representationMap;
+    private Map<String, String> representationsMap(Function<String, String> routeForFormat) {
+        return Stream.of(Representations.Format.values())
+                .map(Representations.Format::name)
+                .collect(toMap(Function.<String>identity(),
+                        routeForFormat));
     }
 
-    private String representationsBaseUri() {
-        String rawRepresentationUri = request().uri();
-        StringBuilder representationUri = new StringBuilder(rawRepresentationUri);
-
-        if(!rawRepresentationUri.contains("?")) {
-            representationUri.append("?" + REPRESENTATION_QUERY_PARAM + "=");
-        } else {
-            representationUri.append("&" + REPRESENTATION_QUERY_PARAM + "=");
-        }
-
-        return representationUri.toString();
+    private String searchUriForFormat(String format) {
+        // makes assumptions about the structure of the uri
+        return request().uri() + "&" + REPRESENTATION_QUERY_PARAM + "=" + format;
     }
 }

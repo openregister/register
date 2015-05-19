@@ -49,7 +49,7 @@
     headers:
       content-type: application/json
     body: >
-      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"field": "test-register", "register": "test-register", "name": "Test Field", "datatype": "string"}}
+      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"field": "test-register", "register": "test-register", "datatype": "string"}}
 
 - request:
     method: GET
@@ -62,7 +62,7 @@
     headers:
       content-type: application/json
     body: >
-      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"field": "name","name": "Name Field", "datatype": "string"}}
+      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"field": "name", "datatype": "string"}}
 
 - request:
     method: GET
@@ -75,7 +75,7 @@
     headers:
       content-type: application/json
     body: >
-      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"field": "key1","name": "key1 Field", "datatype": "string"}}
+      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"field": "key1", "datatype": "string"}}
 
 - request:
     method: GET
@@ -88,7 +88,7 @@
     headers:
       content-type: application/json
     body: >
-      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"field": "key2","name": "key2 Field", "datatype": "string", "cardinality": "n"}}
+      {"hash":"759f1921d04fb297f825c3fede183516dbede0b3","entry":{"field": "key2", "datatype": "string", "cardinality": "n"}}
 
 - request:
     url: ^.*$

@@ -16,7 +16,6 @@ public class RegisterRegister extends Register {
 
     private final List<Field> FIELDS = Arrays.asList(
             new Field("register"),
-            new Field("name"),
             new Field("fields", "Fields", Datatype.of("list"), Cardinality.MANY, Optional.of("field")),
             new Field("text")
     );

@@ -32,7 +32,7 @@ public class EntryPageTest extends ApplicationTests {
 
         assertTrue(resultPage.getUrl().toString().startsWith(BASE_URL + "/hash/"));
 
-        String resultJson = webClient.getPage(resultPage.getUrl() + "?_representation=json").getWebResponse().getContentAsString();
+        String resultJson = webClient.getPage(resultPage.getUrl() + ".json").getWebResponse().getContentAsString();
         assertFalse(resultJson.contains("submit"));
     }
 
@@ -101,7 +101,7 @@ public class EntryPageTest extends ApplicationTests {
         String resultUrl = resultPage.getUrl().toString();
         assertTrue(resultUrl.startsWith(BASE_URL + "/hash/"));
 
-        String jsonResponse = webClient.getPage(resultUrl + "?_representation=json").getWebResponse().getContentAsString();
+        String jsonResponse = webClient.getPage(resultUrl + ".json").getWebResponse().getContentAsString();
         JSONAssert.assertEquals(
                 "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\":\"updated Some key1\",\"key2\":\"updated key2\"}",
                 Json.parse(jsonResponse).get("entry").toString(),

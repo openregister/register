@@ -92,7 +92,7 @@ public class FieldRegisterTest {
     public void testEntryViewShowsTheListOfRegisters() throws Exception {
         running(testServer(3334, fakeApplication("field")), () -> {
 
-            String json = "{\"field\":\"name\",\"name\":\"The Name\"}";
+            String json = "{\"field\":\"name\"}";
             postJson("/create", json);
 
             WSResponse response = get("/field/name");

@@ -1,7 +1,6 @@
 package functional;
 
 import controllers.App;
-import uk.gov.openregister.config.Register;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -17,6 +16,6 @@ public class RegisterInitTest extends ApplicationTests {
 
     @Test
     public void testFriendlyNameIsReadOnStartup() throws Exception {
-        assertThat(App.instance.register.friendlyName()).isEqualTo("Test Register");
+        assertThat(App.instance.register.friendlyName()).isEqualTo("Test-register");
     }
 }

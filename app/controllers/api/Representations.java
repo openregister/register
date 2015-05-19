@@ -2,28 +2,26 @@ package controllers.api;
 
 public class Representations {
     public enum Format {
-        json("json", JsonRepresentation.instance),
-        turtle("turtle", TurtleRepresentation.instance),
-        yaml("yaml", YamlRepresentation.instance),
-        html("html", HtmlRepresentation.instance);
+        json(JsonRepresentation.instance),
+        ttl(TurtleRepresentation.instance),
+        yaml(YamlRepresentation.instance),
+        html(HtmlRepresentation.instance);
 
-        public final String identifier;
         public final Representation representation;
 
-        private Format(final String theIdentifier, Representation representation) {
-            identifier = theIdentifier;
+        Format(Representation representation) {
             this.representation = representation;
         }
     }
 
-    public static Representation representationFor(String representation) {
+    public static Representation representationFor(String representation) throws IllegalArgumentException {
         return getFormat(representation).representation;
     }
 
     private static Format getFormat(String representation) {
         try {
             return Format.valueOf(representation);
-        } catch (IllegalArgumentException | NullPointerException e) {
+        } catch (NullPointerException e) {
             return Format.html;
         }
     }
