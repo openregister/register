@@ -1,8 +1,8 @@
 @(representationsMap: Map[String, String])
-<h3>Get the data</h3>
-<span>
-    <h4>Download all entries:</h4>
+<h2>Data</h2>
+<p>This data is also available in the following representations:</p>
+<ul>
     @representationsMap.map { representation =>
-        <a href=@representation._2>@representation._1</a>
+        <li><a href=@representation._2>@representation._1</a></li>
     }
-</span>
+</ul>
