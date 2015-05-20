@@ -67,6 +67,21 @@ public class Utils {
         return "[ " + StringUtils.join(list, ", ")+ " ]";
     }
 
+    public static boolean isDisplayField(String fieldName, String register) {
+        if(fieldName.equalsIgnoreCase(register)){
+            return true;
+        }
+        if(fieldName.equalsIgnoreCase("hash")){
+            return true;
+        }
+        // Alpha quick hack to pick some other displayable field.
+        // This may be something that moves to fields or config?
+        if(fieldName.equalsIgnoreCase("name") || fieldName.equalsIgnoreCase("street")){
+            return true;
+        }
+        return false;
+    }
+
     private static String toRawValue(Field field, JsonNode value) {
         if (value == null) {
             return "";
