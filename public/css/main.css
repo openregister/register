@@ -318,6 +318,7 @@ pre.panel {
 /* entries  table */
 table#entries {
   font-family: monospace;
+  width: 100%;
 }
 
 table {
@@ -334,12 +335,14 @@ table#entries th  {
   overflow-x: scroll;
 }
 
-.row {
-  max-width: 90%;
-}
-
 span.field-name {
   display: none
+}
+
+td.view > a:after {
+  content: "❯";
+  padding-left: 10px;
+  vertical-align: middle;
 }
 
 /* Styles for responsive entries table */
@@ -381,6 +384,10 @@ span.field-name {
     display: block;
     float: left;
     font-weight: bold;
+  }
+
+  span.field-value {
+
   }
 
 }

@@ -18,6 +18,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.ACCEPTED;
 import static play.mvc.Http.Status.OK;
 
+
 public class SearchPagesTest extends ApplicationTests {
 
     @Test
@@ -53,10 +54,9 @@ public class SearchPagesTest extends ApplicationTests {
     }
 
     @Test
-    public void testSubmitSearchQueryAndReturnsListOfEntries() throws Exception {
+    public void testSearchReturnsEntriesWithKeyHashNameDisplayed() throws Exception {
+
         postJson("/create", "{\"test-register\":\"testregisterkey1\",\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
-        postJson("/create", "{\"test-register\":\"testregisterkey2\",\"name\":\"The Entry2\",\"key1\": \"value2\",\"key2\": [\"C\",\"D\"]}");
-        postJson("/create", "{\"test-register\":\"testregisterkey3\",\"name\":\"The Entry3\",\"key1\": \"value1\",\"key2\": [\"E\",\"F\"]}");
 
         WSResponse response = get("/search?_query=value1");
         assertThat(response.getStatus()).isEqualTo(OK);
@@ -70,92 +70,8 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(th.get(0).text()).isEqualTo("hash");
         assertThat(th.get(1).select("span.field-value").text()).isEqualTo("test-register");
         assertThat(th.get(2).select("span.field-value").text()).isEqualTo("name");
-        assertThat(th.get(3).select("span.field-value").text()).isEqualTo("key1");
-        assertThat(th.get(4).select("span.field-value").text()).isEqualTo("key2");
-
-        Elements td1 = tr.get(1).select("td");
-        assertThat(td1.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/39837068f586ab19bcb2b5f2408b024438e75c43\">3983706</a>");
-        assertThat(td1.get(1).select("span.field-value").text()).isEqualTo("testregisterkey1");
-        assertThat(td1.get(2).select("span.field-value").text()).isEqualTo("The Entry1");
-        assertThat(td1.get(3).select("span.field-value").text()).isEqualTo("value1");
-        assertThat(td1.get(4).select("span.field-value").text()).isEqualTo("[ A, B ]");
-
-        Elements td2 = tr.get(2).select("td");
-        assertThat(td2.get(0).select("a").first().toString()).isEqualTo("<a href=\"/hash/9dd019eb60715299711418bc7a3542e93a466f58\">9dd019e</a>");
-        assertThat(td2.get(1).select("span.field-value").text()).isEqualTo("testregisterkey3");
-        assertThat(td2.get(2).select("span.field-value").text()).isEqualTo("The Entry3");
-        assertThat(td2.get(3).select("span.field-value").text()).isEqualTo("value1");
-        assertThat(td2.get(4).select("span.field-value").text()).isEqualTo("[ E, F ]");
     }
 
-    @Test
-    public void testRenderFieldWithoutKeyValueAndAFieldWithValueIsAList() throws Exception {
-        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
-        String hash =new Record(json).getHash();
-        postJson("/create", json);
-
-        WSResponse response = get("/hash/" + hash);
-
-        assertThat(response.getStatus()).isEqualTo(OK);
-
-        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
-
-        Element dl = html.select("dl").first();
-        assertThat(dl).isNotNull();
-
-        Elements dt = dl.select("dt");
-        Elements dd = dl.select("dd");
-
-        assertThat(dt.get(0).text()).isEqualTo("hash");
-        assertThat(dd.get(0).text()).isEqualTo(hash);
-
-        assertThat(dt.get(1).text()).isEqualTo("test-register");
-        assertThat(dd.get(1).text()).isEqualTo("testregisterkey");
-
-        assertThat(dt.get(2).text()).isEqualTo("name");
-        assertThat(dd.get(2).text()).isEqualTo("The Entry");
-
-        assertThat(dt.get(3).text()).isEqualTo("key1");
-        assertThat(dd.get(3).text()).isEqualTo("value1");
-
-        assertThat(dt.get(4).text()).isEqualTo("key2");
-        assertThat(dd.get(4).text()).isEqualTo("[ A, B ]");
-    }
-
-
-    @Test
-    public void testRenderFieldAsListInEntries() throws Exception {
-        postJson("/create", "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
-
-        WSResponse response = search("key1", "value1", "html");
-
-        assertThat(response.getStatus()).isEqualTo(OK);
-
-        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
-
-        Element key2 = html.getElementsByClass("key2").first();
-        assertThat(key2).isNotNull();
-
-        assertThat(key2.select("span.field-value").text()).isEqualTo("[ A, B ]");
-
-    }
-
-    @Test
-    public void testEntryShowsNameIfPresent() throws Exception {
-        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
-        String hash =new Record(json).getHash();
-        postJson("/create", json);
-
-        WSResponse response = get("/hash/" + hash);
-
-        assertThat(response.getStatus()).isEqualTo(OK);
-
-        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
-
-        Element h1 = html.getElementById("entry_name");
-        assertThat(h1).isNotNull();
-        assertThat(h1.text()).isEqualTo("The Entry");
-    }
 
     @Test
     public void viewEntry_searchByKeyValueRendersTheHistory() throws IOException {

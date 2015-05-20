@@ -54,4 +54,30 @@ public class UtilsTest extends ApplicationTests {
                         "<a class=\"link_to_register\" href=\"http://localhost:8888/field/value2\">value2</a> ]");
     }
 
+    @Test
+    public void testDisplayFieldIsTrueForHash() throws Exception {
+        assertThat(Utils.isDisplayField("hash", "notcare")).isTrue();
+    }
+
+    @Test
+    public void testDisplayFieldIsFalseForRandomField() throws Exception {
+        assertThat(Utils.isDisplayField("banana", "notcare")).isFalse();
+    }
+
+    @Test
+    public void testDisplayFieldIsTrueForRegisterKey() throws Exception {
+        assertThat(Utils.isDisplayField("registername", "registername")).isTrue();
+    }
+
+    @Test
+    public void testDisplayFieldIsTrueForNameField() throws Exception {
+        assertThat(Utils.isDisplayField("name", "notcare")).isTrue();
+    }
+
+    @Test
+    public void testDisplayFieldIsTrueForStreetField() throws Exception {
+        assertThat(Utils.isDisplayField("street", "some-register")).isTrue();
+    }
+
+
 }
