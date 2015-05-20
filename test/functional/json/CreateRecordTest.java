@@ -124,9 +124,7 @@ public class CreateRecordTest extends ApplicationTests {
     public void updateARecordReturns400Json_whenThereIsNoRecordWithTheGivenHash() {
         String updatedJson = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/supersede/nonExistingHash", updatedJson);
-        assertThat(response.getBody())
-                .isEqualTo("{\"errors\":[],\"message\":\"Either this record is outdated or attempted to update the primary key value.\",\"status\":400}");
-
+        assertThat(response.getStatus()).isEqualTo(400);
     }
 
     @Test
@@ -137,8 +135,6 @@ public class CreateRecordTest extends ApplicationTests {
 
         String updatedJson = "{\"test-register\":\"new'PrimaryKey\",\"name\":\"entryName\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
-        assertThat(response.getBody())
-                .isEqualTo("{\"errors\":[],\"message\":\"Either this record is outdated or attempted to update the primary key value.\",\"status\":400}");
-
+        assertThat(response.getStatus()).isEqualTo(400);
     }
 }

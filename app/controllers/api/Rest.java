@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static controllers.api.Representations.representationFor;
@@ -49,7 +48,7 @@ public class Rest extends Controller {
             try {
                 store.save(r);
             } catch (DatabaseException e) {
-                return JsonRepresentation.instance.toResponse(400, e.getMessage());
+                return HtmlRepresentation.instance.toResponse(400, e.getMessage());
             }
 
             return JsonRepresentation.instance.toResponse(202, "Record saved successfully");
@@ -68,7 +67,7 @@ public class Rest extends Controller {
             try {
                 store.update(hash, r);
             } catch (DatabaseException e) {
-                return JsonRepresentation.instance.toResponse(400, e.getMessage());
+                return HtmlRepresentation.instance.toResponse(400, e.getMessage());
             }
             return JsonRepresentation.instance.toResponse(202, "Record saved successfully");
         }
