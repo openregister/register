@@ -85,9 +85,7 @@ public class UI extends Controller {
 
     @SuppressWarnings("unchecked")
     public Result renderUpdateEntryForm(String hash) {
-        Record record = store.findByHash(hash).get().getRecord(
-                
-        );
+        Record record = store.findByHash(hash).get();
 
         Map params = JsonObjectMapper.convert(record.getEntry().toString(), Map.class);
 
