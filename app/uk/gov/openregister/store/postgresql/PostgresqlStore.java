@@ -12,6 +12,7 @@ import uk.gov.openregister.domain.DbRecord;
 import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
+import uk.gov.openregister.store.DatabaseConflictException;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.Store;
 
@@ -95,7 +96,7 @@ public class PostgresqlStore implements Store {
 
                 int result = st.executeUpdate();
                 if (result == 0) {
-                    throw new DatabaseException("Conflict-> Either this record is outdated or trying to update the primary key value.");
+                    throw new DatabaseConflictException("Either this record is outdated or attempted to update the primary key value.");
                 }
             }
 

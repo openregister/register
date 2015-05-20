@@ -3,13 +3,14 @@ package controllers.html;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.App;
+import controllers.api.HtmlRepresentation;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.JsonObjectMapper;
-import uk.gov.openregister.domain.DbRecord;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.model.Field;
+import uk.gov.openregister.store.DatabaseConflictException;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
@@ -66,7 +67,7 @@ public class UI extends Controller {
     @SuppressWarnings("unchecked")
     public Result renderUpdateEntryForm(String hash) {
         Record record = store.findByHash(hash).get().getRecord(
-                
+
         );
 
         Map params = JsonObjectMapper.convert(record.getEntry().toString(), Map.class);
@@ -87,7 +88,11 @@ public class UI extends Controller {
 
         List<ValidationError> validationErrors = new Validator(Collections.singletonList(registerName), fieldNames).validate(record);
         if (validationErrors.isEmpty()) {
-            store.update(hash, record);
+            try {
+                store.update(hash, record);
+            } catch (DatabaseConflictException e) {
+                return HtmlRepresentation.instance.toResponse(409, e.getMessage());
+            }
             return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
         }
         Map<String, String> errors = validationErrors.stream().collect(Collectors.toMap(error -> error.key, error -> error.message));
