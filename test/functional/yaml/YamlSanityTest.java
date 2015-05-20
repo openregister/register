@@ -19,7 +19,8 @@ public class YamlSanityTest extends ApplicationTests {
             "  - \"A\"\n" +
             "  - \"B\"\n" +
             "  name: \"The Entry\"\n" +
-            "  test-register: \"testregisterkey\"\n";
+            "  test-register: \"testregisterkey\"\n" +
+            "lastUpdated: \"";
 
     @Test
     public void testFindOneByKey() throws Exception {
@@ -28,7 +29,7 @@ public class YamlSanityTest extends ApplicationTests {
         WSResponse response = getByKV("key1", "value1", "yaml");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getHeader("Content-type")).isEqualTo("text/yaml; charset=utf-8");
-        assertThat(response.getBody()).isEqualTo(EXPECTED_YAML);
+        assertThat(response.getBody()).startsWith(EXPECTED_YAML);
     }
 
     @Test
@@ -39,6 +40,6 @@ public class YamlSanityTest extends ApplicationTests {
 
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getHeader("Content-type")).isEqualTo("text/yaml; charset=utf-8");
-        assertThat(response.getBody()).isEqualTo(EXPECTED_YAML);
+        assertThat(response.getBody()).startsWith(EXPECTED_YAML);
     }
 }

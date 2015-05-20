@@ -2,9 +2,10 @@ package functional.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import functional.ApplicationTests;
+import org.joda.time.DateTime;
+import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-import play.libs.Json;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.domain.Record;
 
@@ -21,7 +22,10 @@ public class FindEntriesTest extends ApplicationTests {
 
         WSResponse response = getByKV("key1", "value1", "json");
         assertThat(response.getStatus()).isEqualTo(OK);
-        JSONAssert.assertEquals(record.toString(), response.getBody(), false);
+
+        final JsonNode responseJson = response.asJson();
+
+        checkResponseRecords(record, responseJson);
     }
 
 
@@ -32,11 +36,12 @@ public class FindEntriesTest extends ApplicationTests {
         postJson("/create", json);
 
         WSResponse response = getByHash(record.getHash(), "json");
-
         assertThat(response.getStatus()).isEqualTo(OK);
-        JSONAssert.assertEquals(record.toString(), response.getBody(), false);
-    }
 
+        final JsonNode responseJson = response.asJson();
+
+        checkResponseRecords(record, responseJson);
+    }
 
     @Test
     public void testSearch() throws Exception {
@@ -47,15 +52,28 @@ public class FindEntriesTest extends ApplicationTests {
 
         postJson("/create", "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry2\",\"key1\": \"value2\",\"key2\": [\"A\",\"B\"]}");
 
+        final Record record1 = new Record(expectedJson1);
+        final Record record2 = new Record(expectedJson2);
 
         WSResponse response = search("key1", "value1", "json");
-
         assertThat(response.getStatus()).isEqualTo(OK);
-        JsonNode result = Json.parse(response.getBody());
+
+        JsonNode result = response.asJson();
         assertThat(result.size()).isEqualTo(2);
 
-        JSONAssert.assertEquals(new Record(expectedJson1).toString(), result.get(0).toString(), true);
-        JSONAssert.assertEquals(new Record(expectedJson2).toString(), result.get(1).toString(), true);
+        checkResponseRecords(record1, result.get(0));
+        checkResponseRecords(record2, result.get(1));
+    }
 
+    private void checkResponseRecords(Record record, JsonNode responseJson) throws JSONException {
+        final JsonNode recordEntry = responseJson.get("entry");
+        final String lastUpdatedEntry = responseJson.get("lastUpdated").textValue();
+        Record actual = new Record(recordEntry);
+
+        JSONAssert.assertEquals(record.getEntry().toString(), actual.getEntry().toString(), false);
+        assertThat(lastUpdatedEntry).isNotEmpty();
+
+        final DateTime lastUpdatedDateTime = DateTime.parse(lastUpdatedEntry);
+        assertThat(lastUpdatedDateTime).isNotNull();
     }
 }

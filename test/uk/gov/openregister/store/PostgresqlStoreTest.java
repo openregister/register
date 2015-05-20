@@ -7,8 +7,8 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.postgresql.DBInfo;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
@@ -92,7 +92,6 @@ public class PostgresqlStoreTest {
         assertThat(historyRows.size()).isEqualTo(2);
 
         assertEquals(ImmutableSet.of(oldRecord.getHash(), newRecord.getHash()), historyRows.stream().map(row -> row.hash).collect(Collectors.toSet()));
-
     }
 
     @Test
@@ -144,23 +143,23 @@ public class PostgresqlStoreTest {
     @Test
     public void testFindByKV() throws JSONException {
         String json = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
         store.save(new Record(json));
 
         Optional<Record> record = store.findByKV("store_tests", "aValue");
-        JSONAssert.assertEquals(expected, record.get().toString(), true);
+        JSONAssert.assertEquals(json, record.get().getEntry().toString(), true);
+        assertThat(record.get().getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
     }
 
     @Test
     public void testFindByHash() throws JSONException {
         String json = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
         store.save(new Record(json));
 
         Optional<Record> record = store.findByHash("0b5f9e93b101ba410da10279229b6e0aa1411b85");
-        JSONAssert.assertEquals(expected, record.get().toString(), true);
+        JSONAssert.assertEquals(json, record.get().normalise(), true);
+        assertThat(record.get().getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
     }
 
     @Test
@@ -175,7 +174,6 @@ public class PostgresqlStoreTest {
 
         assertEquals(record2.getHash(), store.findByHash(record2.getHash()).get().getHash());
         assertEquals(record1.getHash(), store.findByHash(record1.getHash()).get().getHash());
-
     }
 
     @Test
@@ -201,7 +199,6 @@ public class PostgresqlStoreTest {
     public void testSearch() throws JSONException {
         String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String json2 = "{\"store_tests\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
         store.save(new Record(json1));
         store.save(new Record(json2));
@@ -211,14 +208,14 @@ public class PostgresqlStoreTest {
         q.put("store_tests", "aV");
         List<Record> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        JSONAssert.assertEquals(expected, records.get(0).toString(), true);
+        JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
+        assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
     }
 
     @Test
     public void testSearchEverywhere() throws JSONException {
         String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String json2 = "{\"store_tests\":\"different\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
         store.save(new Record(json1));
         store.save(new Record(json2));
@@ -228,14 +225,14 @@ public class PostgresqlStoreTest {
         q.put("store_tests", "Val");
         List<Record> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        JSONAssert.assertEquals(expected, records.get(0).toString(), true);
+        JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
+        assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
     }
 
     @Test
     public void testSearchCaseInsensitive() throws JSONException {
         String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String json2 = "{\"store_tests\":\"different\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
         store.save(new Record(json1));
         store.save(new Record(json2));
@@ -245,14 +242,14 @@ public class PostgresqlStoreTest {
         q.put("store_tests", "aval");
         List<Record> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        JSONAssert.assertEquals(expected, records.get(0).toString(), true);
+        JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
+        assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
     }
 
     @Test
     public void testSearchWithMultipleValues() throws JSONException {
         String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String json2 = "{\"store_tests\":\"different\",\"anotherKey\":\"anotherValue\"}";
-        String expected = "{\"hash\":\"0b5f9e93b101ba410da10279229b6e0aa1411b85\",\"entry\":{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}}";
 
         store.save(new Record(json1));
         store.save(new Record(json2));
@@ -263,7 +260,8 @@ public class PostgresqlStoreTest {
         q.put("anotherKey", "anotherValue");
         List<Record> records = store.search(q);
         assertThat(records.size()).isEqualTo(1);
-        JSONAssert.assertEquals(expected, records.get(0).toString(), true);
+        JSONAssert.assertEquals(json1,  records.get(0).getEntry().toString(), true);
+        assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
     }
 
     @Test
