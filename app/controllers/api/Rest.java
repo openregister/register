@@ -51,10 +51,10 @@ public class Rest extends Controller {
                 return HtmlRepresentation.instance.toResponse(400, e.getMessage());
             }
 
-            return JsonRepresentation.instance.toResponse(202, "Record saved successfully");
+            return JsonRepresentation.instance.createdResponse();
         }
 
-        return JsonRepresentation.instance.toResponseWithErrors(400, "", validationErrors);
+        return HtmlRepresentation.instance.toResponseWithErrors(400, validationErrors);
 
     }
 
@@ -69,10 +69,10 @@ public class Rest extends Controller {
             } catch (DatabaseException e) {
                 return HtmlRepresentation.instance.toResponse(400, e.getMessage());
             }
-            return JsonRepresentation.instance.toResponse(202, "Record saved successfully");
+            return JsonRepresentation.instance.createdResponse();
         }
 
-        return JsonRepresentation.instance.toResponseWithErrors(400, "", validationErrors);
+        return HtmlRepresentation.instance.toResponseWithErrors(400, validationErrors);
     }
 
     public F.Promise<Result> findByKey(String key, String value) {
