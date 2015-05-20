@@ -327,7 +327,6 @@ table {
 }
 table#entries td,
 table#entries th  {
-  font-size: 0.9rem;
   vertical-align: top;
 }
 
@@ -339,10 +338,9 @@ span.field-name {
   display: none
 }
 
-td.view > a:after {
-  content: "❯";
-  padding-left: 10px;
-  vertical-align: middle;
+td.view {
+  font-family: Helvetica, Arial;
+  font-size: 0.7rem !important;
 }
 
 /* Styles for responsive entries table */
@@ -366,7 +364,6 @@ td.view > a:after {
   table td {
     display: block !important;
     text-align: right;
-    font-size: 0.9rem;
     border-bottom: 1px dotted #ccc;
     min-height: 35px;
   }
@@ -386,11 +383,8 @@ td.view > a:after {
     font-weight: bold;
   }
 
-  span.field-value {
-
-  }
-
 }
+
 /* end styles responsive entries table */
 
 /* responsive styles */
