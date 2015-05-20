@@ -2,18 +2,18 @@ package uk.gov.openregister.domain;
 
 public class DbRecord {
     private final Record record;
-    private final Metadata metaData;
+    private final Metadata metadata;
 
     public DbRecord(Record theRecord, Metadata theMetaData) {
         record = theRecord;
-        metaData = theMetaData;
+        metadata = theMetaData;
     }
 
     public Record getRecord() {
         return record;
     }
 
-    public Metadata getMetaData() {
-        return metaData;
+    public Metadata getMetadata() {
+        return metadata;
     }
 }
