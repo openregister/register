@@ -1,8 +1,9 @@
 @(representationsMap: Map[String, String])
-<h2>Data</h2>
-<p>This data is also available in the following representations:</p>
-<ul>
-    @representationsMap.map { representation =>
-        <li><a href=@representation._2>@representation._1</a></li>
-    }
-</ul>
+<p class="data-representations">This data is available as:
+     <span>
+        @representationsMap.map { representation =>
+           <a href=@representation._2>@representation._1</a>
+        }
+    </span>
+</p>
+
