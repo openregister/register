@@ -341,6 +341,13 @@ span.field-name {
 td.view {
   font-family: Helvetica, Arial;
   font-size: 0.7rem !important;
+  white-space: nowrap;
+}
+
+td.view > a:after {
+  content: "❯";
+  padding-left: 10px;
+  vertical-align: middle;
 }
 
 /* Styles for responsive entries table */
