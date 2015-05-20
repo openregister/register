@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import controllers.App;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
-import uk.gov.openregister.domain.DbRecord;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.linking.Curie;
@@ -42,8 +41,8 @@ public class TurtleRepresentation implements Representation {
     }
 
     @Override
-    public Result toRecord(DbRecord dbRecord, List<RecordVersionInfo> history, Map<String, String> representationsMap) {
-        return ok(TURTLE_HEADER + renderRecord(dbRecord.getRecord())).as(TEXT_TURTLE);
+    public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap) {
+        return ok(TURTLE_HEADER + renderRecord(record)).as(TEXT_TURTLE);
     }
 
     private String renderRecord(Record record) {

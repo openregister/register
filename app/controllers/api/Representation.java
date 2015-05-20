@@ -1,7 +1,6 @@
 package controllers.api;
 
 import play.mvc.Result;
-import uk.gov.openregister.domain.DbRecord;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 
@@ -11,5 +10,5 @@ import java.util.Map;
 public interface Representation {
     Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) throws Exception;
 
-    Result toRecord(DbRecord record, List<RecordVersionInfo> history, Map<String, String> representationsMap);
+    Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap);
 }

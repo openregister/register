@@ -2,7 +2,6 @@ package controllers.api;
 
 import controllers.App;
 import play.mvc.Result;
-import uk.gov.openregister.domain.DbRecord;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 
@@ -23,7 +22,7 @@ public class HtmlRepresentation implements Representation {
     }
 
     @Override
-    public Result toRecord(DbRecord dbRecord, List<RecordVersionInfo> history, Map<String, String> representationsMap) {
+    public Result toRecord(Record dbRecord, List<RecordVersionInfo> history, Map<String, String> representationsMap) {
         return ok(views.html.entry.render(App.instance.register.fields(), dbRecord, history, representationsMap));
     }
 

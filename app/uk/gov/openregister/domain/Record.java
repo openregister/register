@@ -30,6 +30,10 @@ public class Record {
     private String hash;
     private JsonNode entry;
 
+    public Optional<Metadata> getMetadata() {
+        return metadata;
+    }
+
     @JsonIgnore
     private Optional<Metadata> metadata;
 

@@ -81,7 +81,7 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByKeyWithFormat(String key, String value, String format) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, value));
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, URLDecoder.decode(value, "utf-8")));
         return recordF.map(record -> getResponse(record, format,
                 anyFormat -> controllers.api.routes.Rest.findByKeyWithFormat(key, value, anyFormat).url()));
     }
@@ -100,15 +100,15 @@ public class Rest extends Controller {
         return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
-    private Result getResponse(Optional<DbRecord> dbRecordO, String format, Function<String, String> routeForFormat) {
+    private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat) {
         final Representation representation;
         try {
             representation = representationFor(format);
         } catch (IllegalArgumentException e) {
             return formatNotRecognisedResponse(format);
         }
-        return dbRecordO.map(dbRecord ->
-                        representation.toRecord(dbRecord, getHistoryFor(dbRecord.getRecord()), representationsMap(routeForFormat))
+        return recordO.map(record ->
+                        representation.toRecord(record, getHistoryFor(record), representationsMap(routeForFormat))
         ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 
