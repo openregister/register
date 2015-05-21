@@ -38,41 +38,48 @@
 
 <div class="row">
     <div class="small-12 large-12 columns">
-        <!-- Little hack to show registers using a field, on field register only-->
-        @{controllers.App.instance.register match {
+        <div class="history">
+            <!-- Little hack to show registers using a field, on field register only-->
+            @{controllers.App.instance.register match {
             case fr: uk.gov.openregister.config.FieldRegister =>
-                fieldUsage(fr, record.getEntry.get("field").textValue)
+            fieldUsage(fr, record.getEntry.get("field").textValue)
             case _ => {}
-        }}
+            }}
 
-        @defining(org.joda.time.format.DateTimeFormat.forPattern("dd MMMM yyyy HH:mm:ss z")) { timeFormat =>
-        <h2>History</h2>
-        <h3>Latest version:</h3>
-        @defining({
+            @defining(org.joda.time.format.DateTimeFormat.forPattern("dd MMMM yyyy HH:mm:ss z")) { timeFormat =>
+            <h2>History</h2>
+
+            <h3>Latest version:</h3>
+            @defining({
             val registerName = controllers.App.instance.register.name;
             controllers.html.Utils.toUri(registerName, record.getEntry.get(registerName).textValue)
-        }) { latestVersionUrl =>
-        <p><a href="@latestVersionUrl">@latestVersionUrl</a></p>
-        }
-        <h3>This version:</h3>
-        <p><a href="/hash/@{record.getHash}">@{record.getHash}</a> @{timeFormat.print(record.getMetadata.get.creationTime)}</p>
-        <table id="history" class="responsive">
-            <thead>
+            }) { latestVersionUrl =>
+            <p><a href="@latestVersionUrl">@latestVersionUrl</a></p>
+            }
+            <h3>This version:</h3>
+
+            <p><a href="/hash/@{record.getHash}">@{record.getHash}</a>
+                @{timeFormat.print(record.getMetadata.get.creationTime)}</p>
+            <h3>Previous versions:</h3>
+            <table id="history" class="responsive">
+                <thead>
                 <tr>
                     <td>hash</td>
                     <td>timestamp</td>
                 </tr>
-            </thead>
-            <tbody>
-            @history.map{ entry =>
-            <tr>
-                <td><span class="field-name">hash</span><span class="field-value"><a href="/hash/@entry.hash">@entry.hash</a></span></td>
-                <td><span class="field-name">timestamp</span><span class="field-value">@entry.timestamp</span></td>
-            </tr>
+                </thead>
+                <tbody>
+                @history.map{ entry =>
+                <tr>
+                    <td><span class="field-name">hash</span><span class="field-value"><a href="/hash/@entry.hash">@entry.hash</a></span>
+                    </td>
+                    <td><span class="field-name">timestamp</span><span class="field-value">@entry.timestamp</span></td>
+                </tr>
+                }
+                </tbody>
+            </table>
             }
-            </tbody>
-        </table>
-        }
+        </div>
     </div>
 </div>
 @license()

@@ -379,6 +379,22 @@ td.view > a:after {
   vertical-align: middle;
 }
 
+/* history for an entry */
+
+.history h2 {
+  font-size: 1.5rem;
+}
+
+.history h3 {
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+  margin-top: 0.5rem;
+}
+
+.history p {
+  font-size: 1rem;
+}
+
 /* Styles for responsive entries table */
 /* see https://techblog.livingsocial.com/blog/2015/04/06/responsive-tables-in-pure-css */
 @media screen and (max-width: 1100px) {
