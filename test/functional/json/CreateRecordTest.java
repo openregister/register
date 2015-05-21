@@ -42,11 +42,8 @@ public class CreateRecordTest extends ApplicationTests {
         String json = "{\"test-register\":\"testregisterkey\",\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key1\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
 
-        JsonNode result = Json.parse(response.getBody());
-        assertEquals(400, result.get("status").asInt());
-        assertEquals("", result.get("message").textValue());
-        JSONAssert.assertEquals("[{\"key\":\"invalidKey\",\"message\":\"Key not required\"}]", result.get("errors").toString(), true);
-
+        assertThat(response.getStatus()).isEqualTo(400);
+        assertThat(response.getBody()).contains("Key not required");
     }
 
     @Test
@@ -54,14 +51,7 @@ public class CreateRecordTest extends ApplicationTests {
         String json = "{\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
 
-        Map<String, Object> result = JsonObjectMapper.convert(response.getBody(), Map.class);
-
-        assertEquals(400, result.get("status"));
-        assertEquals("", result.get("message"));
-
-        List<Map> errors = (List) result.get("errors");
-        assertEquals(2, errors.size());
-        assertEquals(Arrays.asList("invalidKey", "test-register"), errors.stream().map(it -> it.get("key")).collect(Collectors.toList()));
+        assertThat(response.getStatus()).isEqualTo(400);
     }
 
     @Test
@@ -116,7 +106,7 @@ public class CreateRecordTest extends ApplicationTests {
         String updatedJson = "{\"test-register\":\"\",\"name\":\"entryName\"}";
         WSResponse response = postJson("/supersede/" + record.getHash(), updatedJson);
         assertThat(response.getBody())
-                .isEqualTo("{\"errors\":[{\"key\":\"test-register\",\"message\":\"Missing required key\"}],\"message\":\"\",\"status\":400}");
+                .contains("Missing required key");
 
     }
 
