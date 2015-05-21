@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
-import uk.gov.openregister.JsonObjectMapper;
 import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
@@ -37,26 +36,27 @@ public class PostgresqlStore implements Store {
     }
 
     public void createTables(String tableName) {
-        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb, metadata jsonb)");
-        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + "_history (hash varchar(40) primary key,entry jsonb, metadata jsonb)");
+        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry json, metadata json)");
+        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + "_history (hash varchar(40) primary key,entry json, metadata json)");
     }
 
     @Override
     public void save(Record record) {
 
         String hash = record.getHash();
-        PGobject entryObject = createPGObject(record.getEntry().toString());
+        PGobject entryObject = createPGObject(record.normalisedEntry());
         PGobject metadataObject = createPGObject(new Metadata(DateTime.now(), "").normalise());
 
         try (Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
             try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, metadata) " +
-                    "( select ?,?,?  where not exists ( select 1 from " + dbInfo.tableName + " where entry @> ?))")) {
+                    "( select ?,?,?  where not exists ( select 1 from " + dbInfo.tableName + " where entry ->>?=?))")) {
                 st.setObject(1, hash);
                 st.setObject(2, entryObject);
                 st.setObject(3, metadataObject);
-                st.setObject(4, createPGObject(JsonObjectMapper.convertToString(mapOf(dbInfo.primaryKey, primaryKeyValue(record)))));
+                st.setObject(4, dbInfo.primaryKey);
+                st.setObject(5, primaryKeyValue(record));
                 int result = st.executeUpdate();
                 if (result == 0) {
                     throw new DatabaseException("No record inserted, a record with primary key value already exists");
@@ -82,16 +82,17 @@ public class PostgresqlStore implements Store {
             connection.setAutoCommit(false);
 
             String newHash = record.getHash();
-            PGobject entryObject = createPGObject(record.getEntry().toString());
+            PGobject entryObject = createPGObject(record.normalisedEntry());
             PGobject metadataObject = createPGObject(new Metadata(DateTime.now(), oldhash).normalise());
 
             try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, metadata) " +
-                    "( select ?,?,?  where exists ( select 1 from " + dbInfo.tableName + " where hash=? and entry @> ?))")) {
+                    "( select ?,?,?  where exists ( select 1 from " + dbInfo.tableName + " where hash=? and entry ->>?=?))")) {
                 st.setObject(1, newHash);
                 st.setObject(2, entryObject);
                 st.setObject(3, metadataObject);
                 st.setObject(4, oldhash);
-                st.setObject(5, createPGObject(JsonObjectMapper.convertToString(mapOf(dbInfo.primaryKey, primaryKeyValue(record)))));
+                st.setObject(5, dbInfo.primaryKey);
+                st.setObject(6, primaryKeyValue(record));
 
                 int result = st.executeUpdate();
                 if (result == 0) {
@@ -126,7 +127,7 @@ public class PostgresqlStore implements Store {
 
     @Override
     public Optional<Record> findByKV(String key, String value) {
-        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.tableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }'")
+        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.tableName + " WHERE entry ->>'" + key + "'='" + value + "'")
                 .andThen(this::toOptionalRecord);
     }
 
@@ -214,7 +215,7 @@ public class PostgresqlStore implements Store {
 
     private PGobject createPGObject(String data) {
         PGobject pgo = new PGobject();
-        pgo.setType("jsonb");
+        pgo.setType("json");
         try {
             pgo.setValue(data);
         } catch (Exception e) { //success: api setter throws checked exception
@@ -235,9 +236,8 @@ public class PostgresqlStore implements Store {
         final String metadataStr = resultSet.getString("metadata");
 
         final Metadata metadata = Metadata.from(metadataStr);
-        final Record record = new Record(new ObjectMapper().readValue(entry, JsonNode.class), Optional.of(metadata));
 
-        return record;
+        return new Record(new ObjectMapper().readValue(entry, JsonNode.class), Optional.of(metadata));
     }
 
     private List<Record> getRecords(ResultSet resultSet) throws SQLException, IOException {
@@ -249,10 +249,5 @@ public class PostgresqlStore implements Store {
         return result;
     }
 
-    private Map<String, Object> mapOf(String key, Object value) {
-        Map<String, Object> map = new HashMap<>();
-        map.put(key, value);
-        return map;
-    }
 }
 
