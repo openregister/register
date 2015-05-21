@@ -46,6 +46,7 @@
             case _ => {}
             }}
 
+            @defining(org.joda.time.format.DateTimeFormat.forPattern("dd MMMM yyyy")) { dayFormat =>
             @defining(org.joda.time.format.DateTimeFormat.forPattern("dd MMMM yyyy HH:mm:ss z")) { timeFormat =>
             <h2>History</h2>
 
@@ -73,11 +74,13 @@
                 <tr>
                     <td><span class="field-name">hash</span><span class="field-value"><a href="/hash/@entry.hash">@entry.hash</a></span>
                     </td>
-                    <td><span class="field-name">timestamp</span><span class="field-value">@entry.timestamp</span></td>
+                    <td><span class="field-name">timestamp</span><span
+                            class="field-value">@dayFormat.print(entry.timestamp)</span></td>
                 </tr>
                 }
                 </tbody>
             </table>
+            }
             }
         </div>
     </div>
