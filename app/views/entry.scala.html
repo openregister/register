@@ -10,7 +10,7 @@
             <h1 class="entry-header">@name.textValue</h1>
         }
         <p class="entry-source">An entry in the <a href="/">@controllers.App.instance.register.friendlyName() register</a></p>
-        <p class="hash">hash: @record.getHash</p>
+        <p class="entry-hash">hash: @record.getHash</p>
     </div>
 </div>
 
@@ -56,7 +56,7 @@
         }
         <h3>This version:</h3>
         <p><a href="/hash/@{record.getHash}">@{record.getHash}</a> @{timeFormat.print(record.getMetadata.get.creationTime)}</p>
-        <table id="history">
+        <table id="history" class="responsive">
             <thead>
                 <tr>
                     <td>hash</td>

@@ -251,7 +251,7 @@ dl dd {
 }
 
 /* fields */
-.hash {
+.entry-hash {
   word-wrap: break-word;
   margin-bottom: 30px;
 }
@@ -348,8 +348,8 @@ pre.panel {
   list-style: none;
 }
 
-/* entries  table */
-table#entries {
+/* responsive table */
+table.responsive {
   font-family: monospace;
   width: 100%;
 }
@@ -358,13 +358,9 @@ table {
   border-collapse: collapse;
   border-spacing: 1px;
 }
-table#entries td,
-table#entries th  {
+table.responsive  td,
+table.responsive  th  {
   vertical-align: top;
-}
-
-.entries-col {
-  overflow-x: scroll;
 }
 
 span.field-name {
@@ -387,32 +383,27 @@ td.view > a:after {
 /* see https://techblog.livingsocial.com/blog/2015/04/06/responsive-tables-in-pure-css */
 @media screen and (max-width: 1100px) {
 
-  table#entries {
+  table.responsive  {
     width: 90%;
     border: 1px solid #9B9595;
   }
 
-  table#entries thead {
+  table.responsive thead {
     display: none;
   }
 
-  table#entries tr {
+  table.responsive tr {
     display: block !important;
     border-bottom: 1px solid #9B9595;
   }
 
-  table#entries td {
+  table.responsive  td {
     display: block !important;
     text-align: right;
     border-bottom: 1px dotted #ccc;
-    min-height: 35px;
   }
 
-   table#entries td:first-child {
-    padding-top: 10px;
-  }
-
-  table#entries td:last-child {
+  table.responsive td:last-child {
     border-bottom: 0;
     padding-bottom: 10px;
   }
