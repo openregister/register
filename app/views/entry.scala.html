@@ -61,6 +61,7 @@
 
             <p><a href="/hash/@{record.getHash}">@{record.getHash}</a>
                 @{timeFormat.print(record.getMetadata.get.creationTime)}</p>
+            @if(!history.isEmpty) {
             <h3>Previous versions:</h3>
             <table id="history" class="responsive">
                 <thead>
@@ -80,6 +81,7 @@
                 }
                 </tbody>
             </table>
+            }
             }
             }
         </div>
