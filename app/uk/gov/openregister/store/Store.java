@@ -15,7 +15,7 @@ public interface Store {
 
     Optional<Record> findByKV(String key, String value);
 
-    List<RecordVersionInfo> history(String key, String value);
+    List<RecordVersionInfo> previousVersions(String hash);
 
     Optional<Record> findByHash(String hash);
 

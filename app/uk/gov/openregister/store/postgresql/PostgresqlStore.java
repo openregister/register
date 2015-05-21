@@ -131,17 +131,27 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<RecordVersionInfo> history(String key, String value) {
-        return database.<List<RecordVersionInfo>>select("SELECT hash,metadata::json->>'creationTime' as creationTime FROM " + dbInfo.historyTableName + " WHERE entry @> '" + "{ \"" + key + "\" : \"" + value + "\" }' limit 100")
-                .andThen((resultSet) -> {
-                    List<RecordVersionInfo> history = new ArrayList<>();
-                    while (resultSet.next()) {
-                        history.add(new RecordVersionInfo(resultSet.getString("hash"), DateTime.parse(resultSet.getString("creationTime"))));
-                    }
-                    Collections.sort(history);
-                    return history;
-                });
-
+    public List<RecordVersionInfo> previousVersions(String hash) {
+        // XXX hackity hack
+        List<RecordVersionInfo> versions = new ArrayList<>();
+        String currentHash = hash;
+        while (true) {
+            String previousHash = database.<String>select("SELECT metadata::json->>'previousEntryHash' AS previousHash FROM " + dbInfo.historyTableName +
+                            " WHERE hash = ?", currentHash
+            ).andThen(resultSet -> {
+                resultSet.next();
+                return resultSet.getString("previousHash");
+            });
+            if (previousHash == null || previousHash.isEmpty()) {
+                break;
+            }
+            Record record = findByHash(previousHash).get();
+            versions.add(
+                    new RecordVersionInfo(record.getHash(), record.getMetadata().get().creationTime)
+            );
+            currentHash = previousHash;
+        }
+        return versions;
     }
 
     @Override

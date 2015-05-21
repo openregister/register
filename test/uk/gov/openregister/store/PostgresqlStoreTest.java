@@ -177,7 +177,7 @@ public class PostgresqlStoreTest {
     }
 
     @Test
-    public void history_returnsAllHistoryForTheGivenKeyValueOrderedByLatest() {
+    public void previousVersions_returnsPreviousEntriesForTheGivenKeyValueOrderedByLatest() throws InterruptedException {
         String json = "{\"store_tests\":\"aValue\",\"key\":\"value1\"}";
         Record record1 = new Record(json);
         store.save(record1);
@@ -186,13 +186,15 @@ public class PostgresqlStoreTest {
         Record record3 = new Record(json.replace("value1", "value3"));
         store.update(record2.getHash(), record3);
 
-        List<RecordVersionInfo> resultValues = store.history("store_tests", "aValue");
+        Record retrievedRecord1 = store.findByHash(record1.getHash()).get();
+        Record retrievedRecord2 = store.findByHash(record2.getHash()).get();
+        Record retrievedRecord3 = store.findByHash(record3.getHash()).get();
 
-        assertThat(resultValues.size()).isEqualTo(3);
+        List<RecordVersionInfo> resultValues = store.previousVersions(retrievedRecord3.getHash());
 
-        assertThat(resultValues.get(0).hash).isEqualTo(record3.getHash());
-        assertThat(resultValues.get(1).hash).isEqualTo(record2.getHash());
-        assertThat(resultValues.get(2).hash).isEqualTo(record1.getHash());
+        RecordVersionInfo expectedVersion1 = new RecordVersionInfo(retrievedRecord1.getHash(), retrievedRecord1.getMetadata().get().creationTime);
+        RecordVersionInfo expectedVersion2 = new RecordVersionInfo(retrievedRecord2.getHash(), retrievedRecord2.getMetadata().get().creationTime);
+        assertThat(resultValues).isEqualTo(Arrays.asList(expectedVersion2, expectedVersion1));
     }
 
     @Test

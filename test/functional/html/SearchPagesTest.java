@@ -1,21 +1,13 @@
 package functional.html;
 
-import com.gargoylesoftware.htmlunit.html.DomNodeList;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import functional.ApplicationTests;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.Test;
 import play.libs.ws.WSResponse;
-import uk.gov.openregister.domain.Record;
-
-import java.io.IOException;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static play.mvc.Http.Status.ACCEPTED;
 import static play.mvc.Http.Status.OK;
 
 
@@ -70,41 +62,5 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(th.get(0).text()).isEqualTo("hash");
         assertThat(th.get(1).select("span.field-value").text()).isEqualTo("test-register");
         assertThat(th.get(2).select("span.field-value").text()).isEqualTo("name");
-    }
-
-
-    @Test
-    public void viewEntry_searchByKeyValueRendersTheHistory() throws IOException {
-        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
-        String hash =new Record(json).getHash();
-        postJson("/create", json);
-
-        assertThat(postJson("/supersede/" + hash, json.replace("value1", "new_value")).getStatus()).isEqualTo(ACCEPTED);
-
-        WSResponse response = get("/hash/" + hash);
-        assertThat(response.getStatus()).isEqualTo(OK);
-        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
-        Element table = html.getElementById("history");
-        assertThat(table).isNotNull();
-        Elements rows = table.select("tr");
-        assertThat(rows.size()).isEqualTo(3);
-
-    }
-
-    @Test
-    public void viewEntry_searchByHashRendersTheHistory() throws IOException {
-        String json = "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
-        String hash = new Record(json).getHash();
-        postJson("/create", json);
-
-        assertThat(postJson("/supersede/" + hash, json.replace("value1", "new_value")).getStatus()).isEqualTo(ACCEPTED);
-
-        WSResponse response = get("/hash/" + hash);
-        assertThat(response.getStatus()).isEqualTo(OK);
-        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
-        Element table = html.getElementById("history");
-        assertThat(table).isNotNull();
-        Elements rows = table.select("tr");
-        assertThat(rows.size()).isEqualTo(3);
     }
 }

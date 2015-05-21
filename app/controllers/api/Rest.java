@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static controllers.api.Representations.representationFor;
@@ -139,7 +138,7 @@ public class Rest extends Controller {
     }
 
     private List<RecordVersionInfo> getHistoryFor(Record r) {
-        return store.history(registerName, r.getEntry().get(registerName).textValue());
+        return store.previousVersions(r.getHash());
     }
 
     private Map<String, String> representationsMap(Function<String, String> routeForFormat) {
