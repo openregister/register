@@ -367,6 +367,14 @@ span.field-name {
   display: none
 }
 
+td p {
+  padding: 0.5625rem 0.625rem;
+  font-size: 0.875rem;
+  color: #222;
+  padding-left: 0px;
+  margin-bottom: 0px;
+}
+
 td.view {
   font-family: Helvetica, Arial;
   font-size: 0.7rem !important;
