@@ -27,9 +27,13 @@ public class Field {
     }
 
     public Field(String name) {
+        this(name, Datatype.DEFAULT);
+    }
+
+    public Field(String name, Datatype datatype) {
         this.name = name;
         this.friendlyName = WordUtils.capitalize(name);
-        this.datatype = Datatype.DEFAULT;
+        this.datatype = datatype;
         this.cardinality = Cardinality.ONE;
         this.register = Optional.empty();
         this.allowedValues = Optional.empty();

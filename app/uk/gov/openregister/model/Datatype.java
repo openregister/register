@@ -1,15 +1,25 @@
 package uk.gov.openregister.model;
 
-import uk.gov.openregister.model.datatype.AString;
-
 import java.util.Arrays;
 import java.util.List;
 
 public abstract class Datatype {
 
-    public static final AString DEFAULT = new AString();
+    public static final Datatype DEFAULT = new Datatype() {
+        @Override
+        public String getName() {
+            return "string";
+        }
+    };
 
-    private static final List<Datatype> knownTypes = Arrays.asList(DEFAULT);
+    public static final Datatype TEXT = new Datatype() {
+        @Override
+        public String getName() {
+            return "text";
+        }
+    };
+
+    private static final List<Datatype> knownTypes = Arrays.asList(DEFAULT, TEXT);
 
 
     public abstract String getName();
