@@ -5,29 +5,36 @@
 @header()
 
 <div class="row">
-    <div class="small-12 large-12 columns">
-
+    <div class="small-12 large-8 columns">
         @Option(record.getEntry.get("name")).map { name =>
-            <h1 id="entry_name">@name.textValue</h1>
+            <h1 class="entry-header">@name.textValue</h1>
         }
+        <p class="entry-source">An entry in the <a href="/">@controllers.App.instance.register.friendlyName() register</a></p>
+        <p class="entry-hash">hash: @record.getHash</p>
+    </div>
+</div>
 
-        <p>An entry in the <a href="/">@controllers.App.instance.register.friendlyName() register</a>.</p>
-
-        <h2>View fields</h2>
-
-        <div class="panel entry">
-            <dl>
-                <dt class="hash">hash</dt>
-                <dd class="hash">@record.getHash</dd>
+<div class="row">
+    <div class="small-12 large-12 columns">
+        <table id="entry-table">
+            <tbody>
                 @fields.map { field =>
-                <dt class="@field.getName()">@controllers.html.Utils.toLink(field)</dt>
-                <dd class="@field.getName()">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</dd>
+                <tr>
+                    <td class="@field.getName()">@controllers.html.Utils.toLink(field)</td>
+                    <td class="@field.getName()">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</td>
+                      </tr>
                 }
-            </dl>
-        </div> <!-- /.entry -->
 
+            </tbody>
+        </table>
     </div> <!-- /.columns -->
 </div> <!-- /.row -->
+
+<div class="row">
+    <div class="small-12 large-6 columns">
+        @data_formats(representationsMap)
+    </div>
+</div>
 
 <div class="row">
     <div class="small-12 large-12 columns">
@@ -49,7 +56,7 @@
         }
         <h3>This version:</h3>
         <p><a href="/hash/@{record.getHash}">@{record.getHash}</a> @{timeFormat.print(record.getMetadata.get.creationTime)}</p>
-        <table>
+        <table id="history" class="responsive">
             <thead>
                 <tr>
                     <td>hash</td>
@@ -66,12 +73,6 @@
             </tbody>
         </table>
         }
-    </div>
-</div>
-
-<div class="row">
-    <div class="large-6 columns">
-        @data_formats(representationsMap)
     </div>
 </div>
 @license()

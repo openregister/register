@@ -81,27 +81,30 @@ public class SearchPagesTest extends ApplicationTests {
 
         assertThat(postJson("/supersede/" + hash, json.replace("value1", "new_value")).getStatus()).isEqualTo(ACCEPTED);
 
-        HtmlPage page = webClient.getPage(BASE_URL + "/test-register/testregisterkey");
+        WSResponse response = get("/hash/" + hash);
+        assertThat(response.getStatus()).isEqualTo(OK);
+        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
+        Element table = html.getElementById("history");
+        assertThat(table).isNotNull();
+        Elements rows = table.select("tr");
+        assertThat(rows.size()).isEqualTo(3);
 
-        DomNodeList<HtmlElement> tables = page.getBody().getElementsByTagName("table");
-
-        assertThat(tables.size()).isEqualTo(1);
-        assertThat(((HtmlTable)tables.get(0)).getRows().size()).isEqualTo(3);
     }
 
     @Test
     public void viewEntry_searchByHashRendersTheHistory() throws IOException {
         String json = "{\"test-register\":\"testregisterkey\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}";
-        String hash =new Record(json).getHash();
+        String hash = new Record(json).getHash();
         postJson("/create", json);
 
         assertThat(postJson("/supersede/" + hash, json.replace("value1", "new_value")).getStatus()).isEqualTo(ACCEPTED);
 
-        HtmlPage page = webClient.getPage(BASE_URL + "/hash/" + hash);
-
-        DomNodeList<HtmlElement> tables = page.getBody().getElementsByTagName("table");
-
-        assertThat(tables.size()).isEqualTo(1);
-        assertThat(((HtmlTable)tables.get(0)).getRows().size()).isEqualTo(3);
+        WSResponse response = get("/hash/" + hash);
+        assertThat(response.getStatus()).isEqualTo(OK);
+        org.jsoup.nodes.Document html = Jsoup.parse(response.getBody());
+        Element table = html.getElementById("history");
+        assertThat(table).isNotNull();
+        Elements rows = table.select("tr");
+        assertThat(rows.size()).isEqualTo(3);
     }
 }
