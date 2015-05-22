@@ -1,9 +1,7 @@
 @(representationsMap: Map[String, String])
 <p class="data-representations">This data is available as:
      <span>
-        @representationsMap.map { representation =>
-           <a href=@representation._2>@representation._1</a>
-        }
+        @controllers.html.Utils.toRepresentationLinks(representationsMap)
     </span>
 </p>
 

@@ -13,10 +13,19 @@ import uk.gov.openregister.model.Field;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
 public class Utils {
+
+    public static Html toRepresentationLinks(Map<String, String> representationMap) {
+        final StringBuilder linksHtml = new StringBuilder("");
+
+        representationMap.forEach((k,v) -> linksHtml.append(String.format("<a href=\"%s\">%s</a>,", v, k)));
+
+        return Html.apply(linksHtml.toString().replaceAll(",$", "").replaceAll(",([^,]+)$", " and$1"));
+    }
 
     public static Html toLink(Field field) {
         return toLink("field", field.getName());
