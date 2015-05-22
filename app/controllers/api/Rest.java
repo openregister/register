@@ -27,6 +27,8 @@ import static java.util.stream.Collectors.toMap;
 public class Rest extends Controller {
 
     public static final String REPRESENTATION_QUERY_PARAM = "_representation";
+    public static final String LIMIT_QUERY_PARAM = "_limit";
+    private static final int DEFAULT_RESULT_SIZE = 100;
 
     private final Store store;
     private final List<String> fieldNames;
@@ -99,6 +101,14 @@ public class Rest extends Controller {
         return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
+    private int limitQueryValue() {
+        try {
+            return Integer.parseInt(request().getQueryString(LIMIT_QUERY_PARAM));
+        } catch (NullPointerException | NumberFormatException e) {
+            return DEFAULT_RESULT_SIZE;
+        }
+    }
+
     private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat) {
         final Representation representation;
         try {
@@ -119,14 +129,16 @@ public class Rest extends Controller {
             return F.Promise.pure(formatNotRecognisedResponse(representationQueryString()));
         }
 
+        int limit = limitQueryValue();
+
         F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {
-                return store.search(request().queryString().get("_query")[0]);
+                return store.search(request().queryString().get("_query")[0], limit);
             } else {
                 Map<String, String> map = request().queryString().entrySet().stream()
                         .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
                         .collect(toMap(Map.Entry::getKey, queryParamEntry -> queryParamEntry.getValue()[0]));
-                return store.search(map);
+                return store.search(map, limit);
             }
         });
 

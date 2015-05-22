@@ -161,7 +161,7 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<Record> search(Map<String, String> map) {
+    public List<Record> search(Map<String, String> map, int maxEntries) {
         String sql = "SELECT * FROM " + dbInfo.tableName;
 
         if (!map.isEmpty()) {
@@ -171,14 +171,14 @@ public class PostgresqlStore implements Store {
             sql += " WHERE " + StringUtils.join(where, " AND ");
         }
 
-        sql += " LIMIT 100";
+        sql += " LIMIT " + maxEntries;
 
         return database.<List<Record>>select(sql).andThen(this::getRecords);
 
     }
 
     @Override
-    public List<Record> search(String query) {
+    public List<Record> search(String query, int maxEntries) {
 
         String sql = "SELECT * FROM " + dbInfo.tableName;
 
@@ -189,7 +189,7 @@ public class PostgresqlStore implements Store {
             sql += " WHERE " + StringUtils.join(where, " OR ");
         }
 
-        sql += " LIMIT 100";
+        sql += " LIMIT " + maxEntries;
 
         return database.<List<Record>>select(sql).andThen(this::getRecords);
     }
