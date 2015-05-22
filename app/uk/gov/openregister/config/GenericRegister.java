@@ -39,7 +39,7 @@ public class GenericRegister extends Register {
 
     public static List<Field> getFields(String registerName, BiFunction<Integer, String, Object> errorHandler) {
         CurieResolver curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
-        String rrUrl =  curieResolver.resolve(new Curie("register", registerName)) + "?_representation=json";
+        String rrUrl =  curieResolver.resolve(new Curie("register", registerName)) + ".json";
         WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
 
         if (rr.getStatus() == 200 ) {
@@ -49,7 +49,7 @@ public class GenericRegister extends Register {
 
             return fieldNames.stream().map(field -> {
 
-                String frUrl = curieResolver.resolve(new Curie("field", field)) + "?_representation=json";
+                String frUrl = curieResolver.resolve(new Curie("field", field)) + ".json";
                 WSResponse fr = WS.client().url(frUrl).execute().get(TIMEOUT);
 
                 if (fr.getStatus() == 200) {

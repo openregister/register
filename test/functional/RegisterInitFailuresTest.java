@@ -59,7 +59,7 @@ public class RegisterInitFailuresTest {
     public void testRegisterStartsWhenInitialisationFails() throws Exception {
         running(testServer(3334, fakeApplication("test-register-that-doesnt-exist")), () -> {
             assertThat(App.instance.started()).isEqualTo(false);
-            assertThat(App.instance.getInitErrors()).containsExactly("Error: got status 404 calling http://localhost:8888/register/test-register-that-doesnt-exist?_representation=json");
+            assertThat(App.instance.getInitErrors()).containsExactly("Error: got status 404 calling http://localhost:8888/register/test-register-that-doesnt-exist.json");
             assertThat(App.instance.register.name()).isEqualTo("test-register-that-doesnt-exist");
         });
     }
@@ -70,7 +70,7 @@ public class RegisterInitFailuresTest {
         running(testServer(3334, fakeApplication("test-register-that-doesnt-exist")), () -> {
             String body = get("/").getBody();
             assertThat(body).contains("Test-register-that-doesnt-exist Register bootstrap failed");
-            assertThat(body).contains("Error: got status 404 calling http://localhost:8888/register/test-register-that-doesnt-exist?_representation=json");
+            assertThat(body).contains("Error: got status 404 calling http://localhost:8888/register/test-register-that-doesnt-exist.json");
         });
     }
 
@@ -79,7 +79,7 @@ public class RegisterInitFailuresTest {
         running(testServer(3334, fakeApplication("test-register-with-fields-that-dont-exist")), () -> {
             String body = get("/").getBody();
             assertThat(body).contains("Test-register-with-fields-that-dont-exist Register bootstrap failed");
-            assertThat(body).contains("Error: got status 404 calling http://localhost:8888/field/unknown?_representation=json");
+            assertThat(body).contains("Error: got status 404 calling http://localhost:8888/field/unknown.json");
         });
     }
 
