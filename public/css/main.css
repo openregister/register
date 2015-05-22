@@ -424,7 +424,6 @@ td.view > a:after {
 
   table.responsive  td {
     display: block !important;
-    text-align: right;
     border-bottom: 1px dotted #ccc;
   }
 
@@ -437,6 +436,7 @@ td.view > a:after {
     display: block;
     float: left;
     font-weight: bold;
+    width: 25%;
   }
 
 }
@@ -448,10 +448,4 @@ td.view > a:after {
   .intro p {
     margin-bottom: 4px;
   }
-
-}
-
-
-@media only screen and (max-width: 480px) {
-
 }
