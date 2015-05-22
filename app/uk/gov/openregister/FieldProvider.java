@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FieldProvider {
     public static final int TIMEOUT = 30000;
@@ -24,9 +25,9 @@ public class FieldProvider {
         if (rr.getStatus() == 200 ) {
             JsonNode rEntry = rr.asJson().get("entry");
 
-            List<String> fieldNames = StreamUtils.asStream(rEntry.get("fields").elements()).map(JsonNode::textValue).collect(Collectors.toList());
+            Stream<String> fieldNames = StreamUtils.asStream(rEntry.get("fields").elements()).map(JsonNode::textValue);
 
-            return fieldNames.stream().map(field -> {
+            return fieldNames.map(field -> {
 
                 String frUrl = curieResolver.resolve(new Curie("field", field)) + ".json";
                 WSResponse fr = WS.client().url(frUrl).execute().get(TIMEOUT);
