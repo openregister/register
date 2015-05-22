@@ -37,7 +37,7 @@ public class UtilsTest extends ApplicationTests {
     @Test
     public void testRenderALinkToADatatype() throws Exception {
 
-        assertThat(Utils.toLink(Datatype.DEFAULT).text()).isEqualTo("<a class=\"link_to_register\" href=\"http://localhost:8888/datatype/string\">string</a>");
+        assertThat(Utils.toLink(Datatype.STRING).text()).isEqualTo("<a class=\"link_to_register\" href=\"http://localhost:8888/datatype/string\">string</a>");
     }
 
     @Test

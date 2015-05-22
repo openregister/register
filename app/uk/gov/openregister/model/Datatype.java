@@ -5,7 +5,7 @@ import java.util.List;
 
 public abstract class Datatype {
 
-    public static final Datatype DEFAULT = new Datatype() {
+    public static final Datatype STRING = new Datatype() {
         @Override
         public String getName() {
             return "string";
@@ -19,7 +19,7 @@ public abstract class Datatype {
         }
     };
 
-    private static final List<Datatype> knownTypes = Arrays.asList(DEFAULT, TEXT);
+    private static final List<Datatype> knownTypes = Arrays.asList(STRING, TEXT);
 
 
     public abstract String getName();

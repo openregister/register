@@ -10,7 +10,7 @@ public class Field {
 
     String name;
     String friendlyName;
-    Datatype datatype = Datatype.DEFAULT;
+    Datatype datatype = Datatype.STRING;
     Cardinality cardinality = Cardinality.ONE;
     Optional<String> register = Optional.empty();
     Optional<List<String>> allowedValues = Optional.empty();
@@ -20,14 +20,14 @@ public class Field {
 
         name = Optional.of(node.get("field")).map(JsonNode::asText).get();
         friendlyName = Optional.ofNullable(node.get("name")).map(JsonNode::asText).orElse(WordUtils.capitalize(name));
-        datatype = Optional.ofNullable(node.get("datatype")).map(d -> Datatype.of(d.asText())).orElse(Datatype.DEFAULT);
+        datatype = Optional.ofNullable(node.get("datatype")).map(d -> Datatype.of(d.asText())).orElse(Datatype.STRING);
         cardinality = Optional.ofNullable(node.get("cardinality")).map(c -> Cardinality.fromValue(c.textValue())).orElse(Cardinality.ONE);
         register = Optional.ofNullable(node.get("register")).map(JsonNode::asText).filter(s -> !s.isEmpty() && !"null".equals(s));
         this.allowedValues = Optional.empty();
     }
 
     public Field(String name) {
-        this(name, Datatype.DEFAULT);
+        this(name, Datatype.STRING);
     }
 
     public Field(String name, Datatype datatype) {
