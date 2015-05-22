@@ -27,17 +27,17 @@ public class FieldProvider {
 
             Stream<String> fieldNames = StreamUtils.asStream(rEntry.get("fields").elements()).map(JsonNode::textValue);
 
-            return fieldNames.map(field -> {
+            return fieldNames.flatMap(field -> {
 
                 String frUrl = curieResolver.resolve(new Curie("field", field)) + ".json";
                 WSResponse fr = WS.client().url(frUrl).execute().get(TIMEOUT);
 
                 if (fr.getStatus() == 200) {
                     JsonNode fEntry = fr.asJson().get("entry");
-                    return new Field(fEntry);
+                    return Stream.of(new Field(fEntry));
                 } else {
                     errorHandler.apply(fr.getStatus(), frUrl);
-                    return new Field("unknown");
+                    return Stream.empty();
                 }
 
             }).collect(Collectors.toList());
