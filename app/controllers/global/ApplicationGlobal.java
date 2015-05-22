@@ -2,7 +2,6 @@ package controllers.global;
 
 import controllers.App;
 import controllers.api.HtmlRepresentation;
-import controllers.api.JsonRepresentation;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
@@ -35,7 +34,7 @@ public class ApplicationGlobal extends GlobalSettings {
     @Override
     public F.Promise<Result> onBadRequest(Http.RequestHeader requestHeader, String s) {
         return F.Promise.pure(
-                JsonRepresentation.instance.toResponse(400, s)
+                HtmlRepresentation.instance.toResponse(400, s)
         );
     }
 

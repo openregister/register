@@ -3,14 +3,11 @@ package controllers.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import play.mvc.Result;
-import play.mvc.Results;
-import uk.gov.openregister.validation.ValidationError;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static play.mvc.Results.status;
 
 public class JsonRepresentation extends JacksonRepresentation {
@@ -27,17 +24,13 @@ public class JsonRepresentation extends JacksonRepresentation {
         return objectMapper;
     }
 
-    public Result toResponse(int status, String message) {
-        return toResponseWithErrors(status, message, Collections.<ValidationError>emptyList());
-    }
-
-    public Results.Status toResponseWithErrors(int statusCode, String message, List<ValidationError> errors) {
+    public Result createdResponse() {
         Map<String, Object> result = new HashMap<>();
-        result.put("status", statusCode);
-        result.put("message", message);
-        result.put("errors", errors);
+        result.put("status", 202);
+        result.put("message", "Record saved successfully");
+        result.put("errors", emptyList());
 
-        return status(statusCode, asString(result)).as(CONTENT_TYPE);
+        return status(202, asString(result)).as(CONTENT_TYPE);
     }
 
     public static JsonRepresentation instance = new JsonRepresentation();

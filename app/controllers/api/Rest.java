@@ -48,13 +48,13 @@ public class Rest extends Controller {
             try {
                 store.save(r);
             } catch (DatabaseException e) {
-                return JsonRepresentation.instance.toResponse(400, e.getMessage());
+                return HtmlRepresentation.instance.toResponse(400, e.getMessage());
             }
 
-            return JsonRepresentation.instance.toResponse(202, "Record saved successfully");
+            return JsonRepresentation.instance.createdResponse();
         }
 
-        return JsonRepresentation.instance.toResponseWithErrors(400, "", validationErrors);
+        return HtmlRepresentation.instance.toResponseWithErrors(400, validationErrors);
 
     }
 
@@ -67,12 +67,12 @@ public class Rest extends Controller {
             try {
                 store.update(hash, r);
             } catch (DatabaseException e) {
-                return JsonRepresentation.instance.toResponse(400, e.getMessage());
+                return HtmlRepresentation.instance.toResponse(400, e.getMessage());
             }
-            return JsonRepresentation.instance.toResponse(202, "Record saved successfully");
+            return JsonRepresentation.instance.createdResponse();
         }
 
-        return JsonRepresentation.instance.toResponseWithErrors(400, "", validationErrors);
+        return HtmlRepresentation.instance.toResponseWithErrors(400, validationErrors);
     }
 
     public F.Promise<Result> findByKey(String key, String value) {
