@@ -2,6 +2,7 @@ package uk.gov.openregister.config;
 
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
+import uk.gov.openregister.FieldProvider;
 import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.model.Datatype;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class FieldRegister extends Register {
 
-    public static final List<Field> FIELDS = Arrays.asList(new Field("field"), new Field("datatype"), new Field("register", Optional.of("register")), new Field("cardinality"), new Field("text", Datatype.TEXT));
+    private List<Field> cachedFields = Arrays.asList(new Field("field"), new Field("datatype"), new Field("register", Optional.of("register")), new Field("cardinality"), new Field("text", Datatype.TEXT));
 
     private List<Record> registers = new ArrayList<>();
 
@@ -55,7 +56,12 @@ public class FieldRegister extends Register {
 
     @Override
     public List<Field> fields() {
-        return FIELDS;
+        List<Field> fetchedFields = FieldProvider.getFields(name(), (status, url) -> "ignored");
+        if (!fetchedFields.isEmpty()) {
+            cachedFields = fetchedFields;
+            return fetchedFields;
+        }
+        return cachedFields;
     }
 
     public List<Record> getRegisters() {
