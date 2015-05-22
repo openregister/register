@@ -18,6 +18,7 @@ public class FieldProvider {
     public static final int TIMEOUT = 30000;
 
     public static List<Field> getFields(String registerName, BiFunction<Integer, String, Object> errorHandler) {
+        // would be nice to cache some or all of these requests on the client side
         CurieResolver curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
         String rrUrl =  curieResolver.resolve(new Curie("register", registerName)) + ".json";
         WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
