@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FieldProvider {
     public static List<Field> getFields(String registerName, BiFunction<Integer, String, Object> errorHandler) {
@@ -26,19 +27,17 @@ public class FieldProvider {
 
             List<String> fieldNames = StreamUtils.asStream(rEntry.get("fields").elements()).map(JsonNode::textValue).collect(Collectors.toList());
 
-            return fieldNames.stream().map(field -> {
-
+            return fieldNames.stream().flatMap(field -> {
                 String frUrl = curieResolver.resolve(new Curie("field", field)) + ".json";
                 WSResponse fr = WS.client().url(frUrl).get().get(GenericRegister.TIMEOUT);
 
                 if (fr.getStatus() == 200) {
                     JsonNode fEntry = fr.asJson().get("entry");
-                    return new Field(fEntry);
+                    return Stream.of(new Field(fEntry));
                 } else {
                     errorHandler.apply(fr.getStatus(), frUrl);
-                    return new Field("unknown");
+                    return Stream.empty();
                 }
-
             }).collect(Collectors.toList());
         } else {
             errorHandler.apply(rr.getStatus(), rrUrl);
