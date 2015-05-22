@@ -8,6 +8,8 @@ import org.junit.Test;
 import play.libs.ws.WSResponse;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static play.mvc.Http.Status.ACCEPTED;
 import static play.mvc.Http.Status.OK;
 
 
@@ -63,4 +65,6 @@ public class SearchPagesTest extends ApplicationTests {
         assertThat(th.get(1).select("span.field-value").text()).isEqualTo("test-register");
         assertThat(th.get(2).select("span.field-value").text()).isEqualTo("name");
     }
+
+    
 }

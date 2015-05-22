@@ -1,8 +1,8 @@
 package functional.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import functional.ApplicationTests;
-import uk.gov.openregister.JsonObjectMapper;
 import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -10,6 +10,7 @@ import play.libs.Json;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.domain.Record;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class CreateRecordTest extends ApplicationTests {
     }
 
     @Test
-    public void testCreateARecordWithInvalidAndMissingKeysReturns400() {
+    public void testCreateARecordWithInvalidAndMissingKeysReturns400() throws IOException {
         String json = "{\"name\":\"entryName\",\"invalidKey\": \"value1\",\"key2\": \"value2\"}";
         WSResponse response = postJson("/create", json);
 

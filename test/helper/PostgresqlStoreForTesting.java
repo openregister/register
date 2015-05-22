@@ -30,8 +30,8 @@ public class PostgresqlStoreForTesting {
 
     public static void createTables(String tableName) throws SQLException, ClassNotFoundException {
         try(Statement st = getStatement()){
-            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry jsonb,metadata jsonb)");
-            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + "_history (hash varchar(40) primary key,entry jsonb,metadata jsonb)");
+            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry json,metadata json)");
+            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + "_history (hash varchar(40) primary key,entry json,metadata json)");
         }
     }
 

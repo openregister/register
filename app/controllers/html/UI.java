@@ -87,7 +87,7 @@ public class UI extends Controller {
     public Result renderUpdateEntryForm(String hash) {
         Record record = store.findByHash(hash).get();
 
-        Map params = JsonObjectMapper.convert(record.getEntry().toString(), Map.class);
+        Map params = JsonObjectMapper.convert(record.getEntry(), Map.class);
 
         return ok(views.html.updateEntry.render(registerName,
                         fields,

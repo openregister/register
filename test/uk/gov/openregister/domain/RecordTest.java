@@ -18,7 +18,7 @@ public class RecordTest {
     @Test
     public void testKeysAreSortedBeforeSaving() throws Exception {
 
-        assertThat(new Record("{\"b\":\"value\",\"a\":\"another\"}").normalise())
+        assertThat(new Record("{\"b\":\"value\",\"a\":\"another\"}").normalisedEntry())
                 .isEqualTo("{\"a\":\"another\",\"b\":\"value\"}");
 
     }
@@ -26,7 +26,7 @@ public class RecordTest {
     @Test
     public void testWhitespacesAreRemovedBeforeSaving() throws Exception {
 
-        assertThat(new Record("{\"a\": \"value\", \n\"b\": \"another\"}").normalise())
+        assertThat(new Record("{\"a\": \"value\", \n\"b\": \"another\"}").normalisedEntry())
                 .isEqualTo("{\"a\":\"value\",\"b\":\"another\"}");
 
     }
