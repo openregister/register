@@ -102,17 +102,11 @@ public class Rest extends Controller {
     }
 
     private int limitQueryValue() {
-        int limit = DEFAULT_RESULT_SIZE;
-        final String limitString = request().getQueryString(LIMIT_QUERY_PARAM);
-        if(limitString != null) {
-            try {
-                limit = Integer.parseInt(limitString);
-            } catch (NumberFormatException e) {
-                // Couldnt parse the number - leave limit as default
-            }
+        try {
+            return Integer.parseInt(request().getQueryString(LIMIT_QUERY_PARAM));
+        } catch (NullPointerException | NumberFormatException e) {
+            return DEFAULT_RESULT_SIZE;
         }
-
-        return limit;
     }
 
     private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat) {
