@@ -2,6 +2,7 @@ package uk.gov.openregister.config;
 
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
+import uk.gov.openregister.FieldProvider;
 import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.model.Datatype;
@@ -55,7 +56,7 @@ public class FieldRegister extends Register {
 
     @Override
     public List<Field> fields() {
-        List<Field> fetchedFields = GenericRegister.getFields(name(), (status, url) -> "ignored");
+        List<Field> fetchedFields = FieldProvider.getFields(name(), (status, url) -> "ignored");
         if (!fetchedFields.isEmpty()) {
             cachedFields = fetchedFields;
             return fetchedFields;
