@@ -2,6 +2,7 @@ package controllers.html;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
+import org.markdownj.MarkdownProcessor;
 import play.twirl.api.Html;
 import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.config.ApplicationConf;
@@ -35,7 +36,7 @@ public class Utils {
         return curieResolver.resolve(new Curie(register, value));
     }
 
-    public static Html toRegisterLink(String registerName){
+    public static Html toRegisterLink(String registerName) {
         String registerUri = ApplicationConf.getString("registers.service.template.url").replace("__REGISTER__", registerName);
         return Html.apply("<a class=\"link_to_register\" href=\"" + registerUri + "\">" + registerName + "</a>");
     }
@@ -60,23 +61,27 @@ public class Utils {
     }
 
     public static Html toValue(Field field, JsonNode value) {
-        return Html.apply(toRawValue(field, value));
+        if (field.getDatatype() == Datatype.TEXT) {
+            return Html.apply(new MarkdownProcessor().markdown(toRawValue(field, value)));
+        } else {
+            return Html.apply(toRawValue(field, value));
+        }
     }
 
     public static String join(List<String> list) {
-        return "[ " + StringUtils.join(list, ", ")+ " ]";
+        return "[ " + StringUtils.join(list, ", ") + " ]";
     }
 
     public static boolean isDisplayField(String fieldName, String register) {
-        if(fieldName.equalsIgnoreCase(register)){
+        if (fieldName.equalsIgnoreCase(register)) {
             return true;
         }
-        if(fieldName.equalsIgnoreCase("hash")){
+        if (fieldName.equalsIgnoreCase("hash")) {
             return true;
         }
         // Alpha quick hack to pick some other displayable field.
         // This may be something that moves to fields or config?
-        if(fieldName.equalsIgnoreCase("name") || fieldName.equalsIgnoreCase("street")){
+        if (fieldName.equalsIgnoreCase("name") || fieldName.equalsIgnoreCase("street")) {
             return true;
         }
         return false;

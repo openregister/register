@@ -4,17 +4,18 @@ import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.model.Datatype;
 import uk.gov.openregister.model.Field;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class FieldRegister extends Register {
 
-    public static final List<Field> FIELDS = Arrays.asList(new Field("field"), new Field("datatype"), new Field("register", Optional.of("register")), new Field("cardinality"), new Field("text"));
+    public static final List<Field> FIELDS = Arrays.asList(new Field("field"), new Field("datatype"), new Field("register", Optional.of("register")), new Field("cardinality"), new Field("text", Datatype.TEXT));
 
     private List<Record> registers = new ArrayList<>();
 
