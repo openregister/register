@@ -19,8 +19,8 @@ public class Metadata {
 
     public String normalise(){
         Map<String, Object> map = new HashMap<>();
-        map.put("creationTime", creationTime.toString());
         map.put("previousEntryHash",  previousEntryHash);
+        map.put("creationTime", creationTime.toString());
         return JsonObjectMapper.convertToString(map);
     }
 

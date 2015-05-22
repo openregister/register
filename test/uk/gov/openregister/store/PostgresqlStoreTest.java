@@ -37,7 +37,7 @@ public class PostgresqlStoreTest {
     }
 
     @Test
-    public void save_insertsARecordWithMetadataAndHashAndInsertsIntoTheHistory() throws JSONException {
+    public void save_insertsARecordWithMetadataAndHashAndInsertsIntoTheHistory() {
         String json = "{\"store_tests\": \"va'lue1\",\"key2\": \"value2\"}";
         String expectedhash = "13b7e046212329ca01bd66cc505028dd3ce993b3";
         store.save(new Record(json));
@@ -46,7 +46,7 @@ public class PostgresqlStoreTest {
 
         assertThat(rows.size()).isEqualTo(1);
         assertThat(rows.get(0).hash).isEqualTo(expectedhash);
-        JSONAssert.assertEquals(json, rows.get(0).entry.toString(), true);
+        assertEquals("{\"key2\":\"value2\",\"store_tests\":\"va'lue1\"}", rows.get(0).entry.toString());
         assertNotNull(rows.get(0).metadata.creationTime);
         assertEquals("", rows.get(0).metadata.previousEntryHash);
 
@@ -54,7 +54,7 @@ public class PostgresqlStoreTest {
 
         assertThat(historyRows.size()).isEqualTo(1);
         assertThat(historyRows.get(0).hash).isEqualTo(expectedhash);
-        JSONAssert.assertEquals(json, historyRows.get(0).entry.toString(), true);
+        assertEquals("{\"key2\":\"value2\",\"store_tests\":\"va'lue1\"}", rows.get(0).entry.toString());
         assertNotNull(historyRows.get(0).metadata.creationTime);
         assertEquals("", historyRows.get(0).metadata.previousEntryHash);
     }
@@ -86,7 +86,7 @@ public class PostgresqlStoreTest {
         List<DataRow> rows = PostgresqlStoreForTesting.findAll(TABLE_NAME);
         assertThat(rows.size()).isEqualTo(1);
         assertThat(rows.get(0).hash).isEqualTo(newRecord.getHash());
-        JSONAssert.assertEquals(rows.get(0).entry.toString(), newRecord.getEntry().toString(), true);
+        assertEquals("{\"key2\":\"newValue\",\"store_tests\":\"aValue\"}", rows.get(0).entry.toString());
 
         List<DataRow> historyRows = PostgresqlStoreForTesting.findAll(HISTORY_TABLE_NAME);
         assertThat(historyRows.size()).isEqualTo(2);
@@ -158,7 +158,7 @@ public class PostgresqlStoreTest {
         store.save(new Record(json));
 
         Optional<Record> record = store.findByHash("0b5f9e93b101ba410da10279229b6e0aa1411b85");
-        JSONAssert.assertEquals(json, record.get().normalise(), true);
+        JSONAssert.assertEquals(json, record.get().normalisedEntry(), true);
         assertThat(record.get().getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
     }
 
