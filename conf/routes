@@ -11,6 +11,8 @@ POST        /ui/supersede/:hash                              @controllers.html.U
 GET         /load                                            @controllers.api.ImportData.loadWithProgress()
 GET         /load/progress                                   @controllers.api.ImportData.progress()
 
+GET         /all                                             @controllers.api.Rest.all()
+GET         /all.$format<[a-z]+>                             @controllers.api.Rest.allWithFormat(format)
 GET         /hash/$hash<[A-Fa-f0-9]+>                        @controllers.api.Rest.findByHash(hash)
 GET         /hash/$hash<[A-Fa-f0-9]+>.$format<[a-z]+>        @controllers.api.Rest.findByHashWithFormat(hash, format)
 GET         /search                                          @controllers.api.Rest.search()
