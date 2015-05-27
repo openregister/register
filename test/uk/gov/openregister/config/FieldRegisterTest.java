@@ -1,5 +1,6 @@
 package uk.gov.openregister.config;
 
+import functional.ApplicationTests;
 import org.junit.Test;
 import play.libs.Json;
 import uk.gov.openregister.domain.Record;
@@ -9,7 +10,7 @@ import java.util.Collections;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class FieldRegisterTest {
+public class FieldRegisterTest extends ApplicationTests {
 
     @Test
     public void testReturnsRegisterNames() throws Exception {
