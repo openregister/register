@@ -25,9 +25,10 @@ import static java.util.stream.Collectors.toMap;
 
 public class Rest extends BaseController {
 
-    public static final String REPRESENTATION_QUERY_PARAM = "_representation";
-    public static final String LIMIT_QUERY_PARAM = "_limit";
+    private static final String REPRESENTATION_QUERY_PARAM = "_representation";
+    private static final String LIMIT_QUERY_PARAM = "_limit";
     private static final int DEFAULT_RESULT_SIZE = 100;
+    private static final int ALL_ENTRIES_LIMIT = 100000;
 
     @BodyParser.Of(BodyParser.Json.class)
     public Result create() throws JsonProcessingException {
@@ -115,16 +116,29 @@ public class Rest extends BaseController {
         ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found", registerName));
     }
 
-    public F.Promise<Result> search() {
+    public F.Promise<Result> all() throws Exception {
+        return allWithFormat("html");
+    }
+
+    public F.Promise<Result> allWithFormat(String format) throws Exception {
+        return doSearch(ALL_ENTRIES_LIMIT, Optional.of(format));
+    }
+
+    public F.Promise<Result> search() throws Exception {
+        int limit = limitQueryValue();
+
+        return doSearch(limit, Optional.empty());
+    }
+
+    private F.Promise<Result> doSearch(int limit, Optional<String> format) throws Exception {
         Register register = register();
         Representation representation;
         try {
-            representation = representationFor(representationQueryString());
+            representation = format.map(Representations::representationFor)
+                    .orElse(representationFor(representationQueryString()));
         } catch (IllegalArgumentException e) {
             return F.Promise.pure(formatNotRecognisedResponse(representationQueryString(), register.friendlyName()));
         }
-
-        int limit = limitQueryValue();
 
         F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {

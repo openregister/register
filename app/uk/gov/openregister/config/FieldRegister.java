@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class FieldRegister extends Register {
 
-    public static final List<Field> FIELDS = Arrays.asList(new Field("field"), new Field("datatype"), new Field("register", Optional.of("register")), new Field("cardinality"), new Field("text", Datatype.TEXT));
+    public static final List<Field> FIELDS = Arrays.asList(new Field("field"), new Field("datatype", Optional.of("datatype")), new Field("register", Optional.of("register")), new Field("cardinality"), new Field("text", Datatype.TEXT));
 
     private List<Record> registers = new ArrayList<>();
 
