@@ -2,7 +2,7 @@
 <p class="page_links">
      <span>
         @pageLinksMap.map{ entry =>
-            <p>@entry._1 -> @entry._2</p>
+            <a class="@entry._1" href=@entry._2>@entry._1</a>
         }
     </span>
 </p>

@@ -45,6 +45,11 @@ public class TurtleRepresentation implements Representation {
         return ok(TURTLE_HEADER + renderRecord(record)).as(TEXT_TURTLE);
     }
 
+    @Override
+    public boolean isPaginated() {
+        return false;
+    }
+
     private String renderRecord(Record record) {
         URI hashUri = curieResolver.resolve(new Curie(App.instance.register.name() + "_hash", record.getHash()));
         String entity = String.format("<%s>\n", hashUri);

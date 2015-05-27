@@ -36,5 +36,10 @@ public class HtmlRepresentation implements Representation {
         return ok(views.html.entry.render(App.instance.register.fields(), dbRecord, history, representationsMap));
     }
 
+    @Override
+    public boolean isPaginated() {
+        return true;
+    }
+
     public static HtmlRepresentation instance = new HtmlRepresentation();
 }

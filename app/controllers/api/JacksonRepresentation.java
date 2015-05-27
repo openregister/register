@@ -30,6 +30,11 @@ public class JacksonRepresentation implements Representation {
         return ok(asString(record)).as(contentType);
     }
 
+    @Override
+    public boolean isPaginated() {
+        return false;
+    }
+
     protected String asString(Object record) {
         try {
             return objectMapper.writeValueAsString(record);

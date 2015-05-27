@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static controllers.api.Representations.Format.html;
@@ -34,11 +32,8 @@ public class Rest extends Controller {
 
     private static final String REPRESENTATION_QUERY_PARAM = "_representation";
     private static final String LIMIT_QUERY_PARAM = "_limit";
-    private static final int DEFAULT_RESULT_PAGE_SIZE = 100;
+    public static final int DEFAULT_RESULT_PAGE_SIZE = 30;
     private static final int ALL_ENTRIES_LIMIT = 100000;
-
-    private static final String PAGE_SIZE = "_page_size";
-    private static final String PAGE = "_page";
 
     private final Store store;
     private final List<String> fieldNames;
@@ -111,14 +106,6 @@ public class Rest extends Controller {
         return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
-    private int limitQueryValue() {
-        try {
-            return Integer.parseInt(request().getQueryString(LIMIT_QUERY_PARAM));
-        } catch (NullPointerException | NumberFormatException e) {
-            return DEFAULT_RESULT_PAGE_SIZE;
-        }
-    }
-
     private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat) {
         final Representation representation;
         try {
@@ -131,23 +118,19 @@ public class Rest extends Controller {
         ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
     }
 
-    public F.Promise<Result> all() throws Exception {
-        return allWithFormat(html.name());
+    public F.Promise<Result> all(int page, int pageSize) throws Exception {
+        return allWithFormat(html.name(), page, pageSize);
     }
 
-    public F.Promise<Result> allWithFormat(String format) throws Exception {
-        String uri = request().uri();
-        int currentPage = searchUriForCurrentPage(uri);
-        Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(currentPage, searchUriForPageSize(uri));
-        return doSearch(currentPage, offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), Optional.of(format));
+    public F.Promise<Result> allWithFormat(String format, int page, int pageSize) throws Exception {
+        Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(page, pageSize);
+        return doSearch(page, offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), Optional.of(format));
     }
 
-    public F.Promise<Result> search() throws Exception {
-        String uri = request().uri();
-        int currentPage = searchUriForCurrentPage(uri);
-        Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(currentPage, searchUriForPageSize(uri));
+    public F.Promise<Result> search(int page, int pageSize) throws Exception {
+        Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(page, pageSize);
 
-        return doSearch(currentPage, offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), Optional.empty());
+        return doSearch(page, offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), Optional.empty());
     }
 
     private F.Promise<Result> doSearch(int page, int offset, int limit, Optional<String> format) throws Exception {
@@ -159,31 +142,41 @@ public class Rest extends Controller {
             return F.Promise.pure(formatNotRecognisedResponse(representationQueryString()));
         }
 
+        final int effectiveOffset;
+        final int effectiveLimit;
+        if (representation.isPaginated()) {
+            effectiveOffset = offset;
+            effectiveLimit = limit;
+        } else {
+            effectiveOffset = 0;
+            effectiveLimit = ALL_ENTRIES_LIMIT;
+        }
+
         F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {
-                return store.search(request().queryString().get("_query")[0], offset, limit);
+                return store.search(request().queryString().get("_query")[0], effectiveOffset, effectiveLimit);
             } else {
-                Map<String, String> map = request().queryString().entrySet().stream()
+                    Map<String, String> map = request().queryString().entrySet().stream()
                         .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
                         .collect(toMap(Map.Entry::getKey, queryParamEntry -> queryParamEntry.getValue()[0]));
-                return store.search(map, offset, limit);
+                return store.search(map, effectiveOffset, effectiveLimit);
             }
         });
 
         return recordsF.map(rs ->
                 representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat),
-                        pageLinksMap(page, offset, limit, rs.size())));
+                        pageLinksMap(page, limit, rs.size())));
     }
 
-    private Map<String, String> pageLinksMap(int page, int offset, int limit, int resultSize) {
+    private Map<String, String> pageLinksMap(int page, int limit, int resultSize) {
         final Map<String, String> pageLinksMap = new HashMap<>();
 
         if(page >= 1) {
-            pageLinksMap.put("previous_page", "_page=" + (page - 1));
+            pageLinksMap.put("previous_page", controllers.api.routes.Rest.all(page-1, limit).absoluteURL(request()));
         }
 
         if(resultSize == limit) {
-            pageLinksMap.put("next_page", "_page=" + (page + 1));
+            pageLinksMap.put("next_page", controllers.api.routes.Rest.all(page+1, limit).absoluteURL(request()));
         }
 
         return pageLinksMap;
@@ -209,40 +202,10 @@ public class Rest extends Controller {
         return request().uri() + "&" + REPRESENTATION_QUERY_PARAM + "=" + format;
     }
 
-    private final static Pattern currentPagePattern = Pattern.compile(PAGE + "=(\\d+)");
-    private final static Pattern pageSizePattern = Pattern.compile(PAGE_SIZE + "=(\\d+)");
-    private int searchUriForPageSize(String uriString){
-        int pageSize = DEFAULT_RESULT_PAGE_SIZE;
-
-        if(uriString.contains(PAGE_SIZE)) {
-            Matcher matcher;
-            if((matcher = pageSizePattern.matcher(uriString)).find()) {
-                String pageSizeStr = matcher.group(1);
-                pageSize = Integer.parseInt(pageSizeStr);
-            }
-        }
-
-        return pageSize;
-    }
-
-    private int searchUriForCurrentPage(String uriString){
-        int currentPage = 0;
-
-        if(uriString.contains(PAGE)) {
-            Matcher matcher;
-            if((matcher = currentPagePattern.matcher(uriString)).find()) {
-                String currentPageStr = matcher.group(1);
-                currentPage = Integer.parseInt(currentPageStr);
-            }
-        }
-
-        return currentPage;
-    }
-
     private Pair<Integer, Integer> offsetAndLimitForNextPage(int currentPage, int pageSize) {
         int offset = currentPage * pageSize;
         int limit = pageSize;
 
-        return new ImmutablePair<Integer, Integer>(offset, limit);
+        return new ImmutablePair<>(offset, limit);
     }
 }

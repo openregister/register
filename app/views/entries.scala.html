@@ -11,8 +11,14 @@
             <p>A register of @controllers.App.instance.register.friendlyName() entries.</p>
         </div>
         <div class="medium-3 small-12 columns metadata">
-            <span class="big-number">@{ if(records.size < 100){ records.size } else { s"${records.size}+" }}</span>
-            <h4 class="subheader"><small>Total entries</small></h4>
+            <span class="big-number">@{s"${records.size}"}</span>
+            <h4 class="subheader"><small>Results</small></h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="small-12 columns">
+        @page_links(pageLinksMap)
         </div>
     </div>
 
