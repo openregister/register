@@ -148,17 +148,17 @@ public class Rest extends Controller {
                                 )));
     }
 
-    public F.Promise<Result> search(int page, int pageSize) throws Exception {
+    public F.Promise<Result> search(String query, int page, int pageSize) throws Exception {
         Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(page, pageSize);
         Representation representation = representationFor(null);
 
         return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), representation).map(rs ->
                 representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat),
                         pageLinksMap(page > 0 ?
-                                        Optional.of(controllers.api.routes.Rest.search(page - 1, pageSize).absoluteURL(request()))
+                                        Optional.of(controllers.api.routes.Rest.search(query, page - 1, pageSize).absoluteURL(request()))
                                         : Optional.empty(),
                                 rs.size() == pageSize ?
-                                        Optional.of(controllers.api.routes.Rest.search(page+1, pageSize).absoluteURL(request()))
+                                        Optional.of(controllers.api.routes.Rest.search(query, page+1, pageSize).absoluteURL(request()))
                                         : Optional.empty()
                         )));
 
@@ -230,8 +230,7 @@ public class Rest extends Controller {
 
     private Pair<Integer, Integer> offsetAndLimitForNextPage(int currentPage, int pageSize) {
         int offset = currentPage * pageSize;
-        int limit = pageSize;
 
-        return new ImmutablePair<>(offset, limit);
+        return new ImmutablePair<>(offset, pageSize);
     }
 }
