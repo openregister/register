@@ -3,6 +3,7 @@ package controllers.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import play.mvc.Result;
+import uk.gov.openregister.config.Register;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 
@@ -21,12 +22,12 @@ public class JacksonRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) throws JsonProcessingException {
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Register register) throws JsonProcessingException {
         return ok(asString(records)).as(contentType);
     }
 
     @Override
-    public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap) {
+    public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap, Register register) {
         return ok(asString(record)).as(contentType);
     }
 

@@ -27,23 +27,6 @@ public class FieldRegister extends Register {
     }
 
     @Override
-    public InitResult init() {
-
-        String rrUrl = ApplicationConf.registerUrl("register", "/search?_query=&_representation=json");
-        try {
-            WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
-
-            registers = rr.asJson().findValues("entry").stream()
-                    .map(Record::new)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            // Ignore all exceptions.
-            // Circular dependency with the register register. This register must always start.
-        }
-        return InitResult.OK;
-    }
-
-    @Override
     public String friendlyName() {
         return "Field";
     }
@@ -63,9 +46,25 @@ public class FieldRegister extends Register {
     }
 
     public List<String> getRegisterNamesFor(String fieldName) {
+        if(registers.isEmpty()){
+            loadRegisters();
+        }
         return registers.stream().map(Record::getEntry)
                 .filter(e -> e.has("fields") && StreamUtils.asStream(e.get("fields").elements()).anyMatch(f -> f.textValue().equals(fieldName)))
                 .map(e -> e.get("register").textValue())
                 .collect(Collectors.toList());
+    }
+
+    private void loadRegisters() {
+        String rrUrl = ApplicationConf.registerUrl("register", "/search?_query=&_representation=json");
+        try {
+            WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
+
+            registers = rr.asJson().findValues("entry").stream()
+                    .map(Record::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Register register returned " + e.getMessage() + " calling " + rrUrl);
+        }
     }
 }

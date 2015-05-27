@@ -2,6 +2,7 @@ package functional;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import controllers.global.ApplicationGlobal;
+import helper.PostgresqlStoreForTesting;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -10,7 +11,6 @@ import play.libs.ws.WSResponse;
 import play.test.FakeApplication;
 import play.test.Helpers;
 import play.test.TestServer;
-import helper.PostgresqlStoreForTesting;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -23,9 +23,9 @@ import static play.test.Helpers.testServer;
 public class ApplicationTests {
 
     public static final int PORT = 3333;
-    public static final String BASE_URL = "http://localhost:" + PORT;
     public static final long TIMEOUT = 10000L;
     public static final String REGISTER = "test-register";
+    public static final String BASE_URL = String.format("http://localhost:%s", PORT);
 
     private static TestServer server;
 
@@ -84,7 +84,7 @@ public class ApplicationTests {
         return new FakeApplication(
                 new File(applicationRoot),
                 Helpers.class.getClassLoader(),
-                TestSettings.forRegister(REGISTER),
+                TestSettings.settings(),
                 new ArrayList<>(),
                 new ApplicationGlobal()
         );

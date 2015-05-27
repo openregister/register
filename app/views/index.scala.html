@@ -1,8 +1,8 @@
-@(fields: List[String], count: Long, lastUpdated: String)
+@(register: uk.gov.openregister.config.Register, count: Long, lastUpdated: String)
 
-@main() {
+@main(register.friendlyName + " register") {
 
-@header()
+@header(register.friendlyName)
 
 
 <div class="row">
@@ -18,7 +18,7 @@
                 <p class="label-text">Total entries:</p><p class="big-number">@count</p>
                 <p class="label-text">Provided by:</p><p class="big-meta">@play.Play.application().configuration().getString("register.department")</p>
                 <p class="label-text">Last updated:</p><p class="big-meta">@lastUpdated</p>
-                <p class="label-text">Fields in this register:</p><p class="homepage-field-labels">@Html(fields.map(f => controllers.html.Utils.toLink("field", f).body).mkString(", "))</p>
+                <p class="label-text">Fields in this register:</p><p class="homepage-field-labels">@Html(register.fieldNames.map(f => controllers.html.Utils.toLink("field", f).body).mkString(", "))</p>
         </div>
     </div>
 

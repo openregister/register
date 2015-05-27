@@ -41,12 +41,12 @@ public class Utils {
     }
 
     public static URI toUri(String register, String value) {
-        CurieResolver curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
+        CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
         return curieResolver.resolve(new Curie(register, value));
     }
 
     public static Html toRegisterLink(String registerName) {
-        String registerUri = ApplicationConf.getString("registers.service.template.url").replace("__REGISTER__", registerName);
+        String registerUri = ApplicationConf.getRegisterServiceTemplateUrl().replace("__REGISTER__", registerName);
         return Html.apply("<a class=\"link_to_register\" href=\"" + registerUri + "\">" + registerName + "</a>");
     }
 

@@ -8,8 +8,6 @@ import org.junit.Test;
 import play.libs.ws.WSResponse;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static play.mvc.Http.Status.ACCEPTED;
 import static play.mvc.Http.Status.OK;
 
 

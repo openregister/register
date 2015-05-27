@@ -21,11 +21,6 @@ public class RegisterRegister extends Register {
     );
 
     @Override
-    public InitResult init() {
-        return InitResult.OK;
-    }
-
-    @Override
     public String friendlyName() {
         return "Register";
     }

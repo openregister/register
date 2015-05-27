@@ -1,15 +1,15 @@
-@(fields: List[uk.gov.openregister.model.Field], record: uk.gov.openregister.domain.Record, history: List[uk.gov.openregister.domain.RecordVersionInfo], representationsMap: Map[String, String])
+@(register: uk.gov.openregister.config.Register, fields: List[uk.gov.openregister.model.Field], record: uk.gov.openregister.domain.Record, history: List[uk.gov.openregister.domain.RecordVersionInfo], representationsMap: Map[String, String])
 
-@main() {
+@main(register.friendlyName + " register") {
 
-@header()
+@header(register.friendlyName)
 
 <div class="row">
     <div class="small-12 large-8 columns">
         @Option(record.getEntry.get("name")).map { name =>
             <h1 class="entry-header">@name.textValue</h1>
         }
-        <p class="entry-source">An entry in the <a href="/">@controllers.App.instance.register.friendlyName() register</a></p>
+        <p class="entry-source">An entry in the <a href="/">@register.friendlyName() register</a></p>
         <p class="entry-hash">hash: @record.getHash</p>
     </div>
 </div>
@@ -40,7 +40,7 @@
     <div class="small-12 large-12 columns">
         <div class="history">
             <!-- Little hack to show registers using a field, on field register only-->
-            @{controllers.App.instance.register match {
+            @{register match {
             case fr: uk.gov.openregister.config.FieldRegister =>
             fieldUsage(fr, record.getEntry.get("field").textValue)
             case _ => {}
@@ -52,7 +52,7 @@
 
             <h3>Latest version:</h3>
             @defining({
-            val registerName = controllers.App.instance.register.name;
+            val registerName = register.name;
             controllers.html.Utils.toUri(registerName, record.getEntry.get(registerName).textValue)
             }) { latestVersionUrl =>
             <p><a href="@latestVersionUrl">@latestVersionUrl</a></p>
