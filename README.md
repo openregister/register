@@ -26,6 +26,12 @@ To compile and run all tests:<br>
 
 ## Run
 
+Start the application:<br>
+`sbt run`<br>
+
+
+## Setup and Load data
+
 Add all the register entries to `/etc/hosts`:<br>
 Register, Field and Datatype must be there:<br>
 `127.0.0.1    register.openregister.dev`<br>
@@ -34,11 +40,6 @@ Register, Field and Datatype must be there:<br>
 
 Also add all the register hosts you would like to access. For example for school:<br>
 `127.0.0.1    school.openregister.dev`
-
-
-Start the application:<br>
-`sbt run`<br>
-
 
 Load data into Datatype, Field and Register regsiters: 
 
