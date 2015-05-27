@@ -6,6 +6,7 @@ import uk.gov.openregister.store.Store;
 import uk.gov.openregister.store.postgresql.DBInfo;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,13 +19,17 @@ public abstract class Register {
 
     static {
         try {
-
+            URI dbUri = new URI(ApplicationConf.getString("db.default.url"));
+            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + dbUri.getPath();
             dataSource = new BasicDataSource();
 
+            if (dbUri.getUserInfo() != null) {
+                dataSource.setUsername(dbUri.getUserInfo().split(":")[0]);
+                dataSource.setPassword(dbUri.getUserInfo().split(":")[1]);
+            }
             dataSource.setDriverClassName("org.postgresql.Driver");
-            dataSource.setUrl("jdbc:" + ApplicationConf.getString("db.default.url"));
+            dataSource.setUrl(dbUrl);
             dataSource.setInitialSize(1);
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
