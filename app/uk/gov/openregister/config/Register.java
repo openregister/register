@@ -22,7 +22,7 @@ public abstract class Register {
             dataSource = new BasicDataSource();
 
             dataSource.setDriverClassName("org.postgresql.Driver");
-            dataSource.setUrl(ApplicationConf.getString("db.default.url"));
+            dataSource.setUrl("jdbc:" + ApplicationConf.getString("db.default.url"));
             dataSource.setInitialSize(1);
 
         } catch (Exception e) {
