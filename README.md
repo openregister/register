@@ -17,8 +17,6 @@ Create the test and production databases<br>
 `createdb openregister`<br>
 `createdb testopenregister`
 
-* Mongodb 2.6.x<br>
-http://docs.mongodb.org/manual/installation/    
 
 ## Test
 
@@ -28,15 +26,31 @@ To compile and run all tests:<br>
 
 ## Run
 
-Give the register a name:<br>
-Edit `conf/application.conf` and set `register.name` property. For example: `register.name=school`
+Add all the register entries to `/etc/hosts`:<br>
+Register, Field and Datatype must be there:<br>
+`127.0.0.1    register.openregister.dev`<br>
+`127.0.0.1    field.openregister.dev`<br>
+`127.0.0.1    datatype.openregister.dev`
+
+Also add all the register hosts you would like to access. For example for school:<br>
+`127.0.0.1    school.openregister.dev`
+
 
 Start the application:<br>
 `sbt run`<br>
 
-Access the application at:<br>
-[`http://localhost:9000`](http://localhost:9000)
 
-Load some data into the application:<br>
-Go to [`http://localhost:9000/load`](http://localhost:9000/load), provide a url to the raw csv or tsv data and click Import<br>
-For example, if your register name is `school`, use https://raw.githubusercontent.com/openregister/school.register/master/data/school/schools.tsv
+Load data into Datatype, Field and Register regsiters: 
+
+* Follow [`https://github.com/openregister/register.register`](https://github.com/openregister/register.register) to load data for Regsiter register
+* Follow [`https://github.com/openregister/datatype.register`](https://github.com/openregister/datatype.register) to load data for Datatype register
+* Follow [`https://github.com/openregister/field.register`](https://github.com/openregister/field.register) to load data for Field register
+
+
+Access the application at:<br>
+`http://<register-name>.openregister.dev:9000`
+
+
+Load data into the application for a generic register:<br>
+Type `http://<register-name>.openregister.dev:9000/load` in a browser and provide a url to the raw csv or tsv data and click Import<br>
+For example, if your register name is `school`, go to [`http://school.openregister.dev:9000/load`](http://school.openregister.dev:9000/load) and enter `https://raw.githubusercontent.com/openregister/school.register/master/data/school/schools.tsv`
