@@ -1,4 +1,4 @@
-@(register: uk.gov.openregister.config.Register, fields: List[uk.gov.openregister.model.Field], record: uk.gov.openregister.domain.Record, history: List[uk.gov.openregister.domain.RecordVersionInfo], representationsMap: Map[String, String])
+@(register: uk.gov.openregister.config.Register, record: uk.gov.openregister.domain.Record, history: List[uk.gov.openregister.domain.RecordVersionInfo], representationsMap: Map[String, String])
 
 @main(register.friendlyName + " register") {
 
@@ -18,7 +18,7 @@
     <div class="small-12 large-12 columns">
         <table id="entry-table">
             <tbody>
-                @fields.map { field =>
+                @register.fields.map { field =>
                 <tr>
                     <td class="@field.getName()">@controllers.html.Utils.toLink(field)</td>
                     <td class="@field.getName()">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</td>

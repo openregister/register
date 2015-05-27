@@ -1,4 +1,4 @@
-@(register: uk.gov.openregister.config.Register, fields: List[uk.gov.openregister.model.Field], records: List[uk.gov.openregister.domain.Record], representationsMap: Map[String, String])
+@(register: uk.gov.openregister.config.Register, records: List[uk.gov.openregister.domain.Record], representationsMap: Map[String, String])
 
 @main(register.friendlyName + " register") {
 
@@ -22,7 +22,7 @@
                     <thead>
                     <tr>
                         <th>hash</th>
-                        @fields.map { field =>
+                        @register.fields.map { field =>
                             @if(controllers.html.Utils.isDisplayField(field.getName, register.name)){
                                 <th>
                                     <span class="field-value">@controllers.html.Utils.toLink(field)</span>
@@ -37,7 +37,7 @@
                     <tr>
                         <td class="hash"><span class="field-name">hash</span><span class="field-value"><a href="/hash/@record.getHash">@record.getHash</a></span></td>
 
-                        @fields.map { field =>
+                        @register.fields.map { field =>
                             @if(controllers.html.Utils.isDisplayField(field.getName(), register.name)){
                                 <td class="@field.getName()"><span class="field-name">@controllers.html.Utils.toLink(field)</span><span class="field-value">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</span></td>
                             }

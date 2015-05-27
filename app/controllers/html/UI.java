@@ -45,8 +45,7 @@ public class UI extends BaseController {
     }
 
     public Result renderNewEntryForm() {
-        Register register =register();
-        return ok(views.html.newEntry.render(register, register.fields(), Collections.emptyMap(), Collections.emptyMap()));
+        return ok(views.html.newEntry.render(register(), Collections.emptyMap(), Collections.emptyMap()));
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
@@ -63,12 +62,12 @@ public class UI extends BaseController {
                 return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
             } catch (DatabaseException e) {
 
-                return ok(views.html.newEntry.render(register, register.fields(), convertToMapOfListValues(requestParams), Collections.singletonMap("globalError", e.getMessage())));
+                return ok(views.html.newEntry.render(register, convertToMapOfListValues(requestParams), Collections.singletonMap("globalError", e.getMessage())));
             }
         }
         Map<String, String> errors = validationErrors.stream().collect(Collectors.toMap(error -> error.key, error -> error.message));
 
-        return ok(views.html.newEntry.render(register, register.fields(), convertToMapOfListValues(requestParams), errors));
+        return ok(views.html.newEntry.render(register, convertToMapOfListValues(requestParams), errors));
     }
 
     @SuppressWarnings("unchecked")
@@ -79,7 +78,6 @@ public class UI extends BaseController {
         Map params = JsonObjectMapper.convert(record.getEntry(), Map.class);
 
         return ok(views.html.updateEntry.render(register,
-                        register.fields(),
                         convertToMapOfListValues(params),
                         Collections.emptyMap(),
                         hash)
@@ -104,7 +102,6 @@ public class UI extends BaseController {
         }
         Map<String, String> errors = validationErrors.stream().collect(Collectors.toMap(error -> error.key, error -> error.message));
         return ok(views.html.updateEntry.render(register,
-                register.fields(),
                 convertToMapOfListValues(requestParams),
                 errors,
                 hash));

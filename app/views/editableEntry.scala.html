@@ -1,4 +1,4 @@
-@(register: uk.gov.openregister.config.Register, fields: List[uk.gov.openregister.model.Field], requestParam: Map[String, List[String]], errors: Map[String,String], formAction: play.api.mvc.Call, submitButtonValue: String)
+@(register: uk.gov.openregister.config.Register, requestParam: Map[String, List[String]], errors: Map[String,String], formAction: play.api.mvc.Call, submitButtonValue: String)
 
 @main(register.friendlyName + " register") {
 
@@ -14,7 +14,7 @@
 	<div class="small-12 large-12 columns">
 	@helper.form(action = formAction) {
 
-	    @fields.map{ aField =>
+	    @register.fields.map{ aField =>
 	        @{
 	            if(register.name.equals("register") && aField.getName().equals("fields"))
 	                controllers.html.Utils.checkbox(aField, requestParam.get(aField.getName), aField.getAllowedValues.get);
