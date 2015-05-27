@@ -20,7 +20,7 @@ public abstract class Register {
     static {
         try {
             URI dbUri = new URI(ApplicationConf.getString("db.default.url"));
-            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + dbUri.getPath();
+            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath();
             dataSource = new BasicDataSource();
 
             if (dbUri.getUserInfo() != null) {
