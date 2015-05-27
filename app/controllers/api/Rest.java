@@ -2,6 +2,8 @@ package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import controllers.App;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
@@ -18,8 +20,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static controllers.api.Representations.Format.html;
 import static controllers.api.Representations.representationFor;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
@@ -28,8 +33,11 @@ public class Rest extends Controller {
 
     private static final String REPRESENTATION_QUERY_PARAM = "_representation";
     private static final String LIMIT_QUERY_PARAM = "_limit";
-    private static final int DEFAULT_RESULT_SIZE = 100;
+    private static final int DEFAULT_RESULT_PAGE_SIZE = 100;
     private static final int ALL_ENTRIES_LIMIT = 100000;
+
+    private static final String PAGE_SIZE = "_page_size";
+    private static final String CURRENT_PAGE = "_current_page";
 
     private final Store store;
     private final List<String> fieldNames;
@@ -106,7 +114,7 @@ public class Rest extends Controller {
         try {
             return Integer.parseInt(request().getQueryString(LIMIT_QUERY_PARAM));
         } catch (NullPointerException | NumberFormatException e) {
-            return DEFAULT_RESULT_SIZE;
+            return DEFAULT_RESULT_PAGE_SIZE;
         }
     }
 
@@ -123,20 +131,25 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> all() throws Exception {
-        return allWithFormat("html");
+        return allWithFormat(html.name());
     }
 
     public F.Promise<Result> allWithFormat(String format) throws Exception {
-        return doSearch(ALL_ENTRIES_LIMIT, Optional.of(format));
+        String uri = request().uri();
+        int currentPage = searchUriForCurrentPage(uri);
+        Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(currentPage, searchUriForPageSize(uri));
+        return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), Optional.of(format));
     }
 
     public F.Promise<Result> search() throws Exception {
-        int limit = limitQueryValue();
+        String uri = request().uri();
+        int currentPage = searchUriForCurrentPage(uri);
+        Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(currentPage, searchUriForPageSize(uri));
 
-        return doSearch(limit, Optional.empty());
+        return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), Optional.empty());
     }
 
-    private F.Promise<Result> doSearch(int limit, Optional<String> format) throws Exception {
+    private F.Promise<Result> doSearch(int offset, int limit, Optional<String> format) throws Exception {
         Representation representation;
         try {
             representation = format.map(Representations::representationFor)
@@ -147,12 +160,12 @@ public class Rest extends Controller {
 
         F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {
-                return store.search(request().queryString().get("_query")[0], limit);
+                return store.search(request().queryString().get("_query")[0], offset, limit);
             } else {
                 Map<String, String> map = request().queryString().entrySet().stream()
                         .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
                         .collect(toMap(Map.Entry::getKey, queryParamEntry -> queryParamEntry.getValue()[0]));
-                return store.search(map, limit);
+                return store.search(map, offset, limit);
             }
         });
 
@@ -177,5 +190,42 @@ public class Rest extends Controller {
     private String searchUriForFormat(String format) {
         // makes assumptions about the structure of the uri
         return request().uri() + "&" + REPRESENTATION_QUERY_PARAM + "=" + format;
+    }
+
+    private final static Pattern currentPagePattern = Pattern.compile(CURRENT_PAGE + "=(\\d+)");
+    private final static Pattern pageSizePattern = Pattern.compile(PAGE_SIZE + "=(\\d+)");
+    private int searchUriForPageSize(String uriString){
+        int pageSize = DEFAULT_RESULT_PAGE_SIZE;
+
+        if(uriString.contains(PAGE_SIZE)) {
+            Matcher matcher;
+            if((matcher = pageSizePattern.matcher(uriString)).find()) {
+                String pageSizeStr = matcher.group(1);
+                pageSize = Integer.parseInt(pageSizeStr);
+            }
+        }
+
+        return pageSize;
+    }
+
+    private int searchUriForCurrentPage(String uriString){
+        int currentPage = 0;
+
+        if(uriString.contains(CURRENT_PAGE)) {
+            Matcher matcher;
+            if((matcher = currentPagePattern.matcher(uriString)).find()) {
+                String currentPageStr = matcher.group(1);
+                currentPage = Integer.parseInt(currentPageStr);
+            }
+        }
+
+        return currentPage;
+    }
+
+    private Pair<Integer, Integer> offsetAndLimitForNextPage(int currentPage, int pageSize) {
+        int offset = currentPage * pageSize;
+        int limit = pageSize;
+
+        return new ImmutablePair<Integer, Integer>(offset, limit);
     }
 }
