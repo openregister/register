@@ -33,7 +33,7 @@ public class TurtleRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) throws Exception {
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Map<String, String> stringStringMap) throws Exception {
         return ok(records.stream()
                         .map(this::renderRecord)
                         .collect(Collectors.joining("\n", TURTLE_HEADER, ""))

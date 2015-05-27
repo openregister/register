@@ -16,6 +16,7 @@ import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class Rest extends Controller {
     private static final int ALL_ENTRIES_LIMIT = 100000;
 
     private static final String PAGE_SIZE = "_page_size";
-    private static final String CURRENT_PAGE = "_current_page";
+    private static final String PAGE = "_page";
 
     private final Store store;
     private final List<String> fieldNames;
@@ -138,7 +139,7 @@ public class Rest extends Controller {
         String uri = request().uri();
         int currentPage = searchUriForCurrentPage(uri);
         Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(currentPage, searchUriForPageSize(uri));
-        return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), Optional.of(format));
+        return doSearch(currentPage, offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), Optional.of(format));
     }
 
     public F.Promise<Result> search() throws Exception {
@@ -146,10 +147,10 @@ public class Rest extends Controller {
         int currentPage = searchUriForCurrentPage(uri);
         Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(currentPage, searchUriForPageSize(uri));
 
-        return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), Optional.empty());
+        return doSearch(currentPage, offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), Optional.empty());
     }
 
-    private F.Promise<Result> doSearch(int offset, int limit, Optional<String> format) throws Exception {
+    private F.Promise<Result> doSearch(int page, int offset, int limit, Optional<String> format) throws Exception {
         Representation representation;
         try {
             representation = format.map(Representations::representationFor)
@@ -169,7 +170,23 @@ public class Rest extends Controller {
             }
         });
 
-        return recordsF.map(rs -> representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat)));
+        return recordsF.map(rs ->
+                representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat),
+                        pageLinksMap(page, offset, limit, rs.size())));
+    }
+
+    private Map<String, String> pageLinksMap(int page, int offset, int limit, int resultSize) {
+        final Map<String, String> pageLinksMap = new HashMap<>();
+
+        if(page >= 1) {
+            pageLinksMap.put("previous_page", "_page=" + (page - 1));
+        }
+
+        if(resultSize == limit) {
+            pageLinksMap.put("next_page", "_page=" + (page + 1));
+        }
+
+        return pageLinksMap;
     }
 
     private Result formatNotRecognisedResponse(String format) {
@@ -192,7 +209,7 @@ public class Rest extends Controller {
         return request().uri() + "&" + REPRESENTATION_QUERY_PARAM + "=" + format;
     }
 
-    private final static Pattern currentPagePattern = Pattern.compile(CURRENT_PAGE + "=(\\d+)");
+    private final static Pattern currentPagePattern = Pattern.compile(PAGE + "=(\\d+)");
     private final static Pattern pageSizePattern = Pattern.compile(PAGE_SIZE + "=(\\d+)");
     private int searchUriForPageSize(String uriString){
         int pageSize = DEFAULT_RESULT_PAGE_SIZE;
@@ -211,7 +228,7 @@ public class Rest extends Controller {
     private int searchUriForCurrentPage(String uriString){
         int currentPage = 0;
 
-        if(uriString.contains(CURRENT_PAGE)) {
+        if(uriString.contains(PAGE)) {
             Matcher matcher;
             if((matcher = currentPagePattern.matcher(uriString)).find()) {
                 String currentPageStr = matcher.group(1);

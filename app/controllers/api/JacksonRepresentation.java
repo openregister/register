@@ -21,7 +21,7 @@ public class JacksonRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) throws JsonProcessingException {
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Map<String, String> pageLinksMap) throws JsonProcessingException {
         return ok(asString(records)).as(contentType);
     }
 

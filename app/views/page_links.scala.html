@@ -1,0 +1,9 @@
+@(pageLinksMap: Map[String, String])
+<p class="page_links">
+     <span>
+        @pageLinksMap.map{ entry =>
+            <p>@entry._1 -> @entry._2</p>
+        }
+    </span>
+</p>
+

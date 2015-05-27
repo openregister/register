@@ -1,4 +1,5 @@
-@(fields: List[uk.gov.openregister.model.Field], records: List[uk.gov.openregister.domain.Record], representationsMap: Map[String, String])
+@(fields: List[uk.gov.openregister.model.Field], records: List[uk.gov.openregister.domain.Record],
+        representationsMap: Map[String, String], pageLinksMap: Map[String, String])
 
 @main() {
 
@@ -51,6 +52,12 @@
             } else {
             <h3>No entries found</h3>
             }
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="small-12 columns">
+            @page_links(pageLinksMap)
         </div>
     </div>
 

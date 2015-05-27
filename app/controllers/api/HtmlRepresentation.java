@@ -27,8 +27,8 @@ public class HtmlRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap) {
-        return ok(views.html.entries.render(App.instance.register.fields(), records, representationsMap));
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Map<String, String> pageLinksMap) {
+        return ok(views.html.entries.render(App.instance.register.fields(), records, representationsMap, pageLinksMap));
     }
 
     @Override
