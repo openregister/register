@@ -218,7 +218,6 @@ h2 {
 }
 
 .data-representations span {
-  padding-left: 5px;
   font-weight: normal;
 }
 
@@ -232,8 +231,39 @@ h1.entry-header {
   font-family: monospace;
   background: #f9f9f9;
 }
+
 #entry-table tr {
   border: solid 1px #ddd;
+}
+
+#entry-table td,
+#entry-table th {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: #222;
+  vertical-align: top;
+}
+
+#entry-table p {
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+}
+
+span.field-name {
+  display: none
+}
+
+td.view {
+  font-family: Helvetica, Arial;
+  font-size: 0.7rem !important;
+  white-space: nowrap;
+}
+
+td.view > a:after {
+  content: "❯";
+  padding-left: 10px;
+  vertical-align: middle;
 }
 
 .entry-source {
@@ -359,33 +389,10 @@ table {
   border-collapse: collapse;
   border-spacing: 1px;
 }
+
 table.responsive  td,
 table.responsive  th  {
   vertical-align: top;
-}
-
-span.field-name {
-  display: none
-}
-
-td p {
-  padding: 0.5625rem 0.625rem;
-  font-size: 0.875rem;
-  color: #222;
-  padding-left: 0px;
-  margin-bottom: 0px;
-}
-
-td.view {
-  font-family: Helvetica, Arial;
-  font-size: 0.7rem !important;
-  white-space: nowrap;
-}
-
-td.view > a:after {
-  content: "❯";
-  padding-left: 10px;
-  vertical-align: middle;
 }
 
 /* history for an entry */
