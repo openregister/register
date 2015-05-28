@@ -27,8 +27,8 @@ public class HtmlRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Map<String, String> pageLinksMap, Register register) {
-        return ok(views.html.entries.render(register, records, representationsMap, pageLinksMap));
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, String previousPageLink, String nextPageLink, Register register) {
+        return ok(views.html.entries.render(register, records, representationsMap, previousPageLink, nextPageLink));
     }
 
     @Override

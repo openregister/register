@@ -14,7 +14,7 @@ public class JsonRepresentation extends JacksonRepresentation {
 
     public static final String CONTENT_TYPE = "application/json; charset=utf-8";
 
-    public JsonRepresentation() {
+    private JsonRepresentation() {
         super(makeObjectMapper(), CONTENT_TYPE);
     }
 

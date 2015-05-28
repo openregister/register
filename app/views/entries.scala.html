@@ -1,4 +1,4 @@
-@(register: uk.gov.openregister.config.Register, records: List[uk.gov.openregister.domain.Record], representationsMap: Map[String, String], pageLinksMap: Map[String, String])
+@(register: uk.gov.openregister.config.Register, records: List[uk.gov.openregister.domain.Record], representationsMap: Map[String, String], previousPage: String, nextPage: String)
 
 @main(register.friendlyName + " register") {
 
@@ -17,7 +17,7 @@
 
     <div class="row">
         <div class="small-12 columns">
-        @page_links(pageLinksMap)
+            @page_links(previousPage, nextPage)
         </div>
     </div>
 
@@ -62,7 +62,7 @@
 
     <div class="row">
         <div class="small-12 columns">
-            @page_links(pageLinksMap)
+            @page_links(previousPage, nextPage)
         </div>
     </div>
 

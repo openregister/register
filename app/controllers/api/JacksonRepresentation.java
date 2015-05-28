@@ -22,7 +22,7 @@ public class JacksonRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Map<String, String> pageLinksMap, Register register) throws JsonProcessingException {
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, String previousPageLink, String nextPageLink, Register register) throws JsonProcessingException {
         return ok(asString(records)).as(contentType);
     }
 

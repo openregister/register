@@ -1,9 +1,11 @@
-@(pageLinksMap: Map[String, String])
+@(previousPage: String, nextPage: String)
 <p class="page_links">
-     <span>
-        @pageLinksMap.map{ entry =>
-            <a class="@entry._1" href=@entry._2>@entry._1</a>
+    <span>
+        @if(previousPage!=null) {
+            <a class="previous_page" href=@previousPage>previous_page</a>
+        }
+        @if(nextPage!=null) {
+            <a class="next_page" href=@nextPage>next_page</a>
         }
     </span>
 </p>
-
