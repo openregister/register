@@ -24,14 +24,11 @@ public class GenericRegister extends Register {
         this.name = name;
         this.friendlyName = WordUtils.capitalize(name);
         this.fields = Collections.singletonList(new Field(name));
+        initialise();
     }
 
-    @Override
-    public InitResult init() {
-
-        InitResult result = new InitResult(false);
-
-        CurieResolver curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
+    private void initialise() {
+        CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
         String rrUrl =  curieResolver.resolve(new Curie("register", name)) + "?_representation=json";
         WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
 
@@ -49,18 +46,13 @@ public class GenericRegister extends Register {
                     JsonNode fEntry = fr.asJson().get("entry");
                     return new Field(fEntry);
                 } else {
-                    result.errors().add("Field register returned " + fr.getStatus() + " calling " + frUrl);
-                    return new Field("unknown");
+                    throw new RuntimeException("Field register returned " + fr.getStatus() + " calling " + frUrl);
                 }
 
             }).collect(Collectors.toList());
-
-            if(result.errors.isEmpty()) result.started = true;
-
         } else {
-            result.errors().add("Register register returned " + rr.getStatus() + " calling " + rrUrl);
+            throw new RuntimeException("Register register returned " + rr.getStatus() + " calling " + rrUrl);
         }
-        return result;
     }
 
     @Override

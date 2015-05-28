@@ -1,9 +1,9 @@
-@(title: String)
+@(register: uk.gov.openregister.config.Register, title: String)
 
 
 @main(title) {
 
-@header()
+@header(register.friendlyName)
 <div class="row">
     <div class="small-12 large-12 columns">
 

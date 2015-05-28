@@ -11,11 +11,6 @@ public class DatatypeRegister extends Register {
     public static final List<Field> FIELDS = Arrays.asList(new Field("datatype"), new Field("text", Datatype.TEXT));
 
     @Override
-    public InitResult init() {
-        return InitResult.OK;
-    }
-
-    @Override
     public String friendlyName() {
         return "Datatype";
     }

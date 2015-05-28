@@ -1,70 +1,40 @@
 package controllers.global;
 
-import controllers.App;
 import controllers.api.HtmlRepresentation;
-import play.Application;
+import org.apache.commons.lang3.StringUtils;
 import play.GlobalSettings;
 import play.Logger;
 import play.libs.F;
-import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
-
-import java.lang.reflect.Method;
-
-import static play.mvc.Results.redirect;
-import static play.mvc.Results.status;
 
 public class ApplicationGlobal extends GlobalSettings {
     @Override
     public F.Promise<Result> onError(Http.RequestHeader requestHeader, Throwable throwable) {
         Logger.error("", throwable);
+
+
         return F.Promise.pure(
-                HtmlRepresentation.instance.toResponse(500, throwable.getMessage())
+                HtmlRepresentation.instance.toResponse(500, throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage(), registerName(requestHeader))
         );
     }
 
     @Override
     public F.Promise<Result> onHandlerNotFound(Http.RequestHeader requestHeader) {
         return F.Promise.pure(
-                HtmlRepresentation.instance.toResponse(404, "Page not found")
+                HtmlRepresentation.instance.toResponse(404, "Page not found", registerName(requestHeader))
         );
     }
 
     @Override
     public F.Promise<Result> onBadRequest(Http.RequestHeader requestHeader, String s) {
         return F.Promise.pure(
-                HtmlRepresentation.instance.toResponse(400, s)
+                HtmlRepresentation.instance.toResponse(400, s, registerName(requestHeader))
         );
     }
 
-    @Override
-    public void onStart(Application application) {
-        App.instance.init();
+    private String registerName(Http.RequestHeader requestHeader) {
+        return StringUtils.capitalize(App.registerName(requestHeader.host()));
     }
 
-    @Override
-    public Action onRequest(Http.Request request, Method method) {
-        if(request.queryString().containsKey("_init")) {
-            App.instance.init();
-            return toAction(redirect("/"));
-        }
-
-        if(!App.instance.started()) {
-            return toAction(status(500, views.html.bootstrapError.render(App.instance.register.friendlyName() + " Register bootstrap failed", App.instance.getInitErrors())));
-
-        } else {
-            return super.onRequest(request, method);
-        }
-    }
-
-    private Action toAction(Result r) {
-        return new Action.Simple(){
-
-            @Override
-            public F.Promise<Result> call(Http.Context context) throws Throwable {
-                return F.Promise.pure(r);
-            }
-        };
-    }
 }

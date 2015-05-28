@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import controllers.App;
+import controllers.BaseController;
 import play.Routes;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import uk.gov.openregister.domain.Record;
@@ -17,15 +16,15 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ImportData extends Controller {
+public class ImportData extends BaseController {
     private final Store store;
 
     public ImportData() {
-        store = App.instance.register.store();
+        store = register().store();
     }
 
     public Result loadWithProgress() {
-        return ok(views.html.load.render("Data import"));
+        return ok(views.html.load.render(register(), "Data import"));
     }
 
     public WebSocket<JsonNode> progress() {

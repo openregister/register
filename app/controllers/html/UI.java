@@ -2,49 +2,36 @@ package controllers.html;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controllers.App;
+import controllers.BaseController;
+import controllers.api.HtmlRepresentation;
 import org.joda.time.DateTime;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
-import controllers.api.HtmlRepresentation;
 import play.mvc.BodyParser;
-import play.mvc.Controller;
 import play.mvc.Result;
 import uk.gov.openregister.JsonObjectMapper;
 import uk.gov.openregister.config.ApplicationConf;
+import uk.gov.openregister.config.Register;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.linking.Curie;
 import uk.gov.openregister.linking.CurieResolver;
-import uk.gov.openregister.model.Field;
 import uk.gov.openregister.store.DatabaseConflictException;
 import uk.gov.openregister.store.DatabaseException;
-import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class UI extends Controller {
-
-    private final List<String> fieldNames;
-    private final List<Field> fields;
-    private final Store store;
-    private final String registerName;
-
-    public UI() {
-        this.store = App.instance.register.store();
-        this.fieldNames = App.instance.register.fieldNames();
-        this.fields = App.instance.register.fields();
-        this.registerName = App.instance.register.name();
-    }
+public class UI extends BaseController {
 
     public Result index() {
-        long count = store.count();
+        Register register =register();
+        long count = register.store().count();
         String lastUpdatedUI = "";
         try {
-            CurieResolver curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
-            String rrUrl = curieResolver.resolve(new Curie("register", registerName)) + "?_representation=json";
+            CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
+            String rrUrl = curieResolver.resolve(new Curie("register", register.name())) + "?_representation=json";
 
             final WSResponse wsResponse = WS.client().url(rrUrl).execute().get(30000L);
             final String lastUpdatedStr = wsResponse.asJson().get("lastUpdated").textValue();
@@ -54,43 +41,43 @@ public class UI extends Controller {
             //ignore
         }
 
-        return ok(views.html.index.render(fieldNames, count, lastUpdatedUI));
+        return ok(views.html.index.render(register, count, lastUpdatedUI));
     }
 
     public Result renderNewEntryForm() {
-        return ok(views.html.newEntry.render(registerName, fields, Collections.emptyMap(), Collections.emptyMap()));
+        return ok(views.html.newEntry.render(register(), Collections.emptyMap(), Collections.emptyMap()));
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public Result create() {
-
+        Register register =register();
         Map<String, String[]> requestParams = request().body().asFormUrlEncoded();
 
         Record record = createRecordFromQueryParams(requestParams);
 
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(registerName), fieldNames).validate(record);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(register.name()), register.fieldNames()).validate(record);
         if (validationErrors.isEmpty()) {
             try {
-                store.save(record);
+                register.store().save(record);
                 return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
             } catch (DatabaseException e) {
 
-                return ok(views.html.newEntry.render(registerName, fields, convertToMapOfListValues(requestParams), Collections.singletonMap("globalError", e.getMessage())));
+                return ok(views.html.newEntry.render(register, convertToMapOfListValues(requestParams), Collections.singletonMap("globalError", e.getMessage())));
             }
         }
         Map<String, String> errors = validationErrors.stream().collect(Collectors.toMap(error -> error.key, error -> error.message));
 
-        return ok(views.html.newEntry.render(registerName, fields, convertToMapOfListValues(requestParams), errors));
+        return ok(views.html.newEntry.render(register, convertToMapOfListValues(requestParams), errors));
     }
 
     @SuppressWarnings("unchecked")
     public Result renderUpdateEntryForm(String hash) {
-        Record record = store.findByHash(hash).get();
+        Register register =register();
+        Record record = register.store().findByHash(hash).get();
 
         Map params = JsonObjectMapper.convert(record.getEntry(), Map.class);
 
-        return ok(views.html.updateEntry.render(registerName,
-                        fields,
+        return ok(views.html.updateEntry.render(register,
                         convertToMapOfListValues(params),
                         Collections.emptyMap(),
                         hash)
@@ -99,22 +86,22 @@ public class UI extends Controller {
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public Result update(String hash) {
+        Register register =register();
         Map<String, String[]> requestParams = request().body().asFormUrlEncoded();
 
         Record record = createRecordFromQueryParams(requestParams);
 
-        List<ValidationError> validationErrors = new Validator(Collections.singletonList(registerName), fieldNames).validate(record);
+        List<ValidationError> validationErrors = new Validator(Collections.singletonList(register.name()), register.fieldNames()).validate(record);
         if (validationErrors.isEmpty()) {
             try {
-                store.update(hash, record);
+                register.store().update(hash, record);
             } catch (DatabaseConflictException e) {
-                return HtmlRepresentation.instance.toResponse(409, e.getMessage());
+                return HtmlRepresentation.instance.toResponse(409, e.getMessage(), register.friendlyName());
             }
             return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
         }
         Map<String, String> errors = validationErrors.stream().collect(Collectors.toMap(error -> error.key, error -> error.message));
-        return ok(views.html.updateEntry.render(registerName,
-                fields,
+        return ok(views.html.updateEntry.render(register,
                 convertToMapOfListValues(requestParams),
                 errors,
                 hash));
@@ -135,10 +122,12 @@ public class UI extends Controller {
     }
 
     private Record createRecordFromQueryParams(Map<String, String[]> formParameters) {
+        Register register =register();
+
         try {
             Map<String, Object> jsonMap = new HashMap<>();
-            formParameters.keySet().stream().filter(fieldNames::contains).forEach(key -> {
-                if (registerName.equals("register") && key.equals("fields")) {
+            formParameters.keySet().stream().filter(register.fieldNames()::contains).forEach(key -> {
+                if (register.name().equals("register") && key.equals("fields")) {
                     jsonMap.put(key, formParameters.get(key));
                 } else {
                     jsonMap.put(key, formParameters.get(key)[0]);

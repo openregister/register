@@ -1,17 +1,16 @@
 package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import controllers.App;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import controllers.BaseController;
 import play.libs.F;
 import play.mvc.BodyParser;
-import play.mvc.Controller;
 import play.mvc.Result;
+import uk.gov.openregister.config.Register;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseException;
-import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
@@ -27,57 +26,50 @@ import static controllers.api.Representations.Format.html;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 
-public class Rest extends Controller {
+public class Rest extends BaseController {
 
     private static final String REPRESENTATION_QUERY_PARAM = "_representation";
     public static final int DEFAULT_RESULT_PAGE_SIZE = 30;
     private static final int ALL_ENTRIES_LIMIT = 1000;
 
-    private final Store store;
-    private final List<String> fieldNames;
-    private final String registerName;
-
-    public Rest() {
-        store = App.instance.register.store();
-        fieldNames = App.instance.register.fieldNames();
-        registerName = App.instance.register.name();
-    }
-
     @BodyParser.Of(BodyParser.Json.class)
     public Result create() throws JsonProcessingException {
+        Register register = register();
+
         Record r = new Record(request().body().asJson());
 
-        List<ValidationError> validationErrors = new Validator(singletonList(registerName), fieldNames).validate(r);
+        List<ValidationError> validationErrors = new Validator(singletonList(register.name()), register.fieldNames()).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
-                store.save(r);
+                register.store().save(r);
             } catch (DatabaseException e) {
-                return HtmlRepresentation.instance.toResponse(400, e.getMessage());
+                return HtmlRepresentation.instance.toResponse(400, e.getMessage(), register.friendlyName());
             }
 
             return JsonRepresentation.instance.createdResponse();
         }
 
-        return HtmlRepresentation.instance.toResponseWithErrors(400, validationErrors);
+        return HtmlRepresentation.instance.toResponseWithErrors(400, validationErrors, register.friendlyName());
 
     }
 
     @BodyParser.Of(BodyParser.Json.class)
     public Result update(String hash) {
+        Register register = register();
         Record r = new Record(request().body().asJson());
-        List<ValidationError> validationErrors = new Validator(singletonList(registerName), fieldNames).validate(r);
+        List<ValidationError> validationErrors = new Validator(singletonList(register.name()), register.fieldNames()).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
-                store.update(hash, r);
+                register.store().update(hash, r);
             } catch (DatabaseException e) {
-                return HtmlRepresentation.instance.toResponse(400, e.getMessage());
+                return HtmlRepresentation.instance.toResponse(400, e.getMessage(), register.friendlyName());
             }
             return JsonRepresentation.instance.createdResponse();
         }
 
-        return HtmlRepresentation.instance.toResponseWithErrors(400, validationErrors);
+        return HtmlRepresentation.instance.toResponseWithErrors(400, validationErrors, register.friendlyName());
     }
 
     public F.Promise<Result> findByKey(String key, String value) {
@@ -85,9 +77,10 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByKeyWithFormat(String key, String value, String format) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, URLDecoder.decode(value, "utf-8")));
+        Register register = register();
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> register.store().findByKV(key, URLDecoder.decode(value, "utf-8")));
         return recordF.map(record -> getResponse(record, format,
-                anyFormat -> controllers.api.routes.Rest.findByKeyWithFormat(key, value, anyFormat).url()));
+                anyFormat -> controllers.api.routes.Rest.findByKeyWithFormat(key, value, anyFormat).url(), register.friendlyName()));
     }
 
     public F.Promise<Result> findByHash(String hash) {
@@ -95,25 +88,26 @@ public class Rest extends Controller {
     }
 
     public F.Promise<Result> findByHashWithFormat(String hash, String format) {
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
+        Register register = register();
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> register.store().findByHash(hash));
         return recordF.map(record -> getResponse(record, format,
-                anyFormat -> controllers.api.routes.Rest.findByHashWithFormat(hash, anyFormat).url()));
+                anyFormat -> controllers.api.routes.Rest.findByHashWithFormat(hash, anyFormat).url(), register.friendlyName()));
     }
 
     private String representationQueryString() {
         return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
-    private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat) {
+    private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat, String registerName) {
         final Representation representation;
         try {
             representation = representationFor(format);
         } catch (IllegalArgumentException e) {
-            return formatNotRecognisedResponse(format);
+            return formatNotRecognisedResponse(format, registerName);
         }
         return recordO.map(record ->
-                        representation.toRecord(record, getHistoryFor(record), representationsMap(routeForFormat))
-        ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found"));
+                        representation.toRecord(record, getHistoryFor(record), representationsMap(routeForFormat), register())
+        ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found", registerName));
     }
 
     public F.Promise<Result> all(int page, int pageSize) throws Exception {
@@ -172,6 +166,7 @@ public class Rest extends Controller {
     }
 
     private F.Promise<List<Record>> doSearch(int offset, int limit, Representation representation) throws Exception {
+        Register register = register();
         final int effectiveOffset;
         final int effectiveLimit;
         if (representation.isPaginated()) {
@@ -184,12 +179,12 @@ public class Rest extends Controller {
 
         return F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {
-                return store.search(request().queryString().get("_query")[0], effectiveOffset, effectiveLimit);
+                return register.store().search(request().queryString().get("_query")[0], effectiveOffset, effectiveLimit);
             } else {
                 Map<String, String> map = request().queryString().entrySet().stream()
                         .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
                         .collect(toMap(Map.Entry::getKey, queryParamEntry -> queryParamEntry.getValue()[0]));
-                return store.search(map, effectiveOffset, effectiveLimit);
+                return register.store().search(map, effectiveOffset, effectiveLimit);
             }
         });
     }
@@ -208,12 +203,12 @@ public class Rest extends Controller {
         return pageLinksMap;
     }
 
-    private Result formatNotRecognisedResponse(String format) {
-        return HtmlRepresentation.instance.toResponse(400, "Format '" + format + "' not recognised");
+    private Result formatNotRecognisedResponse(String format, String registerName) {
+        return HtmlRepresentation.instance.toResponse(400, "Format '" + format + "' not recognised", registerName);
     }
 
     private List<RecordVersionInfo> getHistoryFor(Record r) {
-        return store.previousVersions(r.getHash());
+        return register().store().previousVersions(r.getHash());
     }
 
     private Map<String, String> representationsMap(Function<String, String> routeForFormat) {

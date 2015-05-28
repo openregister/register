@@ -13,10 +13,17 @@ import java.util.List;
 public class PostgresqlStoreForTesting {
     public static final String POSTGRESQL_URI = "jdbc:postgresql://localhost/testopenregister";
 
-    static DataSource dataSource() {
+    static {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static DataSource dataSource() {
         try {
             BasicDataSource dataSource = new BasicDataSource();
-
             dataSource.setDriverClassName("org.postgresql.Driver");
             dataSource.setUrl(POSTGRESQL_URI);
             dataSource.setInitialSize(1);
@@ -26,10 +33,9 @@ public class PostgresqlStoreForTesting {
         }
     }
 
-    public static DataSource dataSource = dataSource();
-
     public static void createTables(String tableName) throws SQLException, ClassNotFoundException {
-        try(Statement st = getStatement()){
+
+        try (Connection conn = DriverManager.getConnection(POSTGRESQL_URI); Statement st = conn.createStatement()) {
             st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry json,metadata json)");
             st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + "_history (hash varchar(40) primary key,entry json,metadata json)");
         }
@@ -40,7 +46,8 @@ public class PostgresqlStoreForTesting {
     }
 
     public static void dropTables(String tableName) throws Exception {
-        try(Statement st = getStatement()) {
+
+        try (Connection conn = DriverManager.getConnection(POSTGRESQL_URI); Statement st = conn.createStatement()) {
             st.execute("DROP TABLE IF EXISTS " + normalized(tableName));
             st.execute("DROP TABLE IF EXISTS " + normalized(tableName) + "_history");
         }
@@ -50,7 +57,8 @@ public class PostgresqlStoreForTesting {
         List<DataRow> result = new ArrayList<>();
         try {
             ResultSet rs = null;
-            try(Statement st = getStatement()) {
+
+            try (Connection conn = DriverManager.getConnection(POSTGRESQL_URI); Statement st = conn.createStatement()) {
 
                 st.execute("SELECT * FROM " + normalized(tableName));
                 rs = st.getResultSet();
@@ -70,11 +78,5 @@ public class PostgresqlStoreForTesting {
         }
         return result;
 
-    }
-
-    private static Statement getStatement() throws ClassNotFoundException, SQLException {
-        Class.forName("org.postgresql.Driver");
-        Connection conn = DriverManager.getConnection(POSTGRESQL_URI);
-        return conn.createStatement();
     }
 }

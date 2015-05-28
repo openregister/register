@@ -32,7 +32,7 @@ public class PostgresqlStoreTest {
         PostgresqlStoreForTesting.dropTables(TABLE_NAME);
         store = new PostgresqlStore(
                 new DBInfo(TABLE_NAME, TABLE_NAME.toLowerCase(), Arrays.asList("store_tests", "anotherKey")),
-                PostgresqlStoreForTesting.dataSource
+                PostgresqlStoreForTesting.dataSource()
         );
     }
 

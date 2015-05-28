@@ -2,9 +2,9 @@ package controllers.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import controllers.App;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
+import uk.gov.openregister.config.Register;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.linking.Curie;
@@ -29,20 +29,20 @@ public class TurtleRepresentation implements Representation {
     private final CurieResolver curieResolver;
 
     public TurtleRepresentation() {
-        curieResolver = new CurieResolver(ApplicationConf.getString("registers.service.template.url"));
+        curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Map<String, String> stringStringMap) throws Exception {
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Map<String, String> stringStringMap, Register register) throws Exception {
         return ok(records.stream()
-                        .map(this::renderRecord)
+                        .map(r -> renderRecord(r, register))
                         .collect(Collectors.joining("\n", TURTLE_HEADER, ""))
         ).as(TEXT_TURTLE);
     }
 
     @Override
-    public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap) {
-        return ok(TURTLE_HEADER + renderRecord(record)).as(TEXT_TURTLE);
+    public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap, Register register) {
+        return ok(TURTLE_HEADER + renderRecord(record, register)).as(TEXT_TURTLE);
     }
 
     @Override
@@ -50,10 +50,10 @@ public class TurtleRepresentation implements Representation {
         return false;
     }
 
-    private String renderRecord(Record record) {
-        URI hashUri = curieResolver.resolve(new Curie(App.instance.register.name() + "_hash", record.getHash()));
+    private String renderRecord(Record record, Register register) {
+        URI hashUri = curieResolver.resolve(new Curie(register.name() + "_hash", record.getHash()));
         String entity = String.format("<%s>\n", hashUri);
-        return App.instance.register.fields().stream()
+        return register.fields().stream()
                 .map(field -> String.format("  field:%s %s", field.getName(), renderValue(record, field)))
                 .collect(Collectors.joining(" ;\n", entity, " .\n"));
     }
