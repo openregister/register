@@ -123,7 +123,7 @@ public class Rest extends BaseController {
                                         rs.size() == pageSize ?
                                                 Optional.of(controllers.api.routes.Rest.all(page + 1, pageSize).absoluteURL(request()))
                                                 : Optional.empty()
-                                )));
+                                ), register()));
     }
 
     public F.Promise<Result> allWithFormat(String format, int page, int pageSize) throws Exception {
@@ -139,7 +139,7 @@ public class Rest extends BaseController {
                                         rs.size() == pageSize ?
                                                 Optional.of(controllers.api.routes.Rest.allWithFormat(format, page + 1, pageSize).absoluteURL(request()))
                                                 : Optional.empty()
-                                )));
+                                ), register()));
     }
 
     public F.Promise<Result> search(String query, int page, int pageSize) throws Exception {
@@ -152,9 +152,9 @@ public class Rest extends BaseController {
                                         Optional.of(controllers.api.routes.Rest.search(query, page - 1, pageSize).absoluteURL(request()))
                                         : Optional.empty(),
                                 rs.size() == pageSize ?
-                                        Optional.of(controllers.api.routes.Rest.search(query, page+1, pageSize).absoluteURL(request()))
+                                        Optional.of(controllers.api.routes.Rest.search(query, page + 1, pageSize).absoluteURL(request()))
                                         : Optional.empty()
-                        )));
+                        ), register()));
 
     }
 
