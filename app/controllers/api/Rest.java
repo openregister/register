@@ -31,7 +31,7 @@ public class Rest extends Controller {
 
     private static final String REPRESENTATION_QUERY_PARAM = "_representation";
     public static final int DEFAULT_RESULT_PAGE_SIZE = 30;
-    private static final int ALL_ENTRIES_LIMIT = 100000;
+    private static final int ALL_ENTRIES_LIMIT = 1000;
 
     private final Store store;
     private final List<String> fieldNames;
