@@ -59,9 +59,8 @@ public class UI extends BaseController {
         if (validationErrors.isEmpty()) {
             try {
                 register.store().save(record);
-                return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
+                return redirect("/hash/" + record.getHash());
             } catch (DatabaseException e) {
-
                 return ok(views.html.newEntry.render(register, convertToMapOfListValues(requestParams), Collections.singletonMap("globalError", e.getMessage())));
             }
         }
@@ -95,10 +94,10 @@ public class UI extends BaseController {
         if (validationErrors.isEmpty()) {
             try {
                 register.store().update(hash, record);
+                return redirect("/hash/" + record.getHash());
             } catch (DatabaseConflictException e) {
                 return HtmlRepresentation.instance.toResponse(409, e.getMessage(), register.friendlyName());
             }
-            return redirect(controllers.api.routes.Rest.findByHash(record.getHash()));
         }
         Map<String, String> errors = validationErrors.stream().collect(Collectors.toMap(error -> error.key, error -> error.message));
         return ok(views.html.updateEntry.render(register,

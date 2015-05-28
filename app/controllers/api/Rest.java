@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import controllers.BaseController;
+import org.apache.commons.lang3.StringUtils;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Result;
@@ -22,7 +23,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static controllers.api.Representations.Format.html;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 
@@ -79,72 +79,46 @@ public class Rest extends BaseController {
     public F.Promise<Result> findByKeyWithFormat(String key, String value, String format) {
         Register register = register();
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> register.store().findByKV(key, URLDecoder.decode(value, "utf-8")));
-        return recordF.map(record -> getResponse(record, format,
+        return recordF.map(record -> getResponse(record, representationFrom(format),
                 anyFormat -> controllers.api.routes.Rest.findByKeyWithFormat(key, value, anyFormat).url(), register.friendlyName()));
     }
 
-    public F.Promise<Result> findByHash(String hash) {
-        return findByHashWithFormat(hash, representationQueryString());
-    }
-
-    public F.Promise<Result> findByHashWithFormat(String hash, String format) {
+    public F.Promise<Result> findByHash(String hash, String format) {
         Register register = register();
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> register.store().findByHash(hash));
-        return recordF.map(record -> getResponse(record, format,
-                anyFormat -> controllers.api.routes.Rest.findByHashWithFormat(hash, anyFormat).url(), register.friendlyName()));
+        return recordF.map(record -> getResponse(record, representationFrom(format),
+                anyFormat -> routes.Rest.findByHash(hash, anyFormat).url(), register.friendlyName()));
     }
 
     private String representationQueryString() {
         return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
-    private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat, String registerName) {
-        final Representation representation;
-        try {
-            representation = representationFor(format);
-        } catch (IllegalArgumentException e) {
-            return formatNotRecognisedResponse(format, registerName);
-        }
+    private Result getResponse(Optional<Record> recordO, Representation representation, Function<String, String> routeForFormat, String registerName) {
         return recordO.map(record ->
                         representation.toRecord(record, getHistoryFor(record), representationsMap(routeForFormat), register())
         ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found", registerName));
     }
 
-    public F.Promise<Result> all(int page, int pageSize) throws Exception {
+    public F.Promise<Result> all(String format, int page, int pageSize) throws Exception {
         Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(page, pageSize);
-        Representation representation = html.representation;
+        Representation representation = representationFrom(format);
 
         return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), representation)
                 .map(rs ->
                         representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat),
                                 pageLinksMap(page > 0 ?
-                                                Optional.of(controllers.api.routes.Rest.all(page - 1, pageSize).absoluteURL(request()))
+                                                Optional.of(controllers.api.routes.Rest.all(format, page - 1, pageSize).absoluteURL(request()))
                                                 : Optional.empty(),
                                         rs.size() == pageSize ?
-                                                Optional.of(controllers.api.routes.Rest.all(page + 1, pageSize).absoluteURL(request()))
-                                                : Optional.empty()
-                                ), register()));
-    }
-
-    public F.Promise<Result> allWithFormat(String format, int page, int pageSize) throws Exception {
-        Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(page, pageSize);
-        Representation representation = representationFor(format);
-
-        return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), representation)
-                .map(rs ->
-                        representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat),
-                                pageLinksMap(page > 0 ?
-                                                Optional.of(controllers.api.routes.Rest.allWithFormat(format, page - 1, pageSize).absoluteURL(request()))
-                                                : Optional.empty(),
-                                        rs.size() == pageSize ?
-                                                Optional.of(controllers.api.routes.Rest.allWithFormat(format, page + 1, pageSize).absoluteURL(request()))
+                                                Optional.of(controllers.api.routes.Rest.all(format, page + 1, pageSize).absoluteURL(request()))
                                                 : Optional.empty()
                                 ), register()));
     }
 
     public F.Promise<Result> search(String query, int page, int pageSize) throws Exception {
         Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(page, pageSize);
-        Representation representation = representationFor(null);
+        Representation representation = representationFrom(null);
 
         return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), representation).map(rs ->
                 representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat),
@@ -156,13 +130,6 @@ public class Rest extends BaseController {
                                         : Optional.empty()
                         ), register()));
 
-    }
-
-    private Representation representationFor(String format) {
-        if(format == null)
-            return Representations.representationFor(representationQueryString());
-
-        return Representations.representationFor(format);
     }
 
     private F.Promise<List<Record>> doSearch(int offset, int limit, Representation representation) throws Exception {
@@ -203,8 +170,17 @@ public class Rest extends BaseController {
         return pageLinksMap;
     }
 
-    private Result formatNotRecognisedResponse(String format, String registerName) {
-        return HtmlRepresentation.instance.toResponse(400, "Format '" + format + "' not recognised", registerName);
+    private Representation representationFrom(String format){
+        if(StringUtils.isEmpty(format) ){
+            String representationQueryValue = representationQueryString();
+            if(representationQueryValue == null){
+                return Representations.Format.html.representation;
+            }else{
+                return Representations.representationFor(representationQueryValue);
+            }
+        }else{
+            return Representations.representationFor(format.replaceAll("\\.(.*)", "$1"));
+        }
     }
 
     private List<RecordVersionInfo> getHistoryFor(Record r) {

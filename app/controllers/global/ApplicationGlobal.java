@@ -13,7 +13,7 @@ public class ApplicationGlobal extends GlobalSettings {
     public F.Promise<Result> onError(Http.RequestHeader requestHeader, Throwable throwable) {
         Logger.error("", throwable);
 
-
+        //Can have specific responses based on error type
         return F.Promise.pure(
                 HtmlRepresentation.instance.toResponse(500, throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage(), registerName(requestHeader))
         );
