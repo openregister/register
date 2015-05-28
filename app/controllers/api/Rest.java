@@ -120,8 +120,8 @@ public class Rest extends BaseController {
                                 representation.toListOfRecords(
                                         records,
                                         representationsMap(this::searchUriForFormat),
-                                        page > 0 ? controllers.api.routes.Rest.all(query, page - 1, pageSize).absoluteURL(request()) : null,
-                                        records.size() == pageSize ? controllers.api.routes.Rest.all(query, page + 1, pageSize).absoluteURL(request()) : null,
+                                        page > 0 ? controllers.api.routes.Rest.search(query, page - 1, pageSize).absoluteURL(request()) : null,
+                                        records.size() == pageSize ? controllers.api.routes.Rest.search(query, page + 1, pageSize).absoluteURL(request()) : null,
                                         register()
                                 )
                 );
