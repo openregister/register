@@ -19,9 +19,9 @@ public interface Store {
 
     Optional<Record> findByHash(String hash);
 
-    List<Record> search(Map<String, String> map, int maxEntries);
+    List<Record> search(Map<String, String> map, int offset, int limit);
 
-    List<Record> search(String query, int maxEntries);
+    List<Record> search(String query, int offset, int limit);
 
     long count();
 

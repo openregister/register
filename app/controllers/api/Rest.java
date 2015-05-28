@@ -1,6 +1,8 @@
 package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import controllers.BaseController;
 import play.libs.F;
 import play.mvc.BodyParser;
@@ -13,22 +15,22 @@ import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static controllers.api.Representations.representationFor;
+import static controllers.api.Representations.Format.html;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 
 public class Rest extends BaseController {
 
     private static final String REPRESENTATION_QUERY_PARAM = "_representation";
-    private static final String LIMIT_QUERY_PARAM = "_limit";
-    private static final int DEFAULT_RESULT_SIZE = 100;
-    private static final int ALL_ENTRIES_LIMIT = 100000;
+    public static final int DEFAULT_RESULT_PAGE_SIZE = 30;
+    private static final int ALL_ENTRIES_LIMIT = 1000;
 
     @BodyParser.Of(BodyParser.Json.class)
     public Result create() throws JsonProcessingException {
@@ -96,14 +98,6 @@ public class Rest extends BaseController {
         return request().getQueryString(REPRESENTATION_QUERY_PARAM);
     }
 
-    private int limitQueryValue() {
-        try {
-            return Integer.parseInt(request().getQueryString(LIMIT_QUERY_PARAM));
-        } catch (NullPointerException | NumberFormatException e) {
-            return DEFAULT_RESULT_SIZE;
-        }
-    }
-
     private Result getResponse(Optional<Record> recordO, String format, Function<String, String> routeForFormat, String registerName) {
         final Representation representation;
         try {
@@ -116,42 +110,97 @@ public class Rest extends BaseController {
         ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found", registerName));
     }
 
-    public F.Promise<Result> all() throws Exception {
-        return allWithFormat("html");
+    public F.Promise<Result> all(int page, int pageSize) throws Exception {
+        Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(page, pageSize);
+        Representation representation = html.representation;
+
+        return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), representation)
+                .map(rs ->
+                        representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat),
+                                pageLinksMap(page > 0 ?
+                                                Optional.of(controllers.api.routes.Rest.all(page - 1, pageSize).absoluteURL(request()))
+                                                : Optional.empty(),
+                                        rs.size() == pageSize ?
+                                                Optional.of(controllers.api.routes.Rest.all(page + 1, pageSize).absoluteURL(request()))
+                                                : Optional.empty()
+                                ), register()));
     }
 
-    public F.Promise<Result> allWithFormat(String format) throws Exception {
-        return doSearch(ALL_ENTRIES_LIMIT, Optional.of(format));
+    public F.Promise<Result> allWithFormat(String format, int page, int pageSize) throws Exception {
+        Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(page, pageSize);
+        Representation representation = representationFor(format);
+
+        return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), representation)
+                .map(rs ->
+                        representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat),
+                                pageLinksMap(page > 0 ?
+                                                Optional.of(controllers.api.routes.Rest.allWithFormat(format, page - 1, pageSize).absoluteURL(request()))
+                                                : Optional.empty(),
+                                        rs.size() == pageSize ?
+                                                Optional.of(controllers.api.routes.Rest.allWithFormat(format, page + 1, pageSize).absoluteURL(request()))
+                                                : Optional.empty()
+                                ), register()));
     }
 
-    public F.Promise<Result> search() throws Exception {
-        int limit = limitQueryValue();
+    public F.Promise<Result> search(String query, int page, int pageSize) throws Exception {
+        Pair<Integer, Integer> offsetAndLimitForNextPage = offsetAndLimitForNextPage(page, pageSize);
+        Representation representation = representationFor(null);
 
-        return doSearch(limit, Optional.empty());
+        return doSearch(offsetAndLimitForNextPage.getLeft(), offsetAndLimitForNextPage.getRight(), representation).map(rs ->
+                representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat),
+                        pageLinksMap(page > 0 ?
+                                        Optional.of(controllers.api.routes.Rest.search(query, page - 1, pageSize).absoluteURL(request()))
+                                        : Optional.empty(),
+                                rs.size() == pageSize ?
+                                        Optional.of(controllers.api.routes.Rest.search(query, page + 1, pageSize).absoluteURL(request()))
+                                        : Optional.empty()
+                        ), register()));
+
     }
 
-    private F.Promise<Result> doSearch(int limit, Optional<String> format) throws Exception {
+    private Representation representationFor(String format) {
+        if(format == null)
+            return Representations.representationFor(representationQueryString());
+
+        return Representations.representationFor(format);
+    }
+
+    private F.Promise<List<Record>> doSearch(int offset, int limit, Representation representation) throws Exception {
         Register register = register();
-        Representation representation;
-        try {
-            representation = format.map(Representations::representationFor)
-                    .orElse(representationFor(representationQueryString()));
-        } catch (IllegalArgumentException e) {
-            return F.Promise.pure(formatNotRecognisedResponse(representationQueryString(), register.friendlyName()));
+        final int effectiveOffset;
+        final int effectiveLimit;
+        if (representation.isPaginated()) {
+            effectiveOffset = offset;
+            effectiveLimit = limit;
+        } else {
+            effectiveOffset = 0;
+            effectiveLimit = ALL_ENTRIES_LIMIT;
         }
 
-        F.Promise<List<Record>> recordsF = F.Promise.promise(() -> {
+        return F.Promise.promise(() -> {
             if (request().queryString().containsKey("_query")) {
-                return register.store().search(request().queryString().get("_query")[0], limit);
+                return register.store().search(request().queryString().get("_query")[0], effectiveOffset, effectiveLimit);
             } else {
                 Map<String, String> map = request().queryString().entrySet().stream()
                         .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
                         .collect(toMap(Map.Entry::getKey, queryParamEntry -> queryParamEntry.getValue()[0]));
-                return register.store().search(map, limit);
+                return register.store().search(map, effectiveOffset, effectiveLimit);
             }
         });
+    }
 
-        return recordsF.map(rs -> representation.toListOfRecords(rs, representationsMap(this::searchUriForFormat), register));
+    private Map<String, String> pageLinksMap(Optional<String> previousPageLink, Optional<String> nextPageLink) {
+        final Map<String, String> pageLinksMap = new HashMap<>();
+
+        if (previousPageLink.isPresent()) {
+            pageLinksMap.put("previous_page", previousPageLink.get());
+        }
+
+        if (nextPageLink.isPresent()) {
+            pageLinksMap.put("next_page", nextPageLink.get());
+        }
+
+        return pageLinksMap;
     }
 
     private Result formatNotRecognisedResponse(String format, String registerName) {
@@ -172,5 +221,11 @@ public class Rest extends BaseController {
     private String searchUriForFormat(String format) {
         // makes assumptions about the structure of the uri
         return request().uri() + "&" + REPRESENTATION_QUERY_PARAM + "=" + format;
+    }
+
+    private Pair<Integer, Integer> offsetAndLimitForNextPage(int currentPage, int pageSize) {
+        int offset = currentPage * pageSize;
+
+        return new ImmutablePair<>(offset, pageSize);
     }
 }

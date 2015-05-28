@@ -404,6 +404,14 @@ td.view > a:after {
   font-size: 1rem;
 }
 
+a.next_page {
+  float:right;
+}
+
+a.previous_page {
+  float:left;
+}
+
 /* Styles for responsive entries table */
 /* see https://techblog.livingsocial.com/blog/2015/04/06/responsive-tables-in-pure-css */
 @media screen and (max-width: 1100px) {

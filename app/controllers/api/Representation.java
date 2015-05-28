@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface Representation {
-    Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Register register) throws Exception;
+    Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Map<String, String> pageLinksMap, Register register) throws Exception;
 
     Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap, Register register);
+
+    boolean isPaginated();
 }

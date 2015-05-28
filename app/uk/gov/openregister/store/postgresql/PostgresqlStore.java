@@ -160,11 +160,11 @@ public class PostgresqlStore implements Store {
 
     @Override
     public Optional<Record> findByHash(String hash) {
-        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.historyTableName + " WHERE hash = ?", hash).andThen(this::toOptionalRecord);
+        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.historyTableName + " WHERE hash = ? ORDER BY hash", hash).andThen(this::toOptionalRecord);
     }
 
     @Override
-    public List<Record> search(Map<String, String> map, int maxEntries) {
+    public List<Record> search(Map<String, String> map, int offset, int limit) {
         String sql = "SELECT * FROM " + dbInfo.tableName;
 
         if (!map.isEmpty()) {
@@ -174,14 +174,16 @@ public class PostgresqlStore implements Store {
             sql += " WHERE " + StringUtils.join(where, " AND ");
         }
 
-        sql += " LIMIT " + maxEntries;
+        sql += " ORDER BY hash ";
+        sql += " LIMIT " + limit;
+        sql += " OFFSET " + offset;
 
         return database.<List<Record>>select(sql).andThen(this::getRecords);
 
     }
 
     @Override
-    public List<Record> search(String query, int maxEntries) {
+    public List<Record> search(String query, int offset, int limit) {
 
         String sql = "SELECT * FROM " + dbInfo.tableName;
 
@@ -192,7 +194,9 @@ public class PostgresqlStore implements Store {
             sql += " WHERE " + StringUtils.join(where, " OR ");
         }
 
-        sql += " LIMIT " + maxEntries;
+        sql += " ORDER BY hash ";
+        sql += " LIMIT " + limit;
+        sql += " OFFSET " + offset;
 
         return database.<List<Record>>select(sql).andThen(this::getRecords);
     }

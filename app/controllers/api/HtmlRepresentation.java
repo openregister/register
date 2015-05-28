@@ -27,13 +27,18 @@ public class HtmlRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Register register) {
-        return ok(views.html.entries.render(register, records, representationsMap));
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Map<String, String> pageLinksMap, Register register) {
+        return ok(views.html.entries.render(register, records, representationsMap, pageLinksMap));
     }
 
     @Override
     public Result toRecord(Record dbRecord, List<RecordVersionInfo> history, Map<String, String> representationsMap, Register register) {
         return ok(views.html.entry.render(register, dbRecord, history, representationsMap));
+    }
+
+    @Override
+    public boolean isPaginated() {
+        return true;
     }
 
     public static HtmlRepresentation instance = new HtmlRepresentation();

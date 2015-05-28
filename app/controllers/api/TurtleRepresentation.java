@@ -33,7 +33,7 @@ public class TurtleRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Register register) throws Exception {
+    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, Map<String, String> pageLinksMap, Register register) throws Exception {
         return ok(records.stream()
                         .map(r -> renderRecord(r, register))
                         .collect(Collectors.joining("\n", TURTLE_HEADER, ""))
@@ -43,6 +43,11 @@ public class TurtleRepresentation implements Representation {
     @Override
     public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap, Register register) {
         return ok(TURTLE_HEADER + renderRecord(record, register)).as(TEXT_TURTLE);
+    }
+
+    @Override
+    public boolean isPaginated() {
+        return false;
     }
 
     private String renderRecord(Record record, Register register) {
