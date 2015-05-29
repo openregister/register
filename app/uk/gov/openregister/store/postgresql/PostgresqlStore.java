@@ -27,6 +27,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PostgresqlStore implements Store {
+    public enum SortOrder {
+        Key(),
+        Time()
+    }
 
     private final DBInfo dbInfo;
     private Database database;
