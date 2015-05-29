@@ -201,7 +201,7 @@ public class NewPostgresqlStore implements Store {
                 " LEFT JOIN LATERAL (SELECT key, value FROM json_each_text(records)) q2 ON TRUE" +
                 " INNER JOIN " + dbInfo.recordTableName +
                 " ON q2.value = hash " + searchClause +
-                " LIMIT " + limit + " OFFSET " + offset )
+                " LIMIT " + limit + " OFFSET " + offset)
                 .andThen(this::toRecords);
     }
 
@@ -219,8 +219,9 @@ public class NewPostgresqlStore implements Store {
 
     @Override
     public long count() {
-        // not implemented
-        return 0;
+        return database.<Long>select("SELECT count(*) FROM (SELECT records FROM " + dbInfo.versionTableName + " ORDER BY version_number DESC LIMIT 1) q1 "+
+                " LEFT JOIN LATERAL (SELECT * FROM json_object_keys(records)) q2 ON TRUE")
+                .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
     }
 
     @Override
