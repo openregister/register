@@ -26,7 +26,7 @@ public class YamlSanityTest extends ApplicationTests {
     public void testFindOneByKey() throws Exception {
         postJson("/create", TEST_JSON);
 
-        WSResponse response = getByKV("key1", "value1", "yaml");
+        WSResponse response = getByKV("test-register", "testregisterkey", "yaml");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getHeader("Content-type")).isEqualTo("text/yaml; charset=utf-8");
         assertThat(response.getBody()).startsWith(EXPECTED_YAML);
