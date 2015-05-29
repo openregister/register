@@ -106,6 +106,8 @@ public class Rest extends BaseController {
         );
     }
 
+    final SortType.SortBy defaultSort = register().store().getSortType().getDefault();
+    final SortType.SortBy lastUpdateSort = register().store().getSortType().getLastUpdate();
     public F.Promise<Result> all(String format, int page, int pageSize) throws Exception {
         return findByQuery(
                 format,
@@ -113,7 +115,7 @@ public class Rest extends BaseController {
                 page,
                 pageSize,
                 (q, p, ps) -> controllers.api.routes.Rest.all(format, p, ps).absoluteURL(request()),
-                register().store().getSortType().getDefault());
+                defaultSort);
     }
 
     public F.Promise<Result> latest(String format, int page, int pageSize) throws Exception {
@@ -123,7 +125,7 @@ public class Rest extends BaseController {
                 page,
                 pageSize,
                 (q, p, ps) -> controllers.api.routes.Rest.latest(format, p, ps).absoluteURL(request()),
-                register().store().getSortType().getLastUpdate());
+                lastUpdateSort);
     }
 
     public F.Promise<Result> search(String query, int page, int pageSize) throws Exception {
@@ -134,7 +136,7 @@ public class Rest extends BaseController {
                 page,
                 pageSize,
                 (q, p, ps) -> controllers.api.routes.Rest.search(q, p, ps).absoluteURL(request()),
-                register().store().getSortType().getDefault());
+                defaultSort);
     }
 
     private F.Promise<Result> findByQuery(String format, String query, int page, int pageSize, PaginationUrlFunction paginationUrlFunction, SortType.SortBy sortBy) throws Exception {
