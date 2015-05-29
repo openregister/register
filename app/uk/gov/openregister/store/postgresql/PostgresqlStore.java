@@ -34,6 +34,7 @@ public class PostgresqlStore implements Store {
 
     public final SortBy sortByKey = new SortBy() {
         private final String sqlTemplate = "  ORDER BY entry ->> '%s' ";
+
         public String sortBy() {
             return sqlTemplate.replace("%s", dbInfo.primaryKey);
         }
@@ -42,10 +43,23 @@ public class PostgresqlStore implements Store {
     public final SortBy sortByUpdateTime = new SortBy() {
 
         private final String sqlTemplate = "  ORDER BY metadata ->> 'creationTime' DESC ";
+
         public String sortBy() {
             return sqlTemplate;
         }
     };
+    private SortType sortType = new SortType() {
+        @Override
+        public SortBy getDefault() {
+            return sortByKey;
+        }
+
+        @Override
+        public SortBy getLastUpdate() {
+            return sortByUpdateTime;
+        }
+    };
+
 
     public PostgresqlStore(DBInfo dbInfo, DataSource dataSource) {
         this.dbInfo = dbInfo;
@@ -56,17 +70,7 @@ public class PostgresqlStore implements Store {
 
     @Override
     public SortType getSortType() {
-        return new SortType(){
-            @Override
-            public SortBy getDefault() {
-                return sortByKey;
-            }
-
-            @Override
-            public SortBy getLastUpdate() {
-                return sortByUpdateTime;
-            }
-        };
+        return sortType;
     }
 
     public void createTables(String tableName) {
