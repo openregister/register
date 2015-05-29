@@ -202,7 +202,7 @@ public class NewPostgresqlStore implements Store {
         return database.<Optional<Record>>select(
                 "SELECT creation_time, hash, entry " +
                         " FROM (SELECT creation_time, records->>'" + value + "' AS hash FROM " + dbInfo.versionTableName + " ORDER BY version_number DESC LIMIT 1) q1 " +
-                        " LEFT JOIN LATERAL (SELECT entry FROM " + dbInfo.recordTableName + " WHERE hash = q1.hash) q2 " +
+                        " INNER JOIN LATERAL (SELECT entry FROM " + dbInfo.recordTableName + " WHERE hash = q1.hash) q2 " +
                         " ON TRUE")
                 .andThen(this::toOptionalRecord);
     }
@@ -220,7 +220,7 @@ public class NewPostgresqlStore implements Store {
                         " FROM (SELECT hash, entry FROM " + dbInfo.recordTableName + " WHERE hash = ?) q1 " +
                         // FIXME this just returns a fake creation_time
                         // fixing this is not trivial as the same hash could be present in multiple versions
-                        " LEFT JOIN LATERAL (SELECT 'now'::timestamp AS creation_time) q2 " +
+                        " INNER JOIN LATERAL (SELECT 'now'::timestamp AS creation_time) q2 " +
                         " ON TRUE", hash)
                 .andThen(this::toOptionalRecord);
     }
