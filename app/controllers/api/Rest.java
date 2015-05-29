@@ -10,6 +10,7 @@ import uk.gov.openregister.config.Register;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseException;
+import uk.gov.openregister.store.SortType;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
@@ -111,8 +112,18 @@ public class Rest extends BaseController {
                 request().getQueryString("_query"),
                 page,
                 pageSize,
-                (q, p, ps) -> controllers.api.routes.Rest.all(format, p, ps).absoluteURL(request())
-        );
+                (q, p, ps) -> controllers.api.routes.Rest.all(format, p, ps).absoluteURL(request()),
+                register().store().getSortType().getDefault());
+    }
+
+    public F.Promise<Result> latest(String format, int page, int pageSize) throws Exception {
+        return findByQuery(
+                format,
+                request().getQueryString("_query"),
+                page,
+                pageSize,
+                (q, p, ps) -> controllers.api.routes.Rest.latest(format, p, ps).absoluteURL(request()),
+                register().store().getSortType().getLastUpdate());
     }
 
     public F.Promise<Result> search(String query, int page, int pageSize) throws Exception {
@@ -122,11 +133,11 @@ public class Rest extends BaseController {
                 query,
                 page,
                 pageSize,
-                (q, p, ps) -> controllers.api.routes.Rest.search(q, p, ps).absoluteURL(request())
-        );
+                (q, p, ps) -> controllers.api.routes.Rest.search(q, p, ps).absoluteURL(request()),
+                register().store().getSortType().getDefault());
     }
 
-    private F.Promise<Result> findByQuery(String format, String query, int page, int pageSize, PaginationUrlFunction paginationUrlFunction) throws Exception {
+    private F.Promise<Result> findByQuery(String format, String query, int page, int pageSize, PaginationUrlFunction paginationUrlFunction, SortType.SortBy sortBy) throws Exception {
         Store store = register().store();
         Representation representation = representationFrom(format);
 
@@ -139,11 +150,11 @@ public class Rest extends BaseController {
         List<Record> records;
 
         if (queryParameters.containsKey("_query")) {
-            records = store.search(queryParameters.get("_query")[0], effectiveOffset, effectiveLimit);
+            records = store.search(queryParameters.get("_query")[0], effectiveOffset, effectiveLimit, sortBy);
         } else {
             Map<String, String> searchParamsMap = queryParameters.keySet().stream().filter(k -> !k.startsWith("_")).collect(Collectors.toMap(key -> key, key -> queryParameters.get(key)[0]));
 
-            records = store.search(searchParamsMap, effectiveOffset, effectiveLimit);
+            records = store.search(searchParamsMap, effectiveOffset, effectiveLimit, sortBy);
         }
 
         return F.Promise.promise(() -> representation.toListOfRecords(
