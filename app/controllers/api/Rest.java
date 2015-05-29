@@ -76,7 +76,7 @@ public class Rest extends BaseController {
                         getResponse(
                                 record,
                                 representationFrom(format),
-                                //todo: . with format is required at this moment because the controller methods gets format with . in it
+                                //todo: . with format is required at this moment because the controller methods receives format starts with '.'
                                 fmt -> routes.Rest.findByKey(key, value, "." + fmt).url(),
                                 register.friendlyName()
                         )
@@ -90,7 +90,7 @@ public class Rest extends BaseController {
                         getResponse(
                                 record,
                                 representationFrom(formatWithDot),
-                                //todo: . with format is required at this moment because the controller methods gets format with . in it
+                                //todo: . with format is required at this moment because the controller methods receives format starts with '.'
                                 fmt -> routes.Rest.findByHash(hash, "." + fmt).url(),
                                 register.friendlyName()
                         )
@@ -98,34 +98,44 @@ public class Rest extends BaseController {
     }
 
     public F.Promise<Result> all(String format, int page, int pageSize) throws Exception {
-        Representation representation = representationFrom(format);
-
-        return doSearch(page * pageSize, pageSize, representation)
-                .map(records ->
-                                representation.toListOfRecords(
-                                        records,
-                                        representationsMap(this::searchUriForFormat),
-                                        page > 0 ? controllers.api.routes.Rest.all(format, page - 1, pageSize).absoluteURL(request()) : null,
-                                        records.size() == pageSize ? controllers.api.routes.Rest.all(format, page + 1, pageSize).absoluteURL(request()) : null,
-                                        register()
-                                )
-                );
+        return findByQuery(
+                format,
+                request().getQueryString("_query"),
+                page,
+                pageSize,
+                (q, p, ps) -> controllers.api.routes.Rest.all(format, p, ps).absoluteURL(request())
+        );
     }
 
     public F.Promise<Result> search(String query, int page, int pageSize) throws Exception {
-        Representation representation = representationFrom(null);
 
-        return doSearch(page * pageSize, pageSize, representation)
-                .map(records ->
-                                representation.toListOfRecords(
-                                        records,
-                                        representationsMap(this::searchUriForFormat),
-                                        page > 0 ? controllers.api.routes.Rest.search(query, page - 1, pageSize).absoluteURL(request()) : null,
-                                        records.size() == pageSize ? controllers.api.routes.Rest.search(query, page + 1, pageSize).absoluteURL(request()) : null,
-                                        register()
-                                )
-                );
+        return findByQuery(
+                request().getQueryString(REPRESENTATION_QUERY_PARAM),
+                query,
+                page,
+                pageSize,
+                (q, p, ps) -> controllers.api.routes.Rest.search(q, p, ps).absoluteURL(request())
+        );
+    }
 
+    public F.Promise<Result> findByQuery(String format, String query, int page, int pageSize, PaginationUrlFunction paginationUrlFunction) throws Exception {
+        Register register = register();
+        Representation representation = representationFrom(format);
+
+        List<Record> records = doSearch(page * pageSize, pageSize, representation, register);
+
+        return F.Promise.promise(() -> representation.toListOfRecords(
+                records,
+                representationsMap(this::searchUriForFormat),
+                page > 0 ? paginationUrlFunction.apply(query, page - 1, pageSize) : null,
+                records.size() == pageSize ? paginationUrlFunction.apply(query, page + 1, pageSize): null,
+                register()
+        ));
+    }
+
+    @FunctionalInterface
+    private interface PaginationUrlFunction {
+        String apply(String query, int page, int pageSize);
     }
 
     private Result getResponse(Optional<Record> recordO, Representation representation, Function<String, String> routeForFormat, String registerName) {
@@ -134,8 +144,8 @@ public class Rest extends BaseController {
         ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found", registerName));
     }
 
-    private F.Promise<List<Record>> doSearch(int offset, int limit, Representation representation) throws Exception {
-        Register register = register();
+    private List<Record> doSearch(int offset, int limit, Representation representation, Register register) throws Exception {
+
         final int effectiveOffset;
         final int effectiveLimit;
         if (representation.isPaginated()) {
@@ -146,16 +156,15 @@ public class Rest extends BaseController {
             effectiveLimit = ALL_ENTRIES_LIMIT;
         }
 
-        return F.Promise.promise(() -> {
-            if (request().queryString().containsKey("_query")) {
-                return register.store().search(request().queryString().get("_query")[0], effectiveOffset, effectiveLimit);
-            } else {
-                Map<String, String> map = request().queryString().entrySet().stream()
-                        .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
-                        .collect(toMap(Map.Entry::getKey, queryParamEntry -> queryParamEntry.getValue()[0]));
-                return register.store().search(map, effectiveOffset, effectiveLimit);
-            }
-        });
+        if (request().queryString().containsKey("_query")) {
+            return register.store().search(request().queryString().get("_query")[0], effectiveOffset, effectiveLimit);
+        } else {
+            Map<String, String> map = request().queryString().entrySet().stream()
+                    .filter(queryParameter -> !queryParameter.getKey().startsWith("_"))
+                    .collect(toMap(Map.Entry::getKey, queryParamEntry -> queryParamEntry.getValue()[0]));
+            return register.store().search(map, effectiveOffset, effectiveLimit);
+        }
+
     }
 
     private Representation representationFrom(String format) {
