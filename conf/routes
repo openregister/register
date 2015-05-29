@@ -2,10 +2,6 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# This must be first line because of url ordering
-# Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                                    controllers.Assets.at(path="/public", file)
-
 
 
 GET         /                                                @controllers.html.UI.index()
@@ -17,11 +13,12 @@ POST        /ui/supersede/:hash                              @controllers.html.U
 GET         /load                                            @controllers.api.ImportData.loadWithProgress()
 GET         /load/progress                                   @controllers.api.ImportData.progress()
 
+GET         /latest$format<(\.\p{Lower}+|)>                  @controllers.api.Rest.latest(format, _page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
 GET         /all$format<(\.\p{Lower}+|)>                     @controllers.api.Rest.all(format, _page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
+GET         /search                                          @controllers.api.Rest.search(_query: String ?= "",_page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
 
 GET         /hash/$hash<\p{Alnum}+>$format<(\.\p{Lower}+|)>  @controllers.api.Rest.findByHash(hash, format)
 
-GET         /search                                          @controllers.api.Rest.search(_query: String ?= "",_page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
 
 GET         /:key/$value<[^./]+>$format<(\.\p{Lower}+|)>      @controllers.api.Rest.findByKey(key, value, format)
 
@@ -29,3 +26,8 @@ POST        /create                                          @controllers.api.Re
 POST        /supersede/:hash                                 @controllers.api.Rest.update(hash)
 
 GET         /assets/javascripts/routes                       @controllers.api.ImportData.javascriptRoutes()
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET         /assets/*file                                    controllers.Assets.at(path="/public", file)
+

@@ -29,10 +29,10 @@ public class GenericRegister extends Register {
 
     private void initialise() {
         CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
-        String rrUrl =  curieResolver.resolve(new Curie("register", name)) + "?_representation=json";
+        String rrUrl = curieResolver.resolve(new Curie("register", name)) + "?_representation=json";
         WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
 
-        if (rr.getStatus() == 200 ) {
+        if (rr.getStatus() == 200) {
             JsonNode rEntry = rr.asJson().get("entry");
 
             List<String> fieldNames = StreamUtils.asStream(rEntry.get("fields").elements()).map(JsonNode::textValue).collect(Collectors.toList());

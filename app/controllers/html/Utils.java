@@ -22,7 +22,7 @@ public class Utils {
     public static Html toRepresentationLinks(Map<String, String> representationMap) {
         final StringBuilder linksHtml = new StringBuilder("");
 
-        representationMap.forEach((k,v) -> linksHtml.append(String.format("<a href=\"%s\">%s</a>,", v, k)));
+        representationMap.forEach((k,v) -> linksHtml.append(String.format("<a href=\"%s\" rel=\"alternate\">%s</a>,", v, k)));
 
         return Html.apply(linksHtml.toString().replaceAll(",$", "").replaceAll(",([^,]+)$", " and$1"));
     }
