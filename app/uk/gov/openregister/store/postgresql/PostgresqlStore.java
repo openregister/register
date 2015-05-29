@@ -174,12 +174,16 @@ public class PostgresqlStore implements Store {
             sql += " WHERE " + StringUtils.join(where, " AND ");
         }
 
-        sql += " ORDER BY hash ";
+        sql += " ORDER BY " + defaultSortCriteria();
         sql += " LIMIT " + limit;
         sql += " OFFSET " + offset;
 
         return database.<List<Record>>select(sql).andThen(this::getRecords);
 
+    }
+
+    private String defaultSortCriteria() {
+        return " entry ->> '" + dbInfo.primaryKey + "' ";
     }
 
     @Override
