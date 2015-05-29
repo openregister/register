@@ -1,14 +1,17 @@
 package uk.gov.openregister.store.newpostgresql;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
+import uk.gov.openregister.JsonObjectMapper;
 import uk.gov.openregister.crypto.Digest;
 import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
+import uk.gov.openregister.domain.Version;
 import uk.gov.openregister.store.SortType;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.store.postgresql.Database;
@@ -21,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -74,19 +78,14 @@ public class NewPostgresqlStore implements Store {
                 " (hash varchar(40) primary key, entry json)");
         database.execute("CREATE TABLE IF NOT EXISTS " + dbInfo.versionTableName +
                 " (hash varchar(40) primary key, records json, signature varchar(40), parent varchar(40), version_number bigserial, creation_time timestamp)");
-        DateTime creationTime = DateTime.now();
-        String hash;
-        try {
-            hash = fakedOutHashOfVersion(creationTime, new ObjectMapper().readValue("{}", ObjectNode.class), "");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Version initialVersion = new Version(DateTime.now(), Collections.emptyMap(), "");
 
         database.execute("INSERT INTO " + dbInfo.versionTableName + " (hash, records, creation_time) " +
-                        " SELECT ?, '{}', ?" +
+                        " SELECT ?, ?, ?" +
                         " WHERE NOT EXISTS (SELECT 1 FROM " + dbInfo.versionTableName + ")",
-                hash,
-                new Timestamp(creationTime.getMillis()));
+                initialVersion.getHash(),
+                createPGObject(JsonObjectMapper.convertToString(initialVersion.getRecords())),
+                new Timestamp(initialVersion.getCreationTime().getMillis()));
     }
 
     private String fakedOutHashOfVersion(DateTime creationTime, ObjectNode records, String parentHash) {
@@ -96,9 +95,6 @@ public class NewPostgresqlStore implements Store {
 
     @Override
     public void save(Record record) {
-        String recordHash = record.getHash();
-        PGobject entryObject = createPGObject(record.normalisedEntry());
-
         try (Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
@@ -108,40 +104,16 @@ public class NewPostgresqlStore implements Store {
                 st.execute();
             }
 
-            // upsert record
-            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.recordTableName + " (hash, entry) " +
-                    " SELECT ?,? " +
-                    " WHERE NOT EXISTS (SELECT 1 FROM " + dbInfo.recordTableName + " WHERE hash=?)")) {
-                st.setObject(1, recordHash);
-                st.setObject(2, entryObject);
-                st.setObject(3, recordHash);
-                st.executeUpdate();
-            }
+            String recordHash = upsertRecord(connection, record);
 
             // insert version
-            // XXX can we do this without fetching the whole records column?
-            String parentHash;
-            ObjectNode records;
-            try (PreparedStatement st = connection.prepareStatement("SELECT hash,records FROM " + dbInfo.versionTableName + " ORDER BY version_number DESC LIMIT 1")) {
-                ResultSet resultSet = st.executeQuery();
-                if (!resultSet.next()) {
-                    throw new RuntimeException("Couldn't find latest version");
-                }
-                parentHash = resultSet.getString("hash");
-                records = new ObjectMapper().readValue(resultSet.getString("records"), ObjectNode.class);
-            }
-            records.put(record.getEntry().get(dbInfo.primaryKey).asText(), recordHash);
+            // XXX don't really want to fetch whole records column
+            // something like http://stackoverflow.com/questions/18209625/how-do-i-modify-fields-inside-the-new-postgresql-json-datatype might assist with that
+            Version currentLatestVersion = getCurrentLatestVersion(connection);
+            String primaryKey = record.getEntry().get(dbInfo.primaryKey).asText();
+            Version newVersion = currentLatestVersion.withNewRecord(primaryKey, recordHash);
 
-            DateTime creationTime = DateTime.now();
-            String versionHash = fakedOutHashOfVersion(creationTime, records, parentHash);
-
-            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.versionTableName + " (hash, records, parent, creation_time) VALUES(?, ?, ?, ?)")) {
-                st.setObject(1, versionHash);
-                st.setObject(2, createPGObject(records.toString()));
-                st.setObject(3, parentHash);
-                st.setObject(4, new Timestamp(creationTime.getMillis()));
-                st.executeUpdate();
-            }
+            insertVersion(connection, newVersion);
 
             connection.commit();
         } catch (SQLException | IOException e) {
@@ -149,9 +121,72 @@ public class NewPostgresqlStore implements Store {
         }
     }
 
+    private void insertVersion(Connection connection, Version newVersion) throws SQLException {
+        try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.versionTableName + " (hash, records, parent, creation_time) VALUES(?, ?, ?, ?)")) {
+            st.setObject(1, newVersion.getHash());
+            st.setObject(2, createPGObject(JsonObjectMapper.convertToString(newVersion.getRecords())));
+            st.setObject(3, newVersion.getParent());
+            st.setObject(4, new Timestamp(newVersion.getCreationTime().getMillis()));
+            st.executeUpdate();
+        }
+    }
+
+    private Version getCurrentLatestVersion(Connection connection) throws SQLException, IOException {
+        Version currentLatestVersion;
+        try (PreparedStatement st = connection.prepareStatement("SELECT creation_time,hash,records FROM " + dbInfo.versionTableName + " ORDER BY version_number DESC LIMIT 1")) {
+            ResultSet resultSet = st.executeQuery();
+            if (!resultSet.next()) {
+                throw new RuntimeException("Couldn't find latest version");
+            }
+            Timestamp creationTime = resultSet.getTimestamp("creation_time");
+            Map<String,String> recordsMap = new ObjectMapper().readValue(resultSet.getString("records"), new TypeReference<Map<String,String>>() {});
+            currentLatestVersion = new Version(new DateTime(creationTime), recordsMap, resultSet.getString("hash"));
+        }
+        return currentLatestVersion;
+    }
+
+    private String upsertRecord(Connection connection, Record record) throws SQLException {
+        String recordHash = record.getHash();
+        PGobject entryObject = createPGObject(record.normalisedEntry());
+
+        // upsert record
+        try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.recordTableName + " (hash, entry) " +
+                " SELECT ?,? " +
+                " WHERE NOT EXISTS (SELECT 1 FROM " + dbInfo.recordTableName + " WHERE hash=?)")) {
+            st.setObject(1, recordHash);
+            st.setObject(2, entryObject);
+            st.setObject(3, recordHash);
+            st.executeUpdate();
+        }
+        return recordHash;
+    }
+
     @Override
     public void update(String oldhash, Record record) {
-        save(record);
+        try (Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            // pessimistic lock to prevent concurrent updates causing divergent history
+            // EXCLUSIVE mode allows concurrent reads but not writes
+            try (PreparedStatement st = connection.prepareStatement("LOCK TABLE " + dbInfo.versionTableName + " IN EXCLUSIVE MODE")) {
+                st.execute();
+            }
+
+            String recordHash = upsertRecord(connection, record);
+
+            // insert version
+            // XXX don't really want to fetch whole records column
+            // something like http://stackoverflow.com/questions/18209625/how-do-i-modify-fields-inside-the-new-postgresql-json-datatype might assist with that
+            Version currentLatestVersion = getCurrentLatestVersion(connection);
+            String primaryKey = record.getEntry().get(dbInfo.primaryKey).asText();
+            Version newVersion = currentLatestVersion.withUpdatedRecord(primaryKey, oldhash, recordHash);
+
+            insertVersion(connection, newVersion);
+
+            connection.commit();
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
