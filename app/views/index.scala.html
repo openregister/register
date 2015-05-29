@@ -7,11 +7,11 @@
 
 <div class="row">
     <div class="small-12 large-8 columns">
-        <div class="summary-copy">
-            <p>@play.Play.application().configuration().getString("register.title")</p>
+        <div class="official-text">
+            <p>@Html(register.officialText())</p>
         </div>
         <div class="exists-copy">
-            <p>@play.Play.application().configuration().getString("register.description")</p>
+            <p>@{s"This register exists as an accurate list of all ${register.name().capitalize} entries."}</p>
         </div> <!-- ./columns -->
 
         <div class="meta-entries">
