@@ -9,7 +9,6 @@ import uk.gov.openregister.crypto.Digest;
 import uk.gov.openregister.domain.Metadata;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
-import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.SortType;
 import uk.gov.openregister.store.Store;
 import uk.gov.openregister.store.postgresql.Database;
@@ -21,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -49,20 +47,21 @@ public class NewPostgresqlStore implements Store {
         DateTime creationTime = DateTime.now();
         String hash;
         try {
-            hash = fakedOutHashOfVersion(creationTime, new ObjectMapper().readValue("{}", ObjectNode.class));
+            hash = fakedOutHashOfVersion(creationTime, new ObjectMapper().readValue("{}", ObjectNode.class), "");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         database.execute("INSERT INTO " + dbInfo.versionTableName + " (hash, records, creation_time) " +
-                        "VALUES(?, '{}', ?)",
+                        " SELECT ?, '{}', ?" +
+                        " WHERE NOT EXISTS (SELECT 1 FROM " + dbInfo.versionTableName + ")",
                 hash,
                 new Timestamp(creationTime.getMillis()));
     }
 
-    private String fakedOutHashOfVersion(DateTime creationTime, ObjectNode records) {
+    private String fakedOutHashOfVersion(DateTime creationTime, ObjectNode records, String parentHash) {
         // XXX needs to account for whole version entry
-        return Digest.shasum(creationTime.toString() + records.toString());
+        return Digest.shasum(creationTime.toString() + records.toString() + parentHash);
     }
 
     @Override
@@ -102,7 +101,7 @@ public class NewPostgresqlStore implements Store {
             records.put(record.getEntry().get(dbInfo.primaryKey).asText(), recordHash);
 
             DateTime creationTime = DateTime.now();
-            String versionHash = fakedOutHashOfVersion(creationTime, records);
+            String versionHash = fakedOutHashOfVersion(creationTime, records, parentHash);
 
             try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.versionTableName + " (hash, records, parent, creation_time) VALUES(?, ?, ?, ?)")) {
                 st.setObject(1, versionHash);
