@@ -56,7 +56,7 @@ public class CreateRecordTest extends ApplicationTests {
         WSResponse response = postJson("/create", json);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
 
-        WSResponse wsResponse = getByKV("name", "entryName", "json");
+        WSResponse wsResponse = getByKV("test-register", "testregisterkey", "json");
         String body = wsResponse.getBody();
 
         JsonNode receivedEntry = Json.parse(body).get("entry");
@@ -84,7 +84,7 @@ public class CreateRecordTest extends ApplicationTests {
         WSResponse response = postJson("/supersede/" + hash, updatedJson);
         assertThat(response.getStatus()).isEqualTo(ACCEPTED);
 
-        WSResponse wsResponse = getByKV("key2", "value2", "json");
+        WSResponse wsResponse = getByKV("test-register", "testregisterkey", "json");
         String body = wsResponse.getBody();
 
         JsonNode receivedEntry = Json.parse(body).get("entry");
