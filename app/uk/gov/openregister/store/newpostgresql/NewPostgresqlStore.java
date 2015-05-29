@@ -225,6 +225,16 @@ public class NewPostgresqlStore implements Store {
                 .andThen(this::toOptionalRecord);
     }
 
+    public Optional<Record> findByVersionHash(String versionHash, String primaryKey) {
+        return database.<Optional<Record>>select(
+                "SELECT creation_time, hash, entry " +
+                        " FROM (SELECT creation_time, records->>? AS hash FROM " + dbInfo.versionTableName + " WHERE hash = ?) version " +
+                        " INNER JOIN (SELECT hash,entry FROM " + dbInfo.recordTableName + " ) record " +
+                        " USING(hash)",
+                primaryKey, versionHash
+        ).andThen(this::toOptionalRecord);
+    }
+
     @Override
     public List<Record> search(Map<String, String> map, int offset, int limit, SortType.SortBy Key) {
         // XXX sql injection ahoy!

@@ -18,6 +18,7 @@ GET         /all$format<(\.\p{Lower}+|)>                     @controllers.api.Re
 GET         /search                                          @controllers.api.Rest.search(_query: String ?= "",_page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
 
 GET         /hash/$hash<\p{Alnum}+>$format<(\.\p{Lower}+|)>  @controllers.api.Rest.findByHash(hash, format)
+GET         /version/$hash<\p{Alnum}+>/$primaryKey<[^./]+>$format<(\.\p{Lower}+|)>  @controllers.api.Rest.findByVersionHash(hash, primaryKey, format)
 
 
 GET         /:key/$value<[^./]+>$format<(\.\p{Lower}+|)>      @controllers.api.Rest.findByKey(key, value, format)
