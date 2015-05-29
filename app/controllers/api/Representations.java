@@ -5,7 +5,9 @@ public class Representations {
         json(JsonRepresentation.instance),
         ttl(TurtleRepresentation.instance),
         yaml(YamlRepresentation.instance),
-        html(HtmlRepresentation.instance);
+        html(HtmlRepresentation.instance),
+        tsv(CSVRepresentation.tsvInstance),
+        csv(CSVRepresentation.csvInstance);
 
         public final Representation representation;
 
