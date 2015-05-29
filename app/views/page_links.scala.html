@@ -1,11 +1,11 @@
 @(previousPage: String, nextPage: String)
-<p class="page_links">
-    <span>
-        @if(previousPage!=null) {
-            <a class="previous_page" href=@previousPage>previous_page</a>
-        }
-        @if(nextPage!=null) {
-            <a class="next_page" href=@nextPage>next_page</a>
-        }
-    </span>
+<p class="page-links">
+
+    @if(previousPage!=null) {
+        <a class="previous-page" href=@previousPage>Previous page</a>
+    }
+    @if(nextPage!=null) {
+        <a class="next-page" href=@nextPage>Next page</a>
+    }
+
 </p>

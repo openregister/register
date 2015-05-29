@@ -418,12 +418,37 @@ table.responsive  th  {
   font-size: 1rem;
 }
 
-a.next_page {
+a.next-page {
   float:right;
+  padding-right: 5px;
 }
 
-a.previous_page {
+a.previous-page {
   float:left;
+  padding-left: 5px;
+}
+
+.page-links {
+  font-size: 17px;
+}
+
+
+.page-links > a.next-page:after {
+  content: "❯";
+  padding-left: 10px;
+  vertical-align: middle;
+}
+
+.page-links > a.previous-page:before {
+  content: "❮";
+  padding-right: 10px;
+  vertical-align: middle;
+}
+
+
+
+.pagination {
+  margin-bottom: 25px;
 }
 
 /* Styles for responsive entries table */
@@ -459,6 +484,10 @@ a.previous_page {
     float: left;
     font-weight: bold;
     width: 25%;
+  }
+
+  a.next-page {
+    padding-right: 15px;
   }
 
 }
