@@ -27,13 +27,28 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PostgresqlStore implements Store {
-    public enum SortOrder {
-        Key(),
-        Time()
-    }
-
     private final DBInfo dbInfo;
     private Database database;
+
+    public enum SortBy {
+        Key("  ORDER BY entry ->> '%s' ") {
+            @Override
+            public String sortSql(DBInfo dbInfo) {
+                return this.sortFieldTemplate.replace("%s", dbInfo.primaryKey);
+            }
+        },
+        UpdateTime("  ORDER BY metadata ->> 'creationTime' DESC");
+
+        final String sortFieldTemplate;
+
+        SortBy(String theSortFieldTemplate) {
+            sortFieldTemplate = theSortFieldTemplate;
+        }
+
+        public String sortSql(DBInfo dbInfo) {
+            return sortFieldTemplate;
+        }
+    }
 
     public PostgresqlStore(DBInfo dbInfo, DataSource dataSource) {
         this.dbInfo = dbInfo;
@@ -168,9 +183,8 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<Record> search(Map<String, String> map, int offset, int limit) {
-        String sql = "SELECT * FROM " + dbInfo.tableName;
-
+    public List<Record> search(Map<String, String> map, int offset, int limit, SortBy sortBy) {
+        String sql = "";
         if (!map.isEmpty()) {
             List<String> where = map.keySet().stream()
                     .map(k -> "entry->>'" + k + "' ILIKE '%" + map.get(k) + "%'")
@@ -178,19 +192,13 @@ public class PostgresqlStore implements Store {
             sql += " WHERE " + StringUtils.join(where, " AND ");
         }
 
-        sql += " ORDER BY hash ";
-        sql += " LIMIT " + limit;
-        sql += " OFFSET " + offset;
-
-        return database.<List<Record>>select(sql).andThen(this::getRecords);
+        return executeSearch(sql, offset, limit, sortBy);
 
     }
 
     @Override
-    public List<Record> search(String query, int offset, int limit) {
-
-        String sql = "SELECT * FROM " + dbInfo.tableName;
-
+    public List<Record> search(String query, int offset, int limit, SortBy sortBy) {
+        String sql = "";
         if (!dbInfo.keys.isEmpty()) {
             List<String> where = dbInfo.keys.stream()
                     .map(k -> "entry->>'" + k + "' ILIKE '%" + query + "%'")
@@ -198,7 +206,15 @@ public class PostgresqlStore implements Store {
             sql += " WHERE " + StringUtils.join(where, " OR ");
         }
 
-        sql += " ORDER BY hash ";
+        return executeSearch(sql, offset, limit, sortBy);
+    }
+
+    private List<Record> executeSearch(String where, int offset, int limit, SortBy sortBy) {
+        String sql = "SELECT * FROM " + dbInfo.tableName;
+
+        sql += where;
+
+        sql += sortBy.sortSql(dbInfo);
         sql += " LIMIT " + limit;
         sql += " OFFSET " + offset;
 
