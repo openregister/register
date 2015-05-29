@@ -15,7 +15,7 @@ GET         /load/progress                                   @controllers.api.Im
 
 GET         /latest$format<(\.\p{Lower}+|)>                  @controllers.api.Rest.latest(format, _page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
 GET         /all$format<(\.\p{Lower}+|)>                     @controllers.api.Rest.all(format, _page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
-GET         /search                                          @controllers.api.Rest.search(_query: String ?= "",_page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
+GET         /search                                          @controllers.api.Rest.search(_page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
 
 GET         /hash/$hash<\p{Alnum}+>$format<(\.\p{Lower}+|)>  @controllers.api.Rest.findByHash(hash, format)
 

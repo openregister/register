@@ -109,35 +109,28 @@ public class Rest extends BaseController {
     public F.Promise<Result> all(String format, int page, int pageSize) throws Exception {
         return findByQuery(
                 format,
-                request().getQueryString("_query"),
                 page,
                 pageSize,
-                (q, p, ps) -> controllers.api.routes.Rest.all(format, p, ps).absoluteURL(request()),
                 register().store().getSortType().getDefault());
     }
 
     public F.Promise<Result> latest(String format, int page, int pageSize) throws Exception {
         return findByQuery(
                 format,
-                request().getQueryString("_query"),
                 page,
                 pageSize,
-                (q, p, ps) -> controllers.api.routes.Rest.latest(format, p, ps).absoluteURL(request()),
                 register().store().getSortType().getLastUpdate());
     }
 
-    public F.Promise<Result> search(String query, int page, int pageSize) throws Exception {
-
+    public F.Promise<Result> search(int page, int pageSize) throws Exception {
         return findByQuery(
                 request().getQueryString(REPRESENTATION_QUERY_PARAM),
-                query,
                 page,
                 pageSize,
-                (q, p, ps) -> controllers.api.routes.Rest.search(q, p, ps).absoluteURL(request()),
                 register().store().getSortType().getDefault());
     }
 
-    private F.Promise<Result> findByQuery(String format, String query, int page, int pageSize, PaginationUrlFunction paginationUrlFunction, SortType.SortBy sortBy) throws Exception {
+    private F.Promise<Result> findByQuery(String format, int page, int pageSize, SortType.SortBy sortBy) throws Exception {
         Store store = register().store();
         Representation representation = representationFrom(format);
 
@@ -157,21 +150,17 @@ public class Rest extends BaseController {
             records = store.search(searchParamsMap, effectiveOffset, effectiveLimit, sortBy);
         }
 
+        URIBuilder uriBuilder = new URIBuilder(request().uri());
 
-        String urlTemplate = new URIBuilder(request().uri()).setParameter(REPRESENTATION_QUERY_PARAM, "__FORMAT__").build().toString();
+        String urlTemplate = new URIBuilder(uriBuilder.build()).setParameter(REPRESENTATION_QUERY_PARAM, "__FORMAT__").build().toString();
 
         return F.Promise.promise(() -> representation.toListOfRecords(
                 records,
                 representationsMap(urlTemplate),
-                page > 0 ? paginationUrlFunction.apply(query, page - 1, pageSize) : null,
-                records.size() == pageSize ? paginationUrlFunction.apply(query, page + 1, pageSize) : null,
+                page > 0 ? uriBuilder.setParameter("_page", "" + (page - 1)).build().toString() : null,
+                records.size() == pageSize ? uriBuilder.setParameter("_page", "" + (page + 1)).build().toString()  : null,
                 register()
         ));
-    }
-
-    @FunctionalInterface
-    private interface PaginationUrlFunction {
-        String apply(String query, int page, int pageSize);
     }
 
     private Representation representationFrom(String format) {
