@@ -20,7 +20,7 @@ public class FindEntriesTest extends ApplicationTests {
         Record record = new Record(json);
         postJson("/create", json);
 
-        WSResponse response = getByKV("key1", "value1", "json");
+        WSResponse response = getByKV("test-register", "testregisterkey", "json");
         assertThat(response.getStatus()).isEqualTo(OK);
 
         final JsonNode responseJson = response.asJson();

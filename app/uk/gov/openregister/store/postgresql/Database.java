@@ -23,8 +23,6 @@ public class Database {
                 }
                 st.execute();
                 return p.andThen(st.getResultSet());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
         };
     }

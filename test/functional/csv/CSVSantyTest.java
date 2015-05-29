@@ -26,7 +26,7 @@ public class CSVSantyTest extends ApplicationTests {
     public void testFindOneByKey() throws Exception {
         postJson("/create", TEST_JSON_R1);
 
-        WSResponse response = getByKV("key1", "value1", "csv");
+        WSResponse response = getByKV("test-register", "testregisterkey", "csv");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getHeader("Content-type")).isEqualTo(EXPECTED_CSV_MEDIA_TYPE);
         assertThat(response.getBody()).contains(EXPECTED_CSV_R1);
@@ -36,7 +36,7 @@ public class CSVSantyTest extends ApplicationTests {
     public void testTSVMediaType() throws Exception {
         postJson("/create", TEST_JSON_R1);
 
-        WSResponse response = getByKV("key1", "value1", "tsv");
+        WSResponse response = getByKV("test-register", "testregisterkey", "tsv");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getHeader("Content-type")).isEqualTo(EXPECTED_TSV_MEDIA_TYPE);
     }
@@ -45,7 +45,7 @@ public class CSVSantyTest extends ApplicationTests {
      public void testCSVHasHeader() throws Exception {
         postJson("/create", TEST_JSON_R1);
 
-        WSResponse response = getByKV("key1", "value1", "csv");
+        WSResponse response = getByKV("test-register", "testregisterkey", "csv");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getBody()).startsWith(EXPECTED_HEADER);
     }
@@ -54,7 +54,7 @@ public class CSVSantyTest extends ApplicationTests {
     public void testValueWithCommaIsEncoded() throws Exception {
         postJson("/create", TEST_JSON_R_WITH_COMMA);
 
-        WSResponse response = getByKV("key1", "value1", "csv");
+        WSResponse response = getByKV("test-register", "testregisterkey", "csv");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getBody()).contains(EXPECTED_CSV_R_WITH_COMMA);
     }
@@ -63,7 +63,7 @@ public class CSVSantyTest extends ApplicationTests {
     public void testValueWithCommaIsEncodedInArray() throws Exception {
         postJson("/create", TEST_JSON_R_WITH_COMMA_IM_ARRAY);
 
-        WSResponse response = getByKV("key1", "value1", "csv");
+        WSResponse response = getByKV("test-register", "testregisterkey", "csv");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getBody()).contains(EXPECTED_CSV_R_WITH_COMMA_IN_ARRAY);
     }
