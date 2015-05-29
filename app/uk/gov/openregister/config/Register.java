@@ -46,7 +46,7 @@ public abstract class Register {
 
     public final Store store() {
         if (store == null) {
-            store = new NewPostgresqlStore(new DBInfo(name(), name().toLowerCase(), fieldNames()), dataSource);
+            store = new NewPostgresqlStore(new DBInfo(name(), name().toLowerCase()), dataSource);
         }
         return store;
     }
