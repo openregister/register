@@ -12,6 +12,8 @@ import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseConflictException;
 import uk.gov.openregister.store.DatabaseException;
+import uk.gov.openregister.store.SortType;
+import uk.gov.openregister.store.SortType.SortBy;
 import uk.gov.openregister.store.Store;
 
 import javax.sql.DataSource;
@@ -27,15 +29,48 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PostgresqlStore implements Store {
-
     private final DBInfo dbInfo;
     private Database database;
+
+    public final SortBy sortByKey = new SortBy() {
+        private final String sqlTemplate = "  ORDER BY entry ->> '%s' ";
+
+        public String sortBy() {
+            return sqlTemplate.replace("%s", dbInfo.primaryKey);
+        }
+    };
+
+    public final SortBy sortByUpdateTime = new SortBy() {
+
+        private final String sqlTemplate = "  ORDER BY metadata ->> 'creationTime' DESC ";
+
+        public String sortBy() {
+            return sqlTemplate;
+        }
+    };
+    private SortType sortType = new SortType() {
+        @Override
+        public SortBy getDefault() {
+            return sortByKey;
+        }
+
+        @Override
+        public SortBy getLastUpdate() {
+            return sortByUpdateTime;
+        }
+    };
+
 
     public PostgresqlStore(DBInfo dbInfo, DataSource dataSource) {
         this.dbInfo = dbInfo;
         this.database = new Database(dataSource);
 
         createTables(dbInfo.tableName);
+    }
+
+    @Override
+    public SortType getSortType() {
+        return sortType;
     }
 
     public void createTables(String tableName) {
@@ -164,9 +199,8 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<Record> search(Map<String, String> map, int offset, int limit) {
-        String sql = "SELECT * FROM " + dbInfo.tableName;
-
+    public List<Record> search(Map<String, String> map, int offset, int limit, SortBy sortBy) {
+        String sql = "";
         if (!map.isEmpty()) {
             List<String> where = map.keySet().stream()
                     .map(k -> "entry->>'" + k + "' ILIKE '%" + map.get(k) + "%'")
@@ -174,19 +208,13 @@ public class PostgresqlStore implements Store {
             sql += " WHERE " + StringUtils.join(where, " AND ");
         }
 
-        sql += " ORDER BY hash ";
-        sql += " LIMIT " + limit;
-        sql += " OFFSET " + offset;
-
-        return database.<List<Record>>select(sql).andThen(this::getRecords);
+        return executeSearch(sql, offset, limit, sortBy);
 
     }
 
     @Override
-    public List<Record> search(String query, int offset, int limit) {
-
-        String sql = "SELECT * FROM " + dbInfo.tableName;
-
+    public List<Record> search(String query, int offset, int limit, SortBy sortBy) {
+        String sql = "";
         if (!dbInfo.keys.isEmpty()) {
             List<String> where = dbInfo.keys.stream()
                     .map(k -> "entry->>'" + k + "' ILIKE '%" + query + "%'")
@@ -194,7 +222,15 @@ public class PostgresqlStore implements Store {
             sql += " WHERE " + StringUtils.join(where, " OR ");
         }
 
-        sql += " ORDER BY hash ";
+        return executeSearch(sql, offset, limit, sortBy);
+    }
+
+    private List<Record> executeSearch(String where, int offset, int limit, SortBy sortBy) {
+        String sql = "SELECT * FROM " + dbInfo.tableName;
+
+        sql += where;
+
+        sql += sortBy.sortBy();
         sql += " LIMIT " + limit;
         sql += " OFFSET " + offset;
 
