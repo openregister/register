@@ -20,7 +20,6 @@ public class SearchPagesTest extends ApplicationTests {
 
         assertThat(response.getStatus()).isEqualTo(OK);
         String body = response.getBody();
-        assertThat(body).contains("This register exists as an accurate list of all Test-register entries");
         assertThat(body).contains("Search register entries");
 
         assertThat(body).contains("<a class=\"link_to_register\" href=\"http://localhost:8888/field/test-register\">test-register</a>, " +
