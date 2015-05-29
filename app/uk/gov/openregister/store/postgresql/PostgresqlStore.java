@@ -12,6 +12,8 @@ import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseConflictException;
 import uk.gov.openregister.store.DatabaseException;
+import uk.gov.openregister.store.SortType;
+import uk.gov.openregister.store.SortType.SortBy;
 import uk.gov.openregister.store.Store;
 
 import javax.sql.DataSource;
@@ -30,31 +32,41 @@ public class PostgresqlStore implements Store {
     private final DBInfo dbInfo;
     private Database database;
 
-    public enum SortBy {
-        Key("  ORDER BY entry ->> '%s' ") {
-            @Override
-            public String sortSql(DBInfo dbInfo) {
-                return this.sortFieldTemplate.replace("%s", dbInfo.primaryKey);
-            }
-        },
-        UpdateTime("  ORDER BY metadata ->> 'creationTime' DESC");
-
-        final String sortFieldTemplate;
-
-        SortBy(String theSortFieldTemplate) {
-            sortFieldTemplate = theSortFieldTemplate;
+    public final SortBy sortByKey = new SortBy() {
+        private final String sqlTemplate = "  ORDER BY entry ->> '%s' ";
+        public String sortBy() {
+            return sqlTemplate.replace("%s", dbInfo.primaryKey);
         }
+    };
 
-        public String sortSql(DBInfo dbInfo) {
-            return sortFieldTemplate;
+    public final SortBy sortByUpdateTime = new SortBy() {
+
+        private final String sqlTemplate = "  ORDER BY metadata ->> 'creationTime' DESC ";
+        public String sortBy() {
+            return sqlTemplate;
         }
-    }
+    };
 
     public PostgresqlStore(DBInfo dbInfo, DataSource dataSource) {
         this.dbInfo = dbInfo;
         this.database = new Database(dataSource);
 
         createTables(dbInfo.tableName);
+    }
+
+    @Override
+    public SortType getSortType() {
+        return new SortType(){
+            @Override
+            public SortBy getDefault() {
+                return sortByKey;
+            }
+
+            @Override
+            public SortBy getLastUpdate() {
+                return sortByUpdateTime;
+            }
+        };
     }
 
     public void createTables(String tableName) {
@@ -214,7 +226,7 @@ public class PostgresqlStore implements Store {
 
         sql += where;
 
-        sql += sortBy.sortSql(dbInfo);
+        sql += sortBy.sortBy();
         sql += " LIMIT " + limit;
         sql += " OFFSET " + offset;
 

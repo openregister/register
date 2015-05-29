@@ -2,14 +2,13 @@ package uk.gov.openregister.store;
 
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
-import uk.gov.openregister.store.postgresql.PostgresqlStore;
+import uk.gov.openregister.store.SortType.SortBy;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public interface Store {
-
     void save(Record s);
 
     void deleteAll();
@@ -20,11 +19,13 @@ public interface Store {
 
     Optional<Record> findByHash(String hash);
 
-    List<Record> search(Map<String, String> map, int offset, int limit, PostgresqlStore.SortBy Key);
+    List<Record> search(Map<String, String> map, int offset, int limit, SortBy Key);
 
-    List<Record> search(String query, int offset, int limit, PostgresqlStore.SortBy sortBy);
+    List<Record> search(String query, int offset, int limit, SortBy sortBy);
 
     long count();
+
+    SortType getSortType();
 
     void update(String hash, Record record);
 }

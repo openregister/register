@@ -76,7 +76,7 @@ public class PostgresqlStoreForTesting {
         } catch (Exception e) {
             throw new RuntimeException("error", e);
         }
-        return result;
 
+        return result;
     }
 }
