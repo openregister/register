@@ -251,6 +251,12 @@ h1.entry-header {
   font-size: inherit;
 }
 
+#entry-table h1 {
+  font-size: inherit;
+  font-family: inherit;
+}
+
+
 span.field-name {
   display: none
 }
