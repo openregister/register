@@ -108,7 +108,7 @@ public class NewPostgresqlStore implements Store {
                 st.execute();
             }
 
-            // insert record
+            // upsert record
             try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.recordTableName + " (hash, entry) " +
                     " SELECT ?,? " +
                     " WHERE NOT EXISTS (SELECT 1 FROM " + dbInfo.recordTableName + " WHERE hash=?)")) {
@@ -147,6 +147,11 @@ public class NewPostgresqlStore implements Store {
         } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void update(String oldhash, Record record) {
+        save(record);
     }
 
     @Override
@@ -221,11 +226,6 @@ public class NewPostgresqlStore implements Store {
     @Override
     public SortType getSortType() {
         return sortType;
-    }
-
-    @Override
-    public void update(String hash, Record record) {
-        // not implemented
     }
 
     private PGobject createPGObject(String data) {
