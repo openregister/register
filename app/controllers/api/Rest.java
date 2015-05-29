@@ -3,6 +3,7 @@ package controllers.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import controllers.BaseController;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Result;
@@ -19,7 +20,6 @@ import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,7 +80,7 @@ public class Rest extends BaseController {
                                         representationFrom(format).toRecord(
                                                 record,
                                                 getHistoryFor(record),
-                                                representationsMap(fmt -> routes.Rest.findByKey(key, value, "." + fmt).url()),
+                                                representationsMap(routes.Rest.findByKey(key, value, ".__FORMAT__").url()),
                                                 register()
                                         )
                         ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found", register.friendlyName())
@@ -97,7 +97,7 @@ public class Rest extends BaseController {
                                                 record,
                                                 getHistoryFor(record),
                                                 //todo: . with format is required at this moment because the controller methods receives format starts with '.'
-                                                representationsMap(fmt -> routes.Rest.findByHash(hash, "." + fmt).url()),
+                                                representationsMap(routes.Rest.findByHash(hash, ".__FORMAT__").url()),
                                                 register()
                                         )
                         ).orElse(
@@ -157,9 +157,12 @@ public class Rest extends BaseController {
             records = store.search(searchParamsMap, effectiveOffset, effectiveLimit, sortBy);
         }
 
+
+        String urlTemplate = new URIBuilder(request().uri()).setParameter(REPRESENTATION_QUERY_PARAM, "__FORMAT__").build().toString();
+
         return F.Promise.promise(() -> representation.toListOfRecords(
                 records,
-                representationsMap(this::searchUriForFormat),
+                representationsMap(urlTemplate),
                 page > 0 ? paginationUrlFunction.apply(query, page - 1, pageSize) : null,
                 records.size() == pageSize ? paginationUrlFunction.apply(query, page + 1, pageSize) : null,
                 register()
@@ -188,14 +191,8 @@ public class Rest extends BaseController {
         return register().store().previousVersions(r.getHash());
     }
 
-    private Map<String, String> representationsMap(Function<String, String> routeForFormat) {
-        return Stream.of(Representations.Format.values())
-                .map(Representations.Format::name)
-                .collect(toMap(Function.<String>identity(), routeForFormat));
-    }
-
-    private String searchUriForFormat(String format) {
-        // makes assumptions about the structure of the uri
-        return request().uri() + "&" + REPRESENTATION_QUERY_PARAM + "=" + format;
+    @SuppressWarnings("Convert2MethodRef")
+    private Map<String, String> representationsMap(String urlTemplate) {
+        return Stream.of(Representations.Format.values()).collect(toMap(fmt -> fmt.name(), fmt -> urlTemplate.replace("__FORMAT__", fmt.name())));
     }
 }
