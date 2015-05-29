@@ -39,12 +39,19 @@ p.total {
   margin-bottom: 0px;
 }
 
-.exists-copy p {
-  font-size: 24px;
-  line-height: 30px;
-  font-weight: 300;
-  margin-top: 45px;
-  margin-bottom: 45px;
+.official-text  p {
+  font-size: 22px;
+  line-height: 40px;
+  padding-right: 10px;
+}
+
+.official-text h1 {
+  font-size: 34px;
+  margin-bottom: 20px;
+}
+
+.meta-entries {
+  margin-top: 50px;
 }
 
 input.postfix {

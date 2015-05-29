@@ -8,12 +8,8 @@
 <div class="row">
     <div class="small-12 large-8 columns">
         <div class="official-text">
-            <p>@Html(register.officialText())</p>
+            @Html(register.officialText())
         </div>
-        <div class="exists-copy">
-            <p>@{s"This register exists as an accurate list of all ${register.name().capitalize} entries."}</p>
-        </div> <!-- ./columns -->
-
         <div class="meta-entries">
                 <p class="label-text">Total entries:</p><p class="big-number">@count</p>
                 <p class="label-text">Provided by:</p><p class="big-meta">@play.Play.application().configuration().getString("register.department")</p>
