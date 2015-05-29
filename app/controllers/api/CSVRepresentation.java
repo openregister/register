@@ -18,14 +18,15 @@ import static play.mvc.Results.ok;
 
 public class CSVRepresentation implements Representation {
 
-    public static CSVRepresentation csvInstance = new CSVRepresentation(",");
-    public static CSVRepresentation tsvInstance = new CSVRepresentation("\t");
+    public static CSVRepresentation csvInstance = new CSVRepresentation(",", "text/csv; charset=utf-8");
+    public static CSVRepresentation tsvInstance = new CSVRepresentation("\t", "text/tab-separated-values; charset=utf-8");
 
-    private static final String MEDIA_TYPE = "text/turtle; charset=utf-8";
     private String separator;
+    private String mediaType;
 
-    public CSVRepresentation(String separator) {
+    public CSVRepresentation(String separator, String mediaType) {
         this.separator = separator;
+        this.mediaType = mediaType;
     }
 
     @Override
@@ -33,7 +34,7 @@ public class CSVRepresentation implements Representation {
         return ok(header(register) + records.stream()
                         .map(r -> renderRecord(r, register))
                         .collect(Collectors.joining("\n"))
-        ).as(MEDIA_TYPE);
+        ).as(mediaType);
     }
 
     private String header(Register register) {
@@ -42,7 +43,7 @@ public class CSVRepresentation implements Representation {
 
     @Override
     public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap, Register register) {
-        return ok(header(register) + renderRecord(record, register)).as(MEDIA_TYPE);
+        return ok(header(register) + renderRecord(record, register)).as(mediaType);
     }
 
     private String renderRecord(Record r, Register register) {

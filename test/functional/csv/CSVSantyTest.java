@@ -19,7 +19,8 @@ public class CSVSantyTest extends ApplicationTests {
     public static final String EXPECTED_CSV_R2 = "b0c762fd934019b14a3ec88d775c6a037a09a74e,testregisterkey2,The Entry2,value2,C;D,20";
     public static final String EXPECTED_CSV_R_WITH_COMMA = "afaa651dfcb7688de8b643f4c966f710687d9459,testregisterkey,\"The, Entry\",value1,A;B,20";
     public static final String EXPECTED_CSV_R_WITH_COMMA_IN_ARRAY = "d8dbf7e5d98df7e95d27d6cf1682417f0a8b000d,testregisterkey,\"The, Entry\",value1,\"A,A1;B\",20";
-    public static final String EXPECTED_MEDIA_TYPE = "text/turtle; charset=utf-8";
+    public static final String EXPECTED_CSV_MEDIA_TYPE = "text/csv; charset=utf-8";
+    public static final String EXPECTED_TSV_MEDIA_TYPE = "text/tab-separated-values; charset=utf-8";
 
     @Test
     public void testFindOneByKey() throws Exception {
@@ -27,9 +28,19 @@ public class CSVSantyTest extends ApplicationTests {
 
         WSResponse response = getByKV("key1", "value1", "csv");
         assertThat(response.getStatus()).isEqualTo(OK);
-        assertThat(response.getHeader("Content-type")).isEqualTo(EXPECTED_MEDIA_TYPE);
+        assertThat(response.getHeader("Content-type")).isEqualTo(EXPECTED_CSV_MEDIA_TYPE);
         assertThat(response.getBody()).contains(EXPECTED_CSV_R1);
     }
+
+    @Test
+    public void testTSVMediaType() throws Exception {
+        postJson("/create", TEST_JSON_R1);
+
+        WSResponse response = getByKV("key1", "value1", "tsv");
+        assertThat(response.getStatus()).isEqualTo(OK);
+        assertThat(response.getHeader("Content-type")).isEqualTo(EXPECTED_TSV_MEDIA_TYPE);
+    }
+
     @Test
      public void testCSVHasHeader() throws Exception {
         postJson("/create", TEST_JSON_R1);
@@ -64,7 +75,7 @@ public class CSVSantyTest extends ApplicationTests {
         WSResponse response = getByHash(EXPECTED_HASH, "csv");
 
         assertThat(response.getStatus()).isEqualTo(OK);
-        assertThat(response.getHeader("Content-type")).isEqualTo(EXPECTED_MEDIA_TYPE);
+        assertThat(response.getHeader("Content-type")).isEqualTo(EXPECTED_CSV_MEDIA_TYPE);
         assertThat(response.getBody()).contains(EXPECTED_CSV_R1);
     }
 
@@ -75,7 +86,7 @@ public class CSVSantyTest extends ApplicationTests {
 
         WSResponse response = get("/search?_query=&_representation=csv");
         assertThat(response.getStatus()).isEqualTo(OK);
-        assertThat(response.getHeader("Content-type")).isEqualTo(EXPECTED_MEDIA_TYPE);
+        assertThat(response.getHeader("Content-type")).isEqualTo(EXPECTED_CSV_MEDIA_TYPE);
         assertThat(response.getBody()).contains(EXPECTED_CSV_R1);
         assertThat(response.getBody()).contains(EXPECTED_CSV_R2);
     }
