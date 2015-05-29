@@ -20,10 +20,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 
@@ -38,6 +40,34 @@ public class NewPostgresqlStore implements Store {
 
         createTables(dbInfo);
     }
+
+    public final SortType.SortBy sortByKey = new SortType.SortBy() {
+        private final String sqlTemplate = "  ORDER BY entry ->> '%s' ";
+
+        public String sortBy() {
+            return sqlTemplate.replace("%s", dbInfo.primaryKey);
+        }
+    };
+
+    public final SortType.SortBy sortByUpdateTime = new SortType.SortBy() {
+
+        private final String sqlTemplate = "  ORDER BY metadata ->> 'creationTime' DESC ";
+
+        public String sortBy() {
+            return sqlTemplate;
+        }
+    };
+    private SortType sortType = new SortType() {
+        @Override
+        public SortBy getDefault() {
+            return sortByKey;
+        }
+
+        @Override
+        public SortBy getLastUpdate() {
+            return sortByUpdateTime;
+        }
+    };
 
     public void createTables(DBInfo dbInfo) {
         database.execute("CREATE TABLE IF NOT EXISTS " + dbInfo.recordTableName +
@@ -73,6 +103,7 @@ public class NewPostgresqlStore implements Store {
             connection.setAutoCommit(false);
 
             // pessimistic lock to prevent concurrent updates causing divergent history
+            // EXCLUSIVE mode allows concurrent reads but not writes
             try (PreparedStatement st = connection.prepareStatement("LOCK TABLE " + dbInfo.versionTableName + " IN EXCLUSIVE MODE")) {
                 st.execute();
             }
@@ -88,9 +119,10 @@ public class NewPostgresqlStore implements Store {
             }
 
             // insert version
+            // XXX can we do this without fetching the whole records column?
             String parentHash;
             ObjectNode records;
-            try (PreparedStatement st = connection.prepareStatement("SELECT hash,records FROM " + dbInfo.versionTableName + " ORDER BY creation_time DESC LIMIT 1")) {
+            try (PreparedStatement st = connection.prepareStatement("SELECT hash,records FROM " + dbInfo.versionTableName + " ORDER BY version_number DESC LIMIT 1")) {
                 ResultSet resultSet = st.executeQuery();
                 if (!resultSet.next()) {
                     throw new RuntimeException("Couldn't find latest version");
@@ -119,7 +151,9 @@ public class NewPostgresqlStore implements Store {
 
     @Override
     public void deleteAll() {
-        // not implemented
+        database.execute("DROP TABLE IF EXISTS " + dbInfo.recordTableName);
+        database.execute("DROP TABLE IF EXISTS " + dbInfo.versionTableName);
+        createTables(dbInfo);
     }
 
     @Override
@@ -144,8 +178,8 @@ public class NewPostgresqlStore implements Store {
         return database.<Optional<Record>>select(
                 "SELECT creation_time, hash, entry " +
                         " FROM (SELECT hash, entry FROM " + dbInfo.recordTableName + " WHERE hash = ?) q1 " +
-                        // FIXME better query for creation_time
-                        // not trivial as the same hash could be present in multiple versions
+                        // FIXME this just returns a fake creation_time
+                        // fixing this is not trivial as the same hash could be present in multiple versions
                         " LEFT JOIN LATERAL (SELECT 'now'::timestamp AS creation_time) q2 " +
                         " ON TRUE", hash)
                 .andThen(this::toOptionalRecord);
@@ -153,12 +187,29 @@ public class NewPostgresqlStore implements Store {
 
     @Override
     public List<Record> search(Map<String, String> map, int offset, int limit, SortType.SortBy Key) {
-        return null;
+        // XXX sql injection ahoy!
+        String searchClause = map.entrySet().stream()
+                .map(e -> " AND entry->>'" + e.getKey() + "' ILIKE '%" + e.getValue() + "%'")
+                .collect(Collectors.joining());
+        return database.<List<Record>>select("SELECT creation_time, hash, entry " +
+                " FROM (SELECT creation_time, records FROM " + dbInfo.versionTableName + " ORDER BY version_number DESC LIMIT 1) q1 " +
+                " LEFT JOIN LATERAL (SELECT key, value FROM json_each_text(records)) q2 ON TRUE" +
+                " INNER JOIN " + dbInfo.recordTableName +
+                " ON q2.value = hash " + searchClause +
+                " LIMIT " + limit + " OFFSET " + offset )
+                .andThen(this::toRecords);
     }
 
     @Override
     public List<Record> search(String query, int offset, int limit, SortType.SortBy sortBy) {
-        return null;
+        // XXX sql injection ahoy!
+        return database.<List<Record>>select("SELECT creation_time, hash, entry " +
+                " FROM (SELECT creation_time, records FROM " + dbInfo.versionTableName + " ORDER BY version_number DESC LIMIT 1) q1 " +
+                " LEFT JOIN LATERAL (SELECT key, value FROM json_each_text(records)) q2 ON TRUE" +
+                " INNER JOIN " + dbInfo.recordTableName + " ON q2.value = hash " +
+                " LEFT JOIN LATERAL (SELECT key, value FROM json_each_text(entry)) record ON record.value ILIKE '" + query + "'" +
+                " LIMIT " + limit + " OFFSET " + offset)
+                .andThen(this::toRecords);
     }
 
     @Override
@@ -169,7 +220,7 @@ public class NewPostgresqlStore implements Store {
 
     @Override
     public SortType getSortType() {
-        return null;
+        return sortType;
     }
 
     @Override
@@ -193,6 +244,14 @@ public class NewPostgresqlStore implements Store {
         } else {
             return Optional.empty();
         }
+    }
+
+    private List<Record> toRecords(ResultSet resultSet) throws SQLException, IOException {
+        List<Record> result = new ArrayList<>();
+        while (resultSet.next()) {
+            result.add(toRecord(resultSet));
+        }
+        return result;
     }
 
     private Record toRecord(ResultSet resultSet) throws SQLException, IOException {
