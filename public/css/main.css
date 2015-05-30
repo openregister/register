@@ -265,6 +265,7 @@ td.view {
   font-family: Helvetica, Arial;
   font-size: 0.7rem !important;
   white-space: nowrap;
+  text-align: right;
 }
 
 td.view > a:after {
@@ -420,7 +421,7 @@ table.responsive  th  {
 
 a.next-page {
   float:right;
-  padding-right: 5px;
+  padding-right: 10px;
 }
 
 a.previous-page {
@@ -429,19 +430,19 @@ a.previous-page {
 }
 
 .page-links {
-  font-size: 17px;
+  font-size: 15px;
 }
 
 
 .page-links > a.next-page:after {
   content: "❯";
-  padding-left: 10px;
+  padding-left: 5px;
   vertical-align: middle;
 }
 
 .page-links > a.previous-page:before {
   content: "❮";
-  padding-right: 10px;
+  padding-right: 5px;
   vertical-align: middle;
 }
 
@@ -453,7 +454,7 @@ a.previous-page {
 
 /* Styles for responsive entries table */
 /* see https://techblog.livingsocial.com/blog/2015/04/06/responsive-tables-in-pure-css */
-@media screen and (max-width: 1100px) {
+@media only screen and  (max-width: 64em) {
 
   table.responsive  {
     width: 90%;
@@ -479,6 +480,10 @@ a.previous-page {
     padding-bottom: 10px;
   }
 
+  td.view {
+    text-align: inherit;
+  }
+
   span.field-name {
     display: block;
     float: left;
@@ -487,7 +492,7 @@ a.previous-page {
   }
 
   a.next-page {
-    padding-right: 15px;
+    padding-right: 20px;
   }
 
 }
