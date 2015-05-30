@@ -13,6 +13,7 @@ import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.SortType;
 import uk.gov.openregister.store.Store;
+import uk.gov.openregister.store.newpostgresql.NewPostgresqlStore;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
@@ -91,6 +92,24 @@ public class Rest extends BaseController {
     public F.Promise<Result> findByHash(String hash, String format) {
         Register register = register();
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> register.store().findByHash(hash));
+        return recordF.map(optionalRecord ->
+                        optionalRecord.map(record ->
+                                        representationFrom(format).toRecord(
+                                                record,
+                                                getHistoryFor(record),
+                                                //todo: . with format is required at this moment because the controller methods receives format starts with '.'
+                                                representationsMap(routes.Rest.findByHash(hash, ".__FORMAT__").url()),
+                                                register()
+                                        )
+                        ).orElse(
+                                HtmlRepresentation.instance.toResponse(404, "Entry not found", register.friendlyName())
+                        )
+        );
+    }
+
+    public F.Promise<Result> findByVersionHash(String hash, String primaryKey, String format) {
+        Register register = register();
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> ((NewPostgresqlStore)register.store()).findByVersionHash(hash,primaryKey));
         return recordF.map(optionalRecord ->
                         optionalRecord.map(record ->
                                         representationFrom(format).toRecord(

@@ -9,8 +9,8 @@ import uk.gov.openregister.linking.Curie;
 import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.model.Field;
 import uk.gov.openregister.store.Store;
-import uk.gov.openregister.store.postgresql.DBInfo;
-import uk.gov.openregister.store.postgresql.PostgresqlStore;
+import uk.gov.openregister.store.newpostgresql.DBInfo;
+import uk.gov.openregister.store.newpostgresql.NewPostgresqlStore;
 
 import java.net.URI;
 import java.util.List;
@@ -46,7 +46,7 @@ public abstract class Register {
 
     public final Store store() {
         if (store == null) {
-            store = new PostgresqlStore(new DBInfo(name(), name().toLowerCase(), fieldNames()), dataSource);
+            store = new NewPostgresqlStore(new DBInfo(name(), name().toLowerCase()), dataSource);
         }
         return store;
     }

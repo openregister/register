@@ -23,7 +23,7 @@ public class JsonObjectMapper {
         }
     }
 
-    public static String convertToString(Map<String, Object> json) {
+    public static <T> String convertToString(Map<String, T> json) {
         try {
             return objectMapper.writeValueAsString(json);
         } catch (JsonProcessingException e) {

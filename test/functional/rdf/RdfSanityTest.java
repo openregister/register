@@ -24,7 +24,7 @@ public class RdfSanityTest extends ApplicationTests {
     public void testFindOneByKey() throws Exception {
         postJson("/create", TEST_JSON);
 
-        WSResponse response = getByKV("key1", "value1", "ttl");
+        WSResponse response = getByKV("test-register", "testregisterkey", "ttl");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getHeader("Content-type")).isEqualTo("text/turtle; charset=utf-8");
         assertThat(response.getBody()).isEqualTo(EXPECTED_TURTLE);
