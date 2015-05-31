@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static play.mvc.Results.status;
 
 public class JsonRepresentation extends JacksonRepresentation {
@@ -30,7 +31,16 @@ public class JsonRepresentation extends JacksonRepresentation {
         result.put("message", "Record saved successfully");
         result.put("errors", emptyList());
 
-        return status(202, asString(result)).as(CONTENT_TYPE);
+        return status(202, asString(emptyMap(), result)).as(CONTENT_TYPE);
+    }
+
+    @Override
+    protected String asString(Map<String, String[]> requestParams, Object record) {
+        String json = super.asString(requestParams, record);
+
+        String[] callbacks = requestParams.get("_callback");
+
+        return callbacks != null ? callbacks[0] + "(" + json + ")" : json;
     }
 
     public static JsonRepresentation instance = new JsonRepresentation();

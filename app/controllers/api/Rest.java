@@ -78,10 +78,12 @@ public class Rest extends BaseController {
         return recordF.map(optionalRecord ->
                         optionalRecord.map(record ->
                                         representationFrom(format).toRecord(
+                                                register,
                                                 record,
-                                                getHistoryFor(record),
+                                                request().queryString(),
+                                                //todo: . with format is required at this moment because the controller methods receives format starts with '.'
                                                 representationsMap(routes.Rest.findByKey(key, value, ".__FORMAT__").url()),
-                                                register()
+                                                getHistoryFor(record)
                                         )
                         ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found", register.friendlyName())
                         )
@@ -94,11 +96,12 @@ public class Rest extends BaseController {
         return recordF.map(optionalRecord ->
                         optionalRecord.map(record ->
                                         representationFrom(format).toRecord(
+                                                register,
                                                 record,
-                                                getHistoryFor(record),
+                                                request().queryString(),
                                                 //todo: . with format is required at this moment because the controller methods receives format starts with '.'
                                                 representationsMap(routes.Rest.findByHash(hash, ".__FORMAT__").url()),
-                                                register()
+                                                getHistoryFor(record)
                                         )
                         ).orElse(
                                 HtmlRepresentation.instance.toResponse(404, "Entry not found", register.friendlyName())
@@ -131,17 +134,17 @@ public class Rest extends BaseController {
     }
 
     private F.Promise<Result> findByQuery(String format, int page, int pageSize, SortType.SortBy sortBy) throws Exception {
-        Store store = register().store();
+        Register register = register();
         Representation representation = representationFrom(format);
-
 
         int effectiveOffset = representation.isPaginated() ? page * pageSize : 0;
         int effectiveLimit = representation.isPaginated() ? pageSize : ALL_ENTRIES_LIMIT;
 
-        Map<String, String[]> queryParameters = request().queryString();
+        Store store = register.store();
 
         List<Record> records;
 
+        Map<String, String[]> queryParameters = request().queryString();
         if (queryParameters.containsKey("_query")) {
             records = store.search(queryParameters.get("_query")[0], effectiveOffset, effectiveLimit, sortBy);
         } else {
@@ -155,11 +158,11 @@ public class Rest extends BaseController {
         String urlTemplate = new URIBuilder(uriBuilder.build()).setParameter(REPRESENTATION_QUERY_PARAM, "__FORMAT__").build().toString();
 
         return F.Promise.promise(() -> representation.toListOfRecords(
-                records,
+                register, records,
+                queryParameters,
                 representationsMap(urlTemplate),
                 page > 0 ? uriBuilder.setParameter("_page", "" + (page - 1)).build().toString() : null,
-                records.size() == pageSize ? uriBuilder.setParameter("_page", "" + (page + 1)).build().toString()  : null,
-                register()
+                records.size() == pageSize ? uriBuilder.setParameter("_page", "" + (page + 1)).build().toString() : null
         ));
     }
 
