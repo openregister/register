@@ -7,12 +7,10 @@ import org.apache.http.client.utils.URIBuilder;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Result;
-import uk.gov.openregister.config.Register;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.store.SortType;
-import uk.gov.openregister.store.Store;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
@@ -34,15 +32,13 @@ public class Rest extends BaseController {
 
     @BodyParser.Of(BodyParser.Json.class)
     public Result create() throws JsonProcessingException {
-        Register register = register();
-
-        Record r = new Record(request().body().asJson());
+        Record r = new Record(request.body().asJson());
 
         List<ValidationError> validationErrors = new Validator(singletonList(register.name()), register.fieldNames()).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
-                register.store().save(r);
+                store.save(r);
             } catch (DatabaseException e) {
                 return HtmlRepresentation.instance.toResponse(400, e.getMessage(), register.friendlyName());
             }
@@ -56,13 +52,12 @@ public class Rest extends BaseController {
 
     @BodyParser.Of(BodyParser.Json.class)
     public Result update(String hash) {
-        Register register = register();
-        Record r = new Record(request().body().asJson());
+        Record r = new Record(request.body().asJson());
         List<ValidationError> validationErrors = new Validator(singletonList(register.name()), register.fieldNames()).validate(r);
 
         if (validationErrors.isEmpty()) {
             try {
-                register.store().update(hash, r);
+                store.update(hash, r);
             } catch (DatabaseException e) {
                 return HtmlRepresentation.instance.toResponse(400, e.getMessage(), register.friendlyName());
             }
@@ -73,36 +68,32 @@ public class Rest extends BaseController {
     }
 
     public F.Promise<Result> findByKey(String key, String value, String format) {
-        Register register = register();
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> register.store().findByKV(key, URLDecoder.decode(value, "utf-8")));
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, URLDecoder.decode(value, "utf-8")));
         return recordF.map(optionalRecord ->
-                        optionalRecord.map(record ->
-                                        representationFrom(format).toRecord(
-                                                register,
-                                                record,
-                                                request().queryString(),
-                                                //todo: . with format is required at this moment because the controller methods receives format starts with '.'
-                                                representationsMap(routes.Rest.findByKey(key, value, ".__FORMAT__").url()),
-                                                getHistoryFor(record)
-                                        )
+                        optionalRecord.map(record -> representationFrom(format).toRecord(
+                                        register,
+                                        record,
+                                        request.queryString(),
+                                        //todo: . with format is required at this moment because the controller methods receives format starts with '.'
+                                        representationsMap(routes.Rest.findByKey(key, value, ".__FORMAT__").url()),
+                                        getHistoryFor(record)
+                                )
                         ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found", register.friendlyName())
                         )
         );
     }
 
     public F.Promise<Result> findByHash(String hash, String format) {
-        Register register = register();
-        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> register.store().findByHash(hash));
+        F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
         return recordF.map(optionalRecord ->
-                        optionalRecord.map(record ->
-                                        representationFrom(format).toRecord(
-                                                register,
-                                                record,
-                                                request().queryString(),
-                                                //todo: . with format is required at this moment because the controller methods receives format starts with '.'
-                                                representationsMap(routes.Rest.findByHash(hash, ".__FORMAT__").url()),
-                                                getHistoryFor(record)
-                                        )
+                        optionalRecord.map(record -> representationFrom(format).toRecord(
+                                        register,
+                                        record,
+                                        request.queryString(),
+                                        //todo: . with format is required at this moment because the controller methods receives format starts with '.'
+                                        representationsMap(routes.Rest.findByHash(hash, ".__FORMAT__").url()),
+                                        getHistoryFor(record)
+                                )
                         ).orElse(
                                 HtmlRepresentation.instance.toResponse(404, "Entry not found", register.friendlyName())
                         )
@@ -114,7 +105,7 @@ public class Rest extends BaseController {
                 format,
                 page,
                 pageSize,
-                register().store().getSortType().getDefault());
+                store.getSortType().getDefault());
     }
 
     public F.Promise<Result> latest(String format, int page, int pageSize) throws Exception {
@@ -122,29 +113,26 @@ public class Rest extends BaseController {
                 format,
                 page,
                 pageSize,
-                register().store().getSortType().getLastUpdate());
+                store.getSortType().getLastUpdate());
     }
 
     public F.Promise<Result> search(int page, int pageSize) throws Exception {
         return findByQuery(
-                request().getQueryString(REPRESENTATION_QUERY_PARAM),
+                request.getQueryString(REPRESENTATION_QUERY_PARAM),
                 page,
                 pageSize,
-                register().store().getSortType().getDefault());
+                store.getSortType().getDefault());
     }
 
     private F.Promise<Result> findByQuery(String format, int page, int pageSize, SortType.SortBy sortBy) throws Exception {
-        Register register = register();
         Representation representation = representationFrom(format);
 
         int effectiveOffset = representation.isPaginated() ? page * pageSize : 0;
         int effectiveLimit = representation.isPaginated() ? pageSize : ALL_ENTRIES_LIMIT;
 
-        Store store = register.store();
-
         List<Record> records;
 
-        Map<String, String[]> queryParameters = request().queryString();
+        Map<String, String[]> queryParameters = request.queryString();
         if (queryParameters.containsKey("_query")) {
             records = store.search(queryParameters.get("_query")[0], effectiveOffset, effectiveLimit, sortBy);
         } else {
@@ -153,7 +141,7 @@ public class Rest extends BaseController {
             records = store.search(searchParamsMap, effectiveOffset, effectiveLimit, sortBy);
         }
 
-        URIBuilder uriBuilder = new URIBuilder(request().uri());
+        URIBuilder uriBuilder = new URIBuilder(request.uri());
 
         String urlTemplate = new URIBuilder(uriBuilder.build()).setParameter(REPRESENTATION_QUERY_PARAM, "__FORMAT__").build().toString();
 
@@ -168,7 +156,7 @@ public class Rest extends BaseController {
 
     private Representation representationFrom(String format) {
         if (StringUtils.isEmpty(format)) {
-            String representationQueryValue = request().getQueryString(REPRESENTATION_QUERY_PARAM);
+            String representationQueryValue = request.getQueryString(REPRESENTATION_QUERY_PARAM);
             if (representationQueryValue == null) {
                 return Representations.Format.html.representation;
             } else {
@@ -180,7 +168,7 @@ public class Rest extends BaseController {
     }
 
     private List<RecordVersionInfo> getHistoryFor(Record r) {
-        return register().store().previousVersions(r.getHash());
+        return store.previousVersions(r.getHash());
     }
 
     @SuppressWarnings("Convert2MethodRef")
