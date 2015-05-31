@@ -40,7 +40,7 @@ public class JsonRepresentation extends JacksonRepresentation {
 
         String[] callbacks = requestParams.get("_callback");
 
-        return callbacks != null ? callbacks[0] + "(" + json + ")" : json;
+        return callbacks != null ? callbacks[0] + "(" + json + ");" : json;
     }
 
     public static JsonRepresentation instance = new JsonRepresentation();

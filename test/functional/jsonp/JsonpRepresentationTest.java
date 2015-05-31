@@ -24,7 +24,7 @@ public class JsonpRepresentationTest extends ApplicationTests{
 
         assertThat(body).startsWith("foo(");
         JSONAssert.assertEquals(record.getEntry().toString(), json, true);
-        assertThat(body).endsWith(")");
+        assertThat(body).endsWith(");");
     }
 
     @Test
@@ -40,6 +40,6 @@ public class JsonpRepresentationTest extends ApplicationTests{
 
         assertThat(body).startsWith("foo(");
         JSONAssert.assertEquals(record.getEntry().toString(), json, true);
-        assertThat(body).endsWith(")");
+        assertThat(body).endsWith(");");
     }
 }
