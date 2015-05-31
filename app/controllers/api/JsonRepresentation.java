@@ -31,7 +31,7 @@ public class JsonRepresentation extends JacksonRepresentation {
         result.put("message", "Record saved successfully");
         result.put("errors", emptyList());
 
-        return status(202, asString(emptyMap(), result)).as(CONTENT_TYPE);
+        return status(202, super.asString(emptyMap(), result)).as(CONTENT_TYPE);
     }
 
     @Override
