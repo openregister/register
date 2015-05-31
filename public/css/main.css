@@ -39,18 +39,19 @@ p.total {
   margin-bottom: 0px;
 }
 
-.summary-copy p {
-  font-size: 36px;
+.official-text  p {
+  font-size: 22px;
   line-height: 40px;
-  font-weight: 700;
+  padding-right: 10px;
 }
 
-.exists-copy p {
-  font-size: 24px;
-  line-height: 30px;
-  font-weight: 300;
-  margin-top: 45px;
-  margin-bottom: 45px;
+.official-text h1 {
+  font-size: 34px;
+  margin-bottom: 20px;
+}
+
+.meta-entries {
+  margin-top: 50px;
 }
 
 input.postfix {
@@ -250,6 +251,12 @@ h1.entry-header {
   font-size: inherit;
 }
 
+#entry-table h1 {
+  font-size: inherit;
+  font-family: inherit;
+}
+
+
 span.field-name {
   display: none
 }
@@ -258,6 +265,7 @@ td.view {
   font-family: Helvetica, Arial;
   font-size: 0.7rem !important;
   white-space: nowrap;
+  text-align: right;
 }
 
 td.view > a:after {
@@ -411,17 +419,42 @@ table.responsive  th  {
   font-size: 1rem;
 }
 
-a.next_page {
+a.next-page {
   float:right;
+  padding-right: 10px;
 }
 
-a.previous_page {
+a.previous-page {
   float:left;
+  padding-left: 5px;
+}
+
+.page-links {
+  font-size: 15px;
+}
+
+
+.page-links > a.next-page:after {
+  content: "❯";
+  padding-left: 5px;
+  vertical-align: middle;
+}
+
+.page-links > a.previous-page:before {
+  content: "❮";
+  padding-right: 5px;
+  vertical-align: middle;
+}
+
+
+
+.pagination {
+  margin-bottom: 25px;
 }
 
 /* Styles for responsive entries table */
 /* see https://techblog.livingsocial.com/blog/2015/04/06/responsive-tables-in-pure-css */
-@media screen and (max-width: 1100px) {
+@media only screen and  (max-width: 64em) {
 
   table.responsive  {
     width: 90%;
@@ -447,11 +480,19 @@ a.previous_page {
     padding-bottom: 10px;
   }
 
+  td.view {
+    text-align: inherit;
+  }
+
   span.field-name {
     display: block;
     float: left;
     font-weight: bold;
     width: 25%;
+  }
+
+  a.next-page {
+    padding-right: 20px;
   }
 
 }

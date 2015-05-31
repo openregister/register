@@ -7,13 +7,9 @@
 
 <div class="row">
     <div class="small-12 large-8 columns">
-        <div class="summary-copy">
-            <p>@play.Play.application().configuration().getString("register.title")</p>
+        <div class="official-text">
+            @Html(register.officialText())
         </div>
-        <div class="exists-copy">
-            <p>@play.Play.application().configuration().getString("register.description")</p>
-        </div> <!-- ./columns -->
-
         <div class="meta-entries">
                 <p class="label-text">Total entries:</p><p class="big-number">@count</p>
                 <p class="label-text">Provided by:</p><p class="big-meta">@play.Play.application().configuration().getString("register.department")</p>
