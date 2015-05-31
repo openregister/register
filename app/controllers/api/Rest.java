@@ -108,34 +108,33 @@ public class Rest extends BaseController {
 
     final SortType.SortBy defaultSort = register().store().getSortType().getDefault();
     final SortType.SortBy lastUpdateSort = register().store().getSortType().getLastUpdate();
-    public F.Promise<Result> all(String format, int page, int pageSize) throws Exception {
+    public F.Promise<Result> all(String format, Pager pager) throws Exception {
         return findByQuery(
                 format,
                 request().getQueryString("_query"),
-                page,
-                pageSize,
-                (q, p, ps) -> controllers.api.routes.Rest.all(format, p, ps).absoluteURL(request()),
+                pager.page,
+                pager.pageSize,
+                (q, p, ps) -> controllers.api.routes.Rest.all(format, new Pager(p, ps)).absoluteURL(request()),
                 defaultSort);
     }
 
-    public F.Promise<Result> latest(String format, int page, int pageSize) throws Exception {
+    public F.Promise<Result> latest(String format, Pager pager) throws Exception {
         return findByQuery(
                 format,
                 request().getQueryString("_query"),
-                page,
-                pageSize,
-                (q, p, ps) -> controllers.api.routes.Rest.latest(format, p, ps).absoluteURL(request()),
+                pager.page,
+                pager.pageSize,
+                (q, p, ps) -> controllers.api.routes.Rest.latest(format, new Pager(p, ps)).absoluteURL(request()),
                 lastUpdateSort);
     }
 
-    public F.Promise<Result> search(String query, int page, int pageSize) throws Exception {
-
+    public F.Promise<Result> search(String query, Pager pager) throws Exception {
         return findByQuery(
                 request().getQueryString(REPRESENTATION_QUERY_PARAM),
                 query,
-                page,
-                pageSize,
-                (q, p, ps) -> controllers.api.routes.Rest.search(q, p, ps).absoluteURL(request()),
+                pager.page,
+                pager.pageSize,
+                (q, p, ps) -> controllers.api.routes.Rest.search(q, new Pager(p, ps)).absoluteURL(request()),
                 defaultSort);
     }
 
