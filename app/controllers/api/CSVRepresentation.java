@@ -30,7 +30,7 @@ public class CSVRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, String previousPageLink, String nextPageLink, Register register) throws Exception {
+    public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, String previousPageLink, String nextPageLink) {
         return ok(header(register) + records.stream()
                         .map(r -> renderRecord(r, register))
                         .collect(Collectors.joining("\n"))
@@ -42,7 +42,7 @@ public class CSVRepresentation implements Representation {
     }
 
     @Override
-    public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap, Register register) {
+    public Result toRecord(Register register, Record record, Map<String, String[]> requestParams, Map<String, String> representationsMap, List<RecordVersionInfo> history) {
         return ok(header(register) + renderRecord(record, register)).as(mediaType);
     }
 
