@@ -43,13 +43,15 @@
                     all entries</a></li>
                 <li><a href=@controllers.api.routes.Rest.latest("", controllers.api.Pager.DEFAULT_PAGER)>See
                     latest entries</a></li>
-                @*<li class="data-representations">Download all entries as:*@
-                    @*<span style="display : inline-flex">*@
-                        @*<a href=@controllers.api.routes.Rest.all(".json", controllers.api.Pager.DEFAULT_PAGER)>json</a>&#44;&nbsp;*@
-                        @*<a href=@controllers.api.routes.Rest.all(".yaml", controllers.api.Pager.DEFAULT_PAGER)>yaml</a>&nbsp;or*@
-                        @*<a href=@controllers.api.routes.Rest.all(".ttl", controllers.api.Pager.DEFAULT_PAGER)>ttl</a>*@
-                    @*</span>*@
-                @*</li>*@
+                <li class="data-representations">Download all entries as:
+                    <span style="display : inline-flex">
+                        <a download=@{s"${register.name()}.json"} href=@controllers.api.routes.Rest.all(".json", controllers.api.Pager.DEFAULT_PAGER)>json</a>&nbsp;
+                        <a download=@{s"${register.name()}.yaml"} href=@controllers.api.routes.Rest.all(".yaml", controllers.api.Pager.DEFAULT_PAGER)>yaml</a>&nbsp;
+                        <a download=@{s"${register.name()}.ttl"} href=@controllers.api.routes.Rest.all(".ttl", controllers.api.Pager.DEFAULT_PAGER)>ttl</a>&nbsp;
+                        <a download=@{s"${register.name()}.csv"} href=@controllers.api.routes.Rest.all(".csv", controllers.api.Pager.DEFAULT_PAGER)>csv</a>&nbsp;
+                        <a download=@{s"${register.name()}.tsv"} href=@controllers.api.routes.Rest.all(".tsv", controllers.api.Pager.DEFAULT_PAGER)>tsv</a>
+                    </span>
+                </li>
             </ul>
 
             <hr class="divider"/>
