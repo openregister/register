@@ -11,7 +11,6 @@ import play.mvc.BodyParser;
 import play.mvc.Result;
 import uk.gov.openregister.JsonObjectMapper;
 import uk.gov.openregister.config.ApplicationConf;
-import uk.gov.openregister.config.Register;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.linking.Curie;
 import uk.gov.openregister.linking.CurieResolver;
@@ -26,8 +25,7 @@ import java.util.stream.Collectors;
 public class UI extends BaseController {
 
     public Result index() {
-        Register register =register();
-        long count = register.store().count();
+        long count = store.count();
         String lastUpdatedUI = "";
         try {
             CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
@@ -45,20 +43,19 @@ public class UI extends BaseController {
     }
 
     public Result renderNewEntryForm() {
-        return ok(views.html.newEntry.render(register(), Collections.emptyMap(), Collections.emptyMap()));
+        return ok(views.html.newEntry.render(register, Collections.emptyMap(), Collections.emptyMap()));
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public Result create() {
-        Register register =register();
-        Map<String, String[]> requestParams = request().body().asFormUrlEncoded();
+        Map<String, String[]> requestParams = request.body().asFormUrlEncoded();
 
         Record record = createRecordFromQueryParams(requestParams);
 
         List<ValidationError> validationErrors = new Validator(Collections.singletonList(register.name()), register.fieldNames()).validate(record);
         if (validationErrors.isEmpty()) {
             try {
-                register.store().save(record);
+                store.save(record);
                 return redirect("/hash/" + record.getHash());
             } catch (DatabaseException e) {
                 return ok(views.html.newEntry.render(register, convertToMapOfListValues(requestParams), Collections.singletonMap("globalError", e.getMessage())));
@@ -71,8 +68,7 @@ public class UI extends BaseController {
 
     @SuppressWarnings("unchecked")
     public Result renderUpdateEntryForm(String hash) {
-        Register register =register();
-        Record record = register.store().findByHash(hash).get();
+        Record record = store.findByHash(hash).get();
 
         Map params = JsonObjectMapper.convert(record.getEntry(), Map.class);
 
@@ -85,8 +81,7 @@ public class UI extends BaseController {
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public Result update(String hash) {
-        Register register =register();
-        Map<String, String[]> requestParams = request().body().asFormUrlEncoded();
+        Map<String, String[]> requestParams = request.body().asFormUrlEncoded();
 
         Record record = createRecordFromQueryParams(requestParams);
 
@@ -121,8 +116,6 @@ public class UI extends BaseController {
     }
 
     private Record createRecordFromQueryParams(Map<String, String[]> formParameters) {
-        Register register =register();
-
         try {
             Map<String, Object> jsonMap = new HashMap<>();
             formParameters.keySet().stream().filter(register.fieldNames()::contains).forEach(key -> {
