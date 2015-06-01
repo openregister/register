@@ -22,13 +22,22 @@ public class JacksonRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, String previousPageLink, String nextPageLink, Register register) throws JsonProcessingException {
-        return ok(asString(records)).as(contentType);
+    public Result toListOfRecords(Register register,
+                                  List<Record> records,
+                                  Map<String, String[]> requestParams,
+                                  Map<String, String> representationsMap,
+                                  String previousPageLink,
+                                  String nextPageLink) {
+        return ok(asString(requestParams, records)).as(contentType);
     }
 
     @Override
-    public Result toRecord(Record record, List<RecordVersionInfo> history, Map<String, String> representationsMap, Register register) {
-        return ok(asString(record)).as(contentType);
+    public Result toRecord(Register register,
+                           Record record,
+                           Map<String, String[]> requestParams,
+                           Map<String, String> representationsMap,
+                           List<RecordVersionInfo> history) {
+        return ok(asString(requestParams, record)).as(contentType);
     }
 
     @Override
@@ -36,7 +45,7 @@ public class JacksonRepresentation implements Representation {
         return false;
     }
 
-    protected String asString(Object record) {
+    protected String asString(Map<String, String[]> requestParams, Object record) {
         try {
             return objectMapper.writeValueAsString(record);
         } catch (JsonProcessingException e) {

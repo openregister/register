@@ -10,21 +10,15 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import uk.gov.openregister.domain.Record;
-import uk.gov.openregister.store.Store;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ImportData extends BaseController {
-    private final Store store;
-
-    public ImportData() {
-        store = register().store();
-    }
 
     public Result loadWithProgress() {
-        return ok(views.html.load.render(register(), "Data import"));
+        return ok(views.html.load.render(register, "Data import"));
     }
 
     public WebSocket<JsonNode> progress() {

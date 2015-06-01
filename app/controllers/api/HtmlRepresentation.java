@@ -27,12 +27,21 @@ public class HtmlRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records, Map<String, String> representationsMap, String previousPageLink, String nextPageLink, Register register) {
+    public Result toListOfRecords(Register register,
+                                  List<Record> records,
+                                  Map<String, String[]> requestParams,
+                                  Map<String, String> representationsMap,
+                                  String previousPageLink,
+                                  String nextPageLink) {
         return ok(views.html.entries.render(register, records, representationsMap, previousPageLink, nextPageLink));
     }
 
     @Override
-    public Result toRecord(Record dbRecord, List<RecordVersionInfo> history, Map<String, String> representationsMap, Register register) {
+    public Result toRecord(Register register,
+                           Record dbRecord,
+                           Map<String, String[]> requestParams,
+                           Map<String, String> representationsMap,
+                           List<RecordVersionInfo> history) {
         return ok(views.html.entry.render(register, dbRecord, history, representationsMap));
     }
 
