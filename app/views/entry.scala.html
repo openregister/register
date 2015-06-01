@@ -42,7 +42,7 @@
             <!-- Little hack to show registers using a field, on field register only-->
             @{register match {
             case fr: uk.gov.openregister.config.FieldRegister =>
-            fieldUsage(fr, record.getEntry.get("field").textValue)
+            fieldUsage(fr.getRegisterNamesFor(record.getEntry.get("field").textValue))
             case _ => {}
             }}
 
