@@ -42,6 +42,7 @@ public abstract class Register {
     }
 
     private String officialText;
+    private String copyright;
 
 
     public final Store store() {
@@ -58,6 +59,13 @@ public abstract class Register {
         return officialText;
     }
 
+    public synchronized String copyright() {
+        if(copyright == null) {
+            getOfficialTextForRegister();
+        }
+        return copyright;
+    }
+
     private void getOfficialTextForRegister() {
         CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
         String rrUrl = curieResolver.resolve(new Curie("register", name())) + "?_representation=json";
@@ -68,6 +76,10 @@ public abstract class Register {
             if (rEntry.get("text") != null) {
                 final String markdownText = rEntry.get("text").textValue();
                 officialText = new MarkdownProcessor().markdown(markdownText);
+            }
+            if (rEntry.get("copyright") != null) {
+                final String markdownText = rEntry.get("copyright").textValue();
+                copyright = new MarkdownProcessor().markdown(markdownText);
             }
         }
     }

@@ -8,28 +8,37 @@
     <div class="row">
         <div class="small-12 large-8 columns">
             <div class="official-text">
-            @Html(register.officialText())
+                @Html(register.officialText())
+
             </div>
+
             <div class="meta-entries">
+
                 <p class="label-text">Total entries:</p>
                 <p class="big-number">
                     <a href=@controllers.api.routes.Rest.all("", controllers.api.Pager.DEFAULT_PAGER)>@count </a>
                 </p>
 
-                <p class="label-text">Provided by:</p>
-                <p class="big-meta">@play.Play.application().configuration().getString("register.department")</p>
-
                 <p class="label-text">Last updated:</p>
                 <p class="big-meta">
                     <a href=@controllers.api.routes.Rest.latest("", controllers.api.Pager.DEFAULT_PAGER)>@lastUpdated</a>
                 </p>
+
                 <p class="label-text">
                     Fields in this register:</p><p class="homepage-field-labels">@Html(register.fieldNames.map(f => controllers.html.Utils.toLink("field", f).body).mkString(", "))</p>
             </div>
+
+            @if(register.copyright()) {
+                <div class="copyright">
+                    <p class="label-text">Copyright:</p>
+                    <div class="copyright-details">@Html(register.copyright())</div>
+
+                </div>
+            }
+
         </div>
 
-
-        <div class="small-12 large-4 columns">
+        <div class="small-12 large-4 columns nav">
 
             <h4>Search register entries</h4>
             <p>@play.Play.application().configuration().getString("register.searchtext")</p>
@@ -65,7 +74,6 @@
 
         </div>
     </div>
-
 
     @license()
 

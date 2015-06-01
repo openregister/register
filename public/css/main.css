@@ -40,14 +40,22 @@ p.total {
 }
 
 .official-text  p {
-  font-size: 22px;
-  line-height: 40px;
+  font-size: 24px;
+  line-height: 30px;
   padding-right: 10px;
 }
 
 .official-text h1 {
   font-size: 34px;
   margin-bottom: 20px;
+}
+
+.copyright-details {
+  margin-top: 5px;
+}
+
+.copyright-details p {
+  font-size: 1.0rem;
 }
 
 .meta-entries {
@@ -157,18 +165,21 @@ input.postfix {
 
 .big-number {
   font-size: 24px;
-  line-height: 30px;
   font-weight: bold;
 }
 
 .big-meta {
   font-size: 24px;
-  line-height: 30px;
   font-weight: bold;
 }
 
 .homepage-field-labels {
   font-family: monospace;
+}
+
+
+.nav h4 {
+  font-size: 1.2rem;
 }
 
 h2 {
@@ -371,7 +382,7 @@ span.label-text {
 }
 
 p.label-text {
-  margin-bottom: 5px;
+  margin-bottom: 0;
 }
 
 .search-panel {
