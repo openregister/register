@@ -69,6 +69,8 @@ public class Rest extends BaseController {
     }
 
     public F.Promise<Result> findByKey(String key, String value, String format) {
+        String canonicalUrl = routes.Rest.findByKey(key, value, "").url();
+        response().setHeader("Link", "<" + canonicalUrl + ">; rel=\"canonical\"");
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, URLDecoder.decode(value, "utf-8")));
         return recordF.map(optionalRecord ->
                         optionalRecord.map(record -> representationFrom(format).toRecord(
@@ -85,6 +87,8 @@ public class Rest extends BaseController {
     }
 
     public F.Promise<Result> findByHash(String hash, String format) {
+        String canonicalUrl = routes.Rest.findByHash(hash, "").url();
+        response().setHeader("Link", "<" + canonicalUrl + ">; rel=\"canonical\"");
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
         return recordF.map(optionalRecord ->
                         optionalRecord.map(record -> representationFrom(format).toRecord(

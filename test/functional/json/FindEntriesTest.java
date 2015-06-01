@@ -22,6 +22,8 @@ public class FindEntriesTest extends ApplicationTests {
 
         WSResponse response = getByKV("key1", "value1", "json");
         assertThat(response.getStatus()).isEqualTo(OK);
+        String expectedLinkHeaderContents = "</key1/value1>; rel=\"canonical\"";
+        assertThat(response.getAllHeaders().get("Link")).contains(expectedLinkHeaderContents);
 
         final JsonNode responseJson = response.asJson();
 
@@ -37,6 +39,8 @@ public class FindEntriesTest extends ApplicationTests {
 
         WSResponse response = getByHash(record.getHash(), "json");
         assertThat(response.getStatus()).isEqualTo(OK);
+        String expectedLinkHeaderContents = "</hash/" + record.getHash() + ">; rel=\"canonical\"";
+        assertThat(response.getAllHeaders().get("Link")).contains(expectedLinkHeaderContents);
 
         final JsonNode responseJson = response.asJson();
 
