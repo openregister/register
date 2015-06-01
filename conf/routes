@@ -4,30 +4,30 @@
 
 
 
-GET         /                                                @controllers.html.UI.index()
-GET         /ui/create                                       @controllers.html.UI.renderNewEntryForm()
-POST        /ui/create                                       @controllers.html.UI.create()
-GET         /ui/supersede/:hash                              @controllers.html.UI.renderUpdateEntryForm(hash)
-POST        /ui/supersede/:hash                              @controllers.html.UI.update(hash)
+GET         /                                                      @controllers.html.UI.index()
+GET         /ui/create                                             @controllers.html.UI.renderNewEntryForm()
+POST        /ui/create                                             @controllers.html.UI.create()
+GET         /ui/supersede/:hash                                    @controllers.html.UI.renderUpdateEntryForm(hash)
+POST        /ui/supersede/:hash                                    @controllers.html.UI.update(hash)
 
-GET         /load                                            @controllers.api.ImportData.loadWithProgress()
-GET         /load/progress                                   @controllers.api.ImportData.progress()
+GET         /load                                                  @controllers.api.ImportData.loadWithProgress()
+GET         /load/progress                                         @controllers.api.ImportData.progress()
 
-GET         /latest$format<(\.\p{Lower}+|)>                  @controllers.api.Rest.latest(format, _page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
-GET         /all$format<(\.\p{Lower}+|)>                     @controllers.api.Rest.all(format, _page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
-GET         /search                                          @controllers.api.Rest.search(_page: Int ?= 0, _page_size: Int ?= controllers.api.Rest.DEFAULT_RESULT_PAGE_SIZE)
+GET         /latest$format<(\.\p{Lower}+|)>                        @controllers.api.Rest.latest(format, pager: controllers.api.Pager ?= controllers.api.Pager.DEFAULT_PAGER)
+GET         /all$format<(\.\p{Lower}+|)>                           @controllers.api.Rest.all(format, pager: controllers.api.Pager ?= controllers.api.Pager.DEFAULT_PAGER)
+GET         /search                                                @controllers.api.Rest.search(pager: controllers.api.Pager ?= controllers.api.Pager.DEFAULT_PAGER)
 
-GET         /hash/$hash<\p{Alnum}+>$format<(\.\p{Lower}+|)>  @controllers.api.Rest.findByHash(hash, format)
+GET         /hash/$hash<\p{Alnum}+>$format<(\.\p{Lower}+|)>        @controllers.api.Rest.findByHash(hash, format)
 
 
-GET         /:key/$value<[^./]+>$format<(\.\p{Lower}+|)>      @controllers.api.Rest.findByKey(key, value, format)
+GET         /:key/$value<[^./]+>$format<(\.\p{Lower}+|)>           @controllers.api.Rest.findByKey(key, value, format)
 
-POST        /create                                          @controllers.api.Rest.create()
-POST        /supersede/:hash                                 @controllers.api.Rest.update(hash)
+POST        /create                                                @controllers.api.Rest.create()
+POST        /supersede/:hash                                       @controllers.api.Rest.update(hash)
 
-GET         /assets/javascripts/routes                       @controllers.api.ImportData.javascriptRoutes()
+GET         /assets/javascripts/routes                             @controllers.api.ImportData.javascriptRoutes()
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                                    controllers.Assets.at(path="/public", file)
+GET         /assets/*file                                          controllers.Assets.at(path="/public", file)
 
