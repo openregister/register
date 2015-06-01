@@ -46,8 +46,9 @@
                 <li class="data-representations">Download all entries as:
                     <span style="display : inline-flex">
                     @controllers.api.Representations.Format.values().filter(rep =>
-                        rep != controllers.api.Representations.Format.html).map(rep => rep.name()).map { repname =>
-                        <a download href=@controllers.api.routes.Rest.all(s".$repname", controllers.api.Pager.DEFAULT_PAGER)>@repname</a> &nbsp;
+                        rep != controllers.api.Representations.Format.html).map(rep =>
+                        rep.name()).map { repname =>
+                            <a download href=@controllers.api.routes.Rest.all(s".$repname", controllers.api.Pager.DEFAULT_PAGER)>@repname</a> &nbsp;
                     }
                     </span>
                 </li>
