@@ -2,49 +2,66 @@
 
 @main(register.friendlyName + " register") {
 
-@header(register.friendlyName)
+    @header(register.friendlyName)
 
 
-<div class="row">
-    <div class="small-12 large-8 columns">
-        <div class="official-text">
+    <div class="row">
+        <div class="small-12 large-8 columns">
+            <div class="official-text">
             @Html(register.officialText())
-        </div>
-        <div class="meta-entries">
+            </div>
+            <div class="meta-entries">
                 <p class="label-text">Total entries:</p><p class="big-number">@count</p>
-                <p class="label-text">Provided by:</p><p class="big-meta">@play.Play.application().configuration().getString("register.department")</p>
+                <p class="label-text">
+                    Provided by:</p><p class="big-meta">@play.Play.application().configuration().getString("register.department")</p>
                 <p class="label-text">Last updated:</p><p class="big-meta">@lastUpdated</p>
-                <p class="label-text">Fields in this register:</p><p class="homepage-field-labels">@Html(register.fieldNames.map(f => controllers.html.Utils.toLink("field", f).body).mkString(", "))</p>
+                <p class="label-text">
+                    Fields in this register:</p><p class="homepage-field-labels">@Html(register.fieldNames.map(f => controllers.html.Utils.toLink("field", f).body).mkString(", "))</p>
+            </div>
+        </div>
+
+
+        <div class="small-12 large-4 columns">
+
+            <h4>Search register entries</h4>
+            <p>@play.Play.application().configuration().getString("register.searchtext")</p>
+
+            <form action="/search">
+                <div class="row collapse">
+                    <div class="small-8 large-11 columns">
+                        <input name="_query" type="text" placeholder="Enter search term">
+
+                            <!-- ./columns -->
+                        <input type="submit" value="Search" class="button postfix" />
+                    </div>
+                </div>
+            </form>
+
+            <hr class="divider"/>
+            <ul class="side-nav">
+                <li><a href=@controllers.api.routes.Rest.all("", controllers.api.Pager.DEFAULT_PAGER)>See
+                    all entries</a></li>
+                <li><a href=@controllers.api.routes.Rest.latest("", controllers.api.Pager.DEFAULT_PAGER)>See
+                    latest entries</a></li>
+                @*<li class="data-representations">Download all entries as:*@
+                    @*<span style="display : inline-flex">*@
+                        @*<a href=@controllers.api.routes.Rest.all(".json", controllers.api.Pager.DEFAULT_PAGER)>json</a>&#44;&nbsp;*@
+                        @*<a href=@controllers.api.routes.Rest.all(".yaml", controllers.api.Pager.DEFAULT_PAGER)>yaml</a>&nbsp;or*@
+                        @*<a href=@controllers.api.routes.Rest.all(".ttl", controllers.api.Pager.DEFAULT_PAGER)>ttl</a>*@
+                    @*</span>*@
+                @*</li>*@
+            </ul>
+
+            <hr class="divider"/>
+            <ul class="side-nav">
+                <li><a href="http://www.openregister.org/">About registers</a></li>
+                <li><a href="http://www.openregister.org/developer">Developer documentation</a></li>
+            </ul>
         </div>
     </div>
 
 
-    <div class="small-12 large-4 columns">
-
-                <h4>Search register entries</h4>
-                <p>@play.Play.application().configuration().getString("register.searchtext")</p>
-
-                <form action="/search">
-                <div class="row collapse">
-                        <div class="small-8 large-11 columns">
-                                <input name="_query" type="text" placeholder="Enter search term">
-
-                             <!-- ./columns -->
-                                <input type="submit" value="Search" class="button postfix" />
-                        </div>
-                </div>
-                </form>
-
-            <hr class="divider"/>
-                <ul class="side-nav">
-                    <li><a href="http://www.openregister.org/">About registers</a></li>
-                    <li><a href="http://www.openregister.org/developer">Developer documentation</a></li>
-                </ul>
-        </div>
-</div>
-
-
-@license()
+    @license()
 
 
 }
