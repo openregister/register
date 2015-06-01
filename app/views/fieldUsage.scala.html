@@ -1,14 +1,16 @@
-@(fr: uk.gov.openregister.config.FieldRegister, fieldName: String)
+@(registerNames: List[String])
+
+@if(!registerNames.isEmpty()){
 <div id="field-usage">
-
     <h2>This field appears in the following registers: </h2>
-
 
     <div class="panel entry">
         <ul>
-            @fr.getRegisterNamesFor(fieldName).map{ registerName =>
-                <li>@controllers.html.Utils.toRegisterLink(registerName)</li>
+            @registerNames.map{ registerName =>
+            <li>@controllers.html.Utils.toRegisterLink(registerName)</li>
             }
         </ul>
     </div>
 </div>
+}
+
