@@ -32,7 +32,7 @@ public class UI extends BaseController {
             String rrUrl = curieResolver.resolve(new Curie("register", register.name())) + "?_representation=json";
 
             final WSResponse wsResponse = WS.client().url(rrUrl).execute().get(30000L);
-            final String lastUpdatedStr = wsResponse.asJson().get("lastUpdated").textValue();
+            final String lastUpdatedStr = wsResponse.asJson().get("last-updated").textValue();
             final DateTime lastUpdated = DateTime.parse(lastUpdatedStr);
             lastUpdatedUI = lastUpdated.toString("dd MMM yyyy");
         } catch (Exception e) {

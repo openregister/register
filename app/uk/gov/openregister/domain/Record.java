@@ -44,7 +44,7 @@ public class Record {
         return entry;
     }
 
-    @JsonProperty("lastUpdated")
+    @JsonProperty("last-updated")
     public String getLastUpdated() {
         return metadata.map(m -> m.creationTime.toString()).orElse("");
     }

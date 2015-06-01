@@ -20,7 +20,7 @@ public class YamlSanityTest extends ApplicationTests {
             "  - \"B\"\n" +
             "  name: \"The Entry\"\n" +
             "  test-register: \"testregisterkey\"\n" +
-            "lastUpdated: \"";
+            "last-updated: \"";
 
     @Test
     public void testFindOneByKey() throws Exception {

@@ -67,7 +67,7 @@ public class FindEntriesTest extends ApplicationTests {
 
     private void checkResponseRecords(Record record, JsonNode responseJson) throws JSONException {
         final JsonNode recordEntry = responseJson.get("entry");
-        final String lastUpdatedEntry = responseJson.get("lastUpdated").textValue();
+        final String lastUpdatedEntry = responseJson.get("last-updated").textValue();
         Record actual = new Record(recordEntry);
 
         JSONAssert.assertEquals(record.getEntry().toString(), actual.getEntry().toString(), false);
