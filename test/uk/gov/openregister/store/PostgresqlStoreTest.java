@@ -302,4 +302,22 @@ public class PostgresqlStoreTest {
 
         assertThat(store.count()).isEqualTo(2);
     }
+
+    @Test
+    public void testFastImport() throws JSONException {
+        String json = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        String json2 = "{\"store_tests\":\"aValue2\",\"anotherKey\":\"anotherValue2\"}";
+
+        Record record1 = new Record(json);
+        Record record2 = new Record(json2);
+        store.fastImport(Arrays.asList(record1, record2));
+
+        Optional<Record> r = store.findByKV("store_tests", "aValue");
+        JSONAssert.assertEquals(json, r.get().getEntry().toString(), true);
+        assertThat(r.get().getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
+
+        Optional<Record> r2 = store.findByKV("store_tests", "aValue2");
+        JSONAssert.assertEquals(json2, r2.get().getEntry().toString(), true);
+        assertThat(r2.get().getHash()).isEqualTo("21f5b193781e765d07a85fbf9e805aaab5adc375");
+    }
 }

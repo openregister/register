@@ -11,11 +11,20 @@ import play.mvc.Result;
 import play.mvc.WebSocket;
 import uk.gov.openregister.domain.Record;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class ImportData extends BaseController {
+
+    public static final int BATCH_SIZE = 1000;
 
     public Result loadWithProgress() {
         return ok(views.html.load.render(register, "Data import"));
@@ -37,35 +46,61 @@ public class ImportData extends BaseController {
         new Thread(() -> {
 
             try {
-                char cs = url.endsWith(".tsv") ? '\t' : ',';
 
-                notifyProgress("Downloading raw data", false, false, 0, out);
+                if(url.endsWith(".zip")) {
+                    ZipInputStream zipInputStream = new ZipInputStream(new URL(url).openStream());
+                    ZipEntry entry;
 
-                CsvMapper mapper = new CsvMapper();
-                CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(cs).withHeader();
-                MappingIterator<JsonNode> it = mapper.reader(JsonNode.class)
-                        .with(schema)
-                        .readValues(new URL(url));
-                long counter = 0;
-
-                notifyProgress("Dropping existing data", false, false, counter, out);
-                store.deleteAll();
-                while (it.hasNext()) {
-                    JsonNode rowAsNode = it.next();
-                    store.save(new Record(rowAsNode));
-                    counter++;
-                    if (counter % 1000 == 0) {
-                        notifyProgress("Importing... (" + counter + " records)", false, false, counter, out);
+                    while ((entry = zipInputStream.getNextEntry()) != null)
+                    {
+                        if(!entry.isDirectory()) {
+                            notifyProgress("Found '" + entry.getName() + "' in zip file, importing....", false, false, 0, out);
+                            importStream(entry.getName(), zipInputStream, out);
+                        }
                     }
+                } else {
+                    importStream(url, new URL(url).openStream(), out);
                 }
 
-                notifyProgress("Imported successfully " + (int) counter + " records", true, true, counter, out);
             } catch (Exception e) {
                 notifyProgress("Failed. " + e.getMessage(), true, false, 0, out);
                 throw new RuntimeException(e);
             }
         }).run();
 
+    }
+
+    private void importStream(String url, InputStream inputStream, WebSocket.Out<JsonNode> out) throws java.io.IOException {
+        char cs = url.endsWith(".tsv") ? '\t' : ',';
+
+        notifyProgress("Downloading raw data", false, false, 0, out);
+
+        InputStreamReader isr = new InputStreamReader(inputStream);
+        BufferedReader br = new BufferedReader(isr);
+
+        CsvMapper mapper = new CsvMapper();
+        CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(cs).withHeader();
+        MappingIterator<JsonNode> it = mapper.reader(JsonNode.class)
+                .with(schema)
+                .readValues(br);
+        long counter = 0;
+
+        notifyProgress("Dropping existing data", false, false, counter, out);
+        store.deleteAll();
+        List<Record> records = new ArrayList<>();
+        while (it.hasNext()) {
+            JsonNode rowAsNode = it.next();
+            records.add(new Record(rowAsNode));
+            counter++;
+            if (counter % BATCH_SIZE == 0) {
+                store.fastImport(records);
+                records.clear();
+                notifyProgress("Importing... (" + counter + " records)", false, false, counter, out);
+            }
+        }
+        store.fastImport(records);
+
+        notifyProgress("Imported successfully " + (int) counter + " records", true, true, counter, out);
     }
 
     private static void notifyProgress(String message, boolean done, boolean success, long count,  WebSocket.Out<JsonNode> out) {

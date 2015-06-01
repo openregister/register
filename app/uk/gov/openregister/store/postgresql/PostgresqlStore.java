@@ -78,6 +78,8 @@ public class PostgresqlStore implements Store {
         database.execute("CREATE TABLE IF NOT EXISTS " + tableName + "_history (hash varchar(40) primary key,entry json, metadata json)");
     }
 
+
+
     @Override
     public void save(Record record) {
 
@@ -241,6 +243,42 @@ public class PostgresqlStore implements Store {
     public long count() {
         return database.<Long>select("SELECT count(hash) FROM " + dbInfo.tableName + " AS count")
                 .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
+    }
+
+    @Override
+    public void fastImport(List<Record> records) {
+
+
+        try (Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+
+            try (PreparedStatement st1 = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, metadata) VALUES(?, ?, ?)");
+                    PreparedStatement st2 = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry,metadata) VALUES(?, ?, ?)")) {
+
+                for (Record record : records) {
+                    String hash = record.getHash();
+                    PGobject entryObject = createPGObject(record.normalisedEntry());
+                    PGobject metadataObject = createPGObject(new Metadata(DateTime.now(), "").normalise());
+                    st1.setObject(1, hash);
+                    st1.setObject(2, entryObject);
+                    st1.setObject(3, metadataObject);
+                    st1.addBatch();
+
+                    st2.setObject(1, hash);
+                    st2.setObject(2, entryObject);
+                    st2.setObject(3, metadataObject);
+                    st2.addBatch();
+                }
+
+                st1.executeBatch();
+                st2.executeBatch();
+            }
+            connection.commit();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //TODO: this will be deleted when we know the datatype of primary key

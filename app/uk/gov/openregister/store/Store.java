@@ -9,7 +9,14 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface Store {
-    void save(Record s);
+
+    void save(Record record);
+
+    /**
+     * Batch import without checking for duplicated primary keys. Used for the initial import
+     * @param records
+     */
+    void fastImport(List<Record> records);
 
     void deleteAll();
 
