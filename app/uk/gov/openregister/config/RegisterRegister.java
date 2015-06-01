@@ -18,7 +18,7 @@ public class RegisterRegister extends Register {
             new Field("register"),
             new Field("fields", "Fields", Datatype.of("list"), Cardinality.MANY, Optional.of("field")),
             new Field("text", Datatype.TEXT),
-            new Field("publisher"),
+            new Field("registry"),
             new Field("copyright", Datatype.TEXT)
     );
 
