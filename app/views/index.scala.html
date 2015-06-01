@@ -45,11 +45,10 @@
                     latest entries</a></li>
                 <li class="data-representations">Download all entries as:
                     <span style="display : inline-flex">
-                        <a download=@{s"${register.name()}.json"} href=@controllers.api.routes.Rest.all(".json", controllers.api.Pager.DEFAULT_PAGER)>json</a>&nbsp;
-                        <a download=@{s"${register.name()}.yaml"} href=@controllers.api.routes.Rest.all(".yaml", controllers.api.Pager.DEFAULT_PAGER)>yaml</a>&nbsp;
-                        <a download=@{s"${register.name()}.ttl"} href=@controllers.api.routes.Rest.all(".ttl", controllers.api.Pager.DEFAULT_PAGER)>ttl</a>&nbsp;
-                        <a download=@{s"${register.name()}.csv"} href=@controllers.api.routes.Rest.all(".csv", controllers.api.Pager.DEFAULT_PAGER)>csv</a>&nbsp;
-                        <a download=@{s"${register.name()}.tsv"} href=@controllers.api.routes.Rest.all(".tsv", controllers.api.Pager.DEFAULT_PAGER)>tsv</a>
+                    @controllers.api.Representations.Format.values().filter(rep =>
+                        rep != controllers.api.Representations.Format.html).map(rep => rep.name()).map { repname =>
+                        <a download href=@controllers.api.routes.Rest.all(s".$repname", controllers.api.Pager.DEFAULT_PAGER)>@repname</a> &nbsp;
+                    }
                     </span>
                 </li>
             </ul>
