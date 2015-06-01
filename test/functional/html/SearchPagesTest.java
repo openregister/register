@@ -30,20 +30,6 @@ public class SearchPagesTest extends ApplicationTests {
     }
 
     @Test
-    public void testGetSearchPageShowsTheTotalAmountOfEntries() throws Exception {
-        postJson("/create","{\"test-register\":\"testregisterkey1\",\"name\":\"The Entry\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
-        postJson("/create", "{\"test-register\":\"testregisterkey2\",\"name\":\"The Entry\",\"key1\": \"value2\",\"key2\": [\"A\",\"B\"]}");
-        postJson("/create", "{\"test-register\":\"testregisterkey3\",\"name\":\"The Entry\",\"key1\": \"value3\",\"key2\": [\"A\",\"B\"]}");
-
-
-        WSResponse response = get("/");
-
-        assertThat(response.getStatus()).isEqualTo(OK);
-        String body = response.getBody();
-        assertThat(body).contains("<p class=\"big-number\">3</p>");
-    }
-
-    @Test
     public void testSearchReturnsEntriesWithKeyHashNameDisplayed() throws Exception {
 
         postJson("/create", "{\"test-register\":\"testregisterkey1\",\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
