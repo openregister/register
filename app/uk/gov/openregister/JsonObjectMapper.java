@@ -1,18 +1,20 @@
 package uk.gov.openregister;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.IOException;
-import java.util.Map;
 
 public class JsonObjectMapper {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = objectMapper(null);
 
-    static {
+    public static ObjectMapper objectMapper(JsonFactory jsonFactory){
+        ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
         objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+        return objectMapper;
     }
 
     public static <T> T convert(JsonNode jsonNode, Class<T> clazz) {
@@ -23,11 +25,12 @@ public class JsonObjectMapper {
         }
     }
 
-    public static String convertToString(Map<String, Object> json) {
+    public static String convertToString(Object obj){
         try {
-            return objectMapper.writeValueAsString(json);
+            return objectMapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Can not convert object to string");
         }
+
     }
 }
