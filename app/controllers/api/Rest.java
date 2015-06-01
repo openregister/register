@@ -3,6 +3,7 @@ package controllers.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import controllers.BaseController;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import play.libs.F;
 import play.mvc.BodyParser;
@@ -103,32 +104,29 @@ public class Rest extends BaseController {
     public F.Promise<Result> all(String format, Pager pager) throws Exception {
         return findByQuery(
                 format,
-                pager.page,
-                pager.pageSize,
+                pager,
                 store.getSortType().getDefault());
     }
 
     public F.Promise<Result> latest(String format, Pager pager) throws Exception {
         return findByQuery(
                 format,
-                pager.page,
-                pager.pageSize,
+                pager,
                 store.getSortType().getLastUpdate());
     }
 
     public F.Promise<Result> search(Pager pager) throws Exception {
         return findByQuery(
                 request.getQueryString(REPRESENTATION_QUERY_PARAM),
-                pager.page,
-                pager.pageSize,
+                pager,
                 store.getSortType().getDefault());
     }
 
-    private F.Promise<Result> findByQuery(String format, int page, int pageSize, SortType.SortBy sortBy) throws Exception {
+    private F.Promise<Result> findByQuery(String format, Pager pager, SortType.SortBy sortBy) throws Exception {
         Representation representation = representationFrom(format);
 
-        int effectiveOffset = representation.isPaginated() ? page * pageSize : 0;
-        int effectiveLimit = representation.isPaginated() ? pageSize : ALL_ENTRIES_LIMIT;
+        int effectiveOffset = representation.isPaginated() ? pager.page * pager.pageSize : 0;
+        int effectiveLimit = representation.isPaginated() ? pager.pageSize : ALL_ENTRIES_LIMIT;
 
         List<Record> records;
 
@@ -149,8 +147,8 @@ public class Rest extends BaseController {
                 register, records,
                 queryParameters,
                 representationsMap(urlTemplate),
-                page > 0 ? uriBuilder.setParameter("_page", "" + (page - 1)).build().toString() : null,
-                records.size() == pageSize ? uriBuilder.setParameter("_page", "" + (page + 1)).build().toString() : null
+                pager.page > 0 ? uriBuilder.setParameter(Pager.PAGE_PARAM, "" + (pager.page - 1)).build().toString() : null,
+                records.size() == pager.pageSize ? uriBuilder.setParameter(Pager.PAGE_PARAM, "" + (pager.page + 1)).build().toString() : null
         ));
     }
 

@@ -9,8 +9,10 @@ import static play.libs.F.Option;
 
 
 public class Pager implements QueryStringBindable<Pager> {
-    public final static Pager DEFAULT_PAGER = new Pager(0,30);
     public static final int DEFAULT_PAGE_SIZE = 30;
+    public static final Pager DEFAULT_PAGER = new Pager(0,DEFAULT_PAGE_SIZE);
+    public static final String PAGE_PARAM = "_page";
+    public static final String PAGE_SIZE_PARAM = "_pageSize";
 
     public int page;
     public int pageSize;
@@ -25,8 +27,8 @@ public class Pager implements QueryStringBindable<Pager> {
 
     @Override
     public F.Option<Pager> bind(String key, Map<String, String[]> params) {
-        String _page = params.containsKey("_page") ? params.get("_page")[0] : "0";
-        String _pageSize = params.containsKey("_pageSize") ? params.get("_pageSize")[0] : String.valueOf(DEFAULT_PAGE_SIZE);
+        String _page = params.containsKey(PAGE_PARAM) ? params.get(PAGE_PARAM)[0] : "0";
+        String _pageSize = params.containsKey(PAGE_SIZE_PARAM) ? params.get(PAGE_SIZE_PARAM)[0] : String.valueOf(DEFAULT_PAGE_SIZE);
 
         try {
             page = Integer.parseInt(_page);
@@ -42,12 +44,12 @@ public class Pager implements QueryStringBindable<Pager> {
         String separator = "";
         String unbound = "";
         if (page > 0) {
-            unbound += "_page=" + page;
+            unbound += PAGE_PARAM + "=" + page;
             separator = "&";
         }
 
-        if(pageSize != 30) {
-            unbound += separator + "_pageSize=" + pageSize;
+        if(pageSize != DEFAULT_PAGE_SIZE) {
+            unbound += separator + PAGE_SIZE_PARAM + "=" + pageSize;
         }
         return unbound;
     }
