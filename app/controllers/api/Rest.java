@@ -100,27 +100,27 @@ public class Rest extends BaseController {
         );
     }
 
-    public F.Promise<Result> all(String format, int page, int pageSize) throws Exception {
+    public F.Promise<Result> all(String format, Pager pager) throws Exception {
         return findByQuery(
                 format,
-                page,
-                pageSize,
+                pager.page,
+                pager.pageSize,
                 store.getSortType().getDefault());
     }
 
-    public F.Promise<Result> latest(String format, int page, int pageSize) throws Exception {
+    public F.Promise<Result> latest(String format, Pager pager) throws Exception {
         return findByQuery(
                 format,
-                page,
-                pageSize,
+                pager.page,
+                pager.pageSize,
                 store.getSortType().getLastUpdate());
     }
 
-    public F.Promise<Result> search(int page, int pageSize) throws Exception {
+    public F.Promise<Result> search(Pager pager) throws Exception {
         return findByQuery(
                 request.getQueryString(REPRESENTATION_QUERY_PARAM),
-                page,
-                pageSize,
+                pager.page,
+                pager.pageSize,
                 store.getSortType().getDefault());
     }
 
