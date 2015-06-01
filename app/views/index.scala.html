@@ -48,7 +48,7 @@
                     @controllers.api.Representations.Format.values().filter(rep =>
                         rep != controllers.api.Representations.Format.html).map(rep =>
                         rep.name()).map { repname =>
-                            <a download href=@controllers.api.routes.Rest.all(s".$repname", controllers.api.Pager.DEFAULT_PAGER)>@repname</a> &nbsp;
+                            <a class="no-padding-left" download href=@controllers.api.routes.Rest.all(s".$repname", controllers.api.Pager.DEFAULT_PAGER)>@repname</a> &nbsp;
                     }
                     </span>
                 </li>
