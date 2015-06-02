@@ -2,9 +2,7 @@ package controllers.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.sun.syndication.feed.synd.*;
-import com.sun.syndication.io.FeedException;
-import com.sun.syndication.io.SyndFeedOutput;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.joda.time.DateTime;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
@@ -15,11 +13,7 @@ import uk.gov.openregister.linking.Curie;
 import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.model.Field;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +23,15 @@ import java.util.stream.StreamSupport;
 import static play.mvc.Results.ok;
 
 public class AtomRepresentation implements Representation {
+    public static final String FIELD_REGISTER_NAMESPACE_PREFIX = "f";
+    public static final String DATATYPE_REGISTER_NAMESPACE_PREFIX = "dt";
+    public static final String FIELD_REGISTER_NAMESPACE =
+            "xmlns:" + FIELD_REGISTER_NAMESPACE_PREFIX + "=\"http://fields.openregister.org/field/\"";
+    public static final String DATATYPE_REGISTER_NAMESPACE =
+            "xmlns:" + DATATYPE_REGISTER_NAMESPACE_PREFIX + "=\"http://fields.openregister.org/datatype/\"";
+
     public static final String TEXT_ATOM = "application/atom+xml; charset=utf-8";
+    public static final String RFC3339_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZ";
     private final CurieResolver curieResolver;
 
     public AtomRepresentation() {
@@ -38,25 +40,21 @@ public class AtomRepresentation implements Representation {
 
     @Override
     public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, String previousPageLink, String nextPageLink) {
-        SyndFeed atomFeed = createSyndFeed(register);
-
-        atomFeed.setEntries(
-                records.stream()
-                        .map(r -> renderRecord(r, register))
-                        .collect(Collectors.toList()));
-
-        return ok(toOutput(atomFeed)).as(TEXT_ATOM);
+        String atomHeader = createAtomHeader(register);
+        String entries = records.stream()
+                .map(r -> renderRecord(r, register))
+                .collect(Collectors.joining());
+        String atomFooter = createAtomFooter();
+        return ok(atomHeader + entries + atomFooter).as(TEXT_ATOM);
     }
 
     @Override
     public Result toRecord(Register register, Record record, Map<String, String[]> requestParams, Map<String, String> representationsMap, List<RecordVersionInfo> history) {
-        SyndFeed atomFeed = createSyndFeed(register);
+        String atomHeader = createAtomHeader(register);
+        String entry = renderRecord(record, register);
+        String atomFooter = createAtomFooter();
 
-        List<SyndEntry> entries = new ArrayList<SyndEntry>();
-        entries.add(renderRecord(record, register));
-
-        atomFeed.setEntries(entries);
-        return ok(toOutput(atomFeed)).as(TEXT_ATOM);
+        return ok(atomHeader + entry + atomFooter).as(TEXT_ATOM);
     }
 
     @Override
@@ -64,51 +62,51 @@ public class AtomRepresentation implements Representation {
         return false;
     }
 
-    private SyndFeed createSyndFeed(Register register) {
-        SyndFeed atomFeed = new SyndFeedImpl();
-        atomFeed.setFeedType("atom_1.0");
-
-        atomFeed.setTitle("Latest updates to the " + register.friendlyName() + " register.");
-        atomFeed.setLink("http://" + register.name() + ".openregister.org");
-        atomFeed.setDescription("This feed contains that latest updates to data in the " + register.friendlyName() + " register.");
-
-        return atomFeed;
+    private String createAtomHeader(Register register) {
+        return "<feed " + FIELD_REGISTER_NAMESPACE + "\n" +
+                " " + DATATYPE_REGISTER_NAMESPACE + "\n" +
+        " xmlns=\"http://www.w3.org/2005/Atom\">\n" +
+                " <title>" + "TODO" + "</title>\n" +
+                " <id>" + curieResolver.resolve(new Curie(register.name(), "latest.atom")) + "</id>\n" +
+                "<link rel=\"self\" href=\"" + curieResolver.resolve(new Curie(register.name(), "")) + "\" />\n" +
+                "<updated>" + DateTime.now().toString(RFC3339_DATETIME_FORMAT) + "</updated>\n" +
+                "<author><name>openregister.org</name></author>\n";
     }
 
-    private String toOutput(final SyndFeed feed) {
-        try {
-            Writer writer = new StringWriter();
-            SyndFeedOutput output = new SyndFeedOutput();
-            output.output(feed, writer);
-
-            return writer.toString();
-        } catch (IOException|FeedException e) {
-            e.printStackTrace();
-        }
-
-        return "";
+    private String createAtomFooter() {
+        return "</feed>";
     }
 
-    private SyndEntry renderRecord(Record record, Register register) {
+    private String renderRecord(Record record, Register register) {
         URI hashUri = curieResolver.resolve(new Curie(register.name() + "_hash", record.getHash()));
-
-        SyndEntry entry = new SyndEntryImpl();
 
         Map<String, String> keyValue = register.fields().stream()
                 .map(field -> new HashMap.SimpleEntry<String, String>(field.getName(), renderValue(record, field)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        entry.setTitle(keyValue.get("name"));
-        entry.setLink(hashUri.toString());
-        DateTime publishedDateTime = renderCreationTime(record);
-        entry.setPublishedDate(publishedDateTime.toDate());
-        SyndContent description = new SyndContentImpl();
-        description.setType("text/plain");
-        description.setValue("This " + register.name() + " was updated on " + friendlyFormatDateTime(renderCreationTime(record)));
-        entry.setDescription(description);
+        String entry = "<entry>\n";
+        entry += "<id>urn:hash:" + record.getHash() + "</id>\n";
+        entry += "<title>" + hashUri.toString() + "</title>\n";
+        entry += "<updated>" + renderCreationTime(record) + "</updated>\n";
+        entry += "<author><name>openregister.org</name></author>\n";
+        entry += "<link href=\"" + hashUri.toString() + "\"></link>";
+        entry += "<content type=\"application/xml\">\n" + fieldEntriesForRecord(register, record) + "</content>\n";
+        entry += "</entry>\n";
 
         return entry;
     }
+
+    private String fieldEntriesForRecord(Register register, Record record) {
+        return register.fields().stream()
+                .map(f -> {
+                    String fieldOpenTag = "<" + FIELD_REGISTER_NAMESPACE_PREFIX + ":" + f.getName() + ">";
+                    String fieldCloseTag = "</" + FIELD_REGISTER_NAMESPACE_PREFIX + ":" + f.getName() + ">";
+                    String fieldValue = renderValue(record, f);
+                    return fieldOpenTag + fieldValue + fieldCloseTag;
+                })
+                .collect(Collectors.joining("\n")) + "\n";
+    }
+
 
     private String renderValue(Record record, Field field) {
         JsonNode jsonNode = record.getEntry().get(field.getName());
@@ -128,25 +126,22 @@ public class AtomRepresentation implements Representation {
     private String renderScalar(Field field, JsonNode jsonNode) {
         if (field.getRegister().isPresent()) {
             Curie curie = new Curie(field.getRegister().get(), jsonNode.asText());
-            return String.format("<%s>", curieResolver.resolve(curie));
+            return String.format("%s", curieResolver.resolve(curie));
         }
-        return jsonNode.toString();
+        return StringEscapeUtils.escapeXml(jsonNode.asText());
     }
 
     private String renderList(Field field, JsonNode jsonNode) {
         ArrayNode arrayNode = (ArrayNode) jsonNode;
-        return StreamSupport.stream(arrayNode.spliterator(),false)
+        return StreamSupport.stream(arrayNode.spliterator(), false)
                 .map(val -> renderScalar(field, val))
                 .collect(Collectors.joining(", "));
     }
 
-    private DateTime renderCreationTime(Record record) {
-        return record.getMetadata().isPresent() ? record.getMetadata().get().creationTime : null;
-    }
-
-    private static final String FRIENDLY_DATETIME_PATTERN = "yyyy-MM-dd 'at' HH:mm";
-    private String friendlyFormatDateTime(DateTime dateTime) {
-        return dateTime.toString(FRIENDLY_DATETIME_PATTERN);
+    private String renderCreationTime(Record record) {
+        return record.getMetadata().isPresent()
+                ? record.getMetadata().get().creationTime.toString(RFC3339_DATETIME_FORMAT)
+                : null;
     }
 
     public static Representation instance = new AtomRepresentation();
