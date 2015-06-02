@@ -4,6 +4,8 @@
 
 @header(register.friendlyName)
 
+
+
 <div class="row">
     @Option(errors.get("globalError")).map { error =>
     <div class="error">@error</div><br/>
@@ -11,21 +13,33 @@
 </div>
 
 <div class="row">
-	<div class="small-12 large-12 columns">
+	<div class="small-12 large-6 columns">
+
 	@helper.form(action = formAction) {
+
+		<fieldset>
+        	<legend class="form-label-bold">Register</legend>
+
+	    @register.fields.map{ aField =>
+	        @{
+	            if(!aField.getName().equals("fields"))
+	                controllers.html.Utils.inputText(aField.getName, requestParam.get(aField.getName), errors.get(aField.getName));
+
+	        }
+	    }
+		</fieldset>
 
 	    @register.fields.map{ aField =>
 	        @{
 	            if(register.name.equals("register") && aField.getName().equals("fields"))
 	                controllers.html.Utils.checkbox(aField, requestParam.get(aField.getName), aField.getAllowedValues.get);
-	             else
-	                controllers.html.Utils.inputText(aField.getName, requestParam.get(aField.getName), errors.get(aField.getName));
 
 	        }
 	    }
 
 
 	    <input type="submit" name="submit" value="@submitButtonValue" class="button"/>
+
 	}
 	</div>
 </div>
