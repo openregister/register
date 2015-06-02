@@ -12,8 +12,8 @@ import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseConflictException;
 import uk.gov.openregister.store.DatabaseException;
-import uk.gov.openregister.store.SortType;
-import uk.gov.openregister.store.SortType.SortBy;
+import uk.gov.openregister.store.SearchSpec;
+import uk.gov.openregister.store.SearchSpec.SearchHelper;
 import uk.gov.openregister.store.Store;
 
 import javax.sql.DataSource;
@@ -32,31 +32,38 @@ public class PostgresqlStore implements Store {
     private final DBInfo dbInfo;
     private Database database;
 
-    public final SortBy sortByKey = new SortBy() {
+    public final SearchHelper searchHelperKey = new SearchHelper() {
         private final String sqlTemplate = "  ORDER BY entry ->> '%s' ";
 
         public String sortBy() {
             return sqlTemplate.replace("%s", dbInfo.primaryKey);
         }
+
+        public boolean isHistoric() {
+            return false;
+        }
     };
 
-    public final SortBy sortByUpdateTime = new SortBy() {
-
-        private final String sqlTemplate = "  ORDER BY metadata ->> 'creationTime' DESC ";
+    public final SearchHelper searchHelperUpdateTime = new SearchHelper() {
+        private final String sqlTemplate = "  ORDER BY entry ->> '%s' DESC, to_timestamp(metadata ->> 'creationTime', 'YYYY-MM-DD HH24:MI:SS.MSZ') DESC ";
 
         public String sortBy() {
-            return sqlTemplate;
+            return sqlTemplate.replace("%s", dbInfo.primaryKey);
+        }
+
+        public boolean isHistoric() {
+            return true;
         }
     };
-    private SortType sortType = new SortType() {
+    private SearchSpec searchSpec = new SearchSpec() {
         @Override
-        public SortBy getDefault() {
-            return sortByKey;
+        public SearchHelper getDefault() {
+            return searchHelperKey;
         }
 
         @Override
-        public SortBy getLastUpdate() {
-            return sortByUpdateTime;
+        public SearchHelper getLastUpdate() {
+            return searchHelperUpdateTime;
         }
     };
 
@@ -69,8 +76,8 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public SortType getSortType() {
-        return sortType;
+    public SearchSpec getSearchSpec() {
+        return searchSpec;
     }
 
     public void createTables(String tableName) {
@@ -200,7 +207,7 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<Record> search(Map<String, String> map, int offset, int limit, Optional<SortBy> sortBy) {
+    public List<Record> search(Map<String, String> map, int offset, int limit, Optional<SearchHelper> sortBy) {
         String sql = "";
         if (!map.isEmpty()) {
             List<String> where = map.keySet().stream()
@@ -214,7 +221,7 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<Record> search(String query, int offset, int limit, Optional<SortBy> sortBy) {
+    public List<Record> search(String query, int offset, int limit, Optional<SearchHelper> sortBy) {
         String sql = "";
         if (!dbInfo.keys.isEmpty()) {
             List<String> where = dbInfo.keys.stream()
@@ -226,8 +233,19 @@ public class PostgresqlStore implements Store {
         return executeSearch(sql, offset, limit, sortBy);
     }
 
-    private List<Record> executeSearch(String where, int offset, int limit, Optional<SortBy> sortBy) {
-        String sql = "SELECT * FROM " + dbInfo.tableName;
+    private List<Record> executeSearch(String where, int offset, int limit, Optional<SearchHelper> sortBy) {
+        String sql;
+        if(sortBy.isPresent() && sortBy.get().isHistoric()) {
+            sql = createQuery(where, offset, limit, sortBy, dbInfo.historyTableName);
+        } else {
+            sql = createQuery(where, offset, limit, sortBy, dbInfo.tableName);
+        }
+
+        return database.<List<Record>>select(sql).andThen(this::getRecords);
+    }
+
+    private String createQuery(String where, int offset, int limit, Optional<SearchHelper> sortBy, String tableName) {
+        String sql = "SELECT * FROM " + tableName;
 
         sql += where;
 
@@ -237,8 +255,9 @@ public class PostgresqlStore implements Store {
         sql += " LIMIT " + limit;
         sql += " OFFSET " + offset;
 
-        return database.<List<Record>>select(sql).andThen(this::getRecords);
+        return sql;
     }
+
 
     @Override
     public long count() {
