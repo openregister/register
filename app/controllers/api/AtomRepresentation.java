@@ -52,11 +52,10 @@ public class AtomRepresentation implements Representation {
     public Result toRecord(Register register, Record record, Map<String, String[]> requestParams, Map<String, String> representationsMap, List<RecordVersionInfo> history) {
         SyndFeed atomFeed = createSyndFeed(register);
 
-        atomFeed.setEntries(
-                new ArrayList<SyndEntry>(){{
-                    add(renderRecord(record, register));
-                }}
-        );
+        List<SyndEntry> entries = new ArrayList<SyndEntry>();
+        entries.add(renderRecord(record, register));
+
+        atomFeed.setEntries(entries);
         return ok(toOutput(atomFeed)).as(TEXT_ATOM);
     }
 
