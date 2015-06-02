@@ -235,12 +235,8 @@ public class PostgresqlStore implements Store {
 
     private List<Record> executeSearch(String where, int offset, int limit, Optional<SortBy> sortBy) {
         String sql;
-        if(sortBy.isPresent()) {
-            if (sortBy.get().isHistoric()) {
-                sql = createQuery(where, offset, limit, sortBy, dbInfo.historyTableName);
-            } else {
-                sql = createQuery(where, offset, limit, sortBy, dbInfo.tableName);
-            }
+        if(sortBy.isPresent() && sortBy.get().isHistoric()) {
+            sql = createQuery(where, offset, limit, sortBy, dbInfo.historyTableName);
         } else {
             sql = createQuery(where, offset, limit, sortBy, dbInfo.tableName);
         }
