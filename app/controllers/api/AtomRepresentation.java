@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.sun.syndication.feed.synd.*;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedOutput;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
@@ -20,6 +19,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,7 +50,14 @@ public class AtomRepresentation implements Representation {
 
     @Override
     public Result toRecord(Register register, Record record, Map<String, String[]> requestParams, Map<String, String> representationsMap, List<RecordVersionInfo> history) {
-        return ok("TODO").as(TEXT_ATOM);
+        SyndFeed atomFeed = createSyndFeed(register);
+
+        atomFeed.setEntries(
+                new ArrayList<SyndEntry>(){{
+                    add(renderRecord(record, register));
+                }}
+        );
+        return ok(toOutput(atomFeed)).as(TEXT_ATOM);
     }
 
     @Override
@@ -78,7 +86,8 @@ public class AtomRepresentation implements Representation {
         } catch (IOException|FeedException e) {
             e.printStackTrace();
         }
-        return "Problem occurred...";
+
+        return "";
     }
 
     private SyndEntry renderRecord(Record record, Register register) {
@@ -87,8 +96,8 @@ public class AtomRepresentation implements Representation {
         SyndEntry entry = new SyndEntryImpl();
 
         Map<String, String> keyValue = register.fields().stream()
-                .map(field -> new ImmutablePair<String, String>(field.getName(), renderValue(record, field)))
-                .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+                .map(field -> new HashMap.SimpleEntry<String, String>(field.getName(), renderValue(record, field)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         entry.setTitle(keyValue.get("name"));
         entry.setLink(hashUri.toString());
