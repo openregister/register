@@ -7,7 +7,8 @@ public class Representations {
         yaml(YamlRepresentation.instance),
         html(HtmlRepresentation.instance),
         tsv(CSVRepresentation.tsvInstance),
-        csv(CSVRepresentation.csvInstance);
+        csv(CSVRepresentation.csvInstance),
+        atom(AtomRepresentation.instance);
 
         public final Representation representation;
 

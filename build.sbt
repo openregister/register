@@ -16,6 +16,7 @@ initialize := {
 
 libraryDependencies ++= Seq(
   javaWs,
+  "rome" % "rome" % "1.0",
   "org.markdownj" % "markdownj-core" % "0.4",
   "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
   "org.mongodb" % "mongo-java-driver" % "3.0.0",
@@ -28,5 +29,5 @@ libraryDependencies ++= Seq(
   // Test only dependencies
   "com.novocode" % "junit-interface" % "0.11" % "test",
   "org.jsoup" % "jsoup" % "1.7.2" % "test",
-  "by.stub" % "stubby4j" % "3.1.3"  % "test"
+  "by.stub" % "stubby4j" % "3.1.3" % "test"
 )
