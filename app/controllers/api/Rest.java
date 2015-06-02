@@ -3,7 +3,6 @@ package controllers.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import controllers.BaseController;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import play.libs.F;
 import play.mvc.BodyParser;
@@ -28,7 +27,6 @@ import static java.util.stream.Collectors.toMap;
 public class Rest extends BaseController {
 
     private static final String REPRESENTATION_QUERY_PARAM = "_representation";
-    public static final int DEFAULT_RESULT_PAGE_SIZE = 30;
     private static final int ALL_ENTRIES_LIMIT = 1000;
 
     @BodyParser.Of(BodyParser.Json.class)
@@ -109,24 +107,24 @@ public class Rest extends BaseController {
         return findByQuery(
                 format,
                 pager,
-                store.getSortType().getDefault());
+                Optional.of(store.getSortType().getDefault()));
     }
 
     public F.Promise<Result> latest(String format, Pager pager) throws Exception {
         return findByQuery(
                 format,
                 pager,
-                store.getSortType().getLastUpdate());
+                Optional.of(store.getSortType().getLastUpdate()));
     }
 
     public F.Promise<Result> search(Pager pager) throws Exception {
         return findByQuery(
                 request.getQueryString(REPRESENTATION_QUERY_PARAM),
                 pager,
-                store.getSortType().getDefault());
+                Optional.empty());
     }
 
-    private F.Promise<Result> findByQuery(String format, Pager pager, SortType.SortBy sortBy) throws Exception {
+    private F.Promise<Result> findByQuery(String format, Pager pager, Optional<SortType.SortBy> sortBy) throws Exception {
         Representation representation = representationFrom(format);
 
         int effectiveOffset = representation.isPaginated() ? pager.page * pager.pageSize : 0;
