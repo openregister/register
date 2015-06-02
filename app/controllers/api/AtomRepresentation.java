@@ -14,9 +14,7 @@ import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.model.Field;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -40,7 +38,7 @@ public class AtomRepresentation implements Representation {
 
     @Override
     public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, String previousPageLink, String nextPageLink) {
-        String atomHeader = createAtomHeader(register);
+        String atomHeader = createAtomHeader(register, records);
         String entries = records.stream()
                 .map(r -> renderRecord(r, register))
                 .collect(Collectors.joining());
@@ -50,7 +48,7 @@ public class AtomRepresentation implements Representation {
 
     @Override
     public Result toRecord(Register register, Record record, Map<String, String[]> requestParams, Map<String, String> representationsMap, List<RecordVersionInfo> history) {
-        String atomHeader = createAtomHeader(register);
+        String atomHeader = createAtomHeader(register, Collections.singletonList(record));
         String entry = renderRecord(record, register);
         String atomFooter = createAtomFooter();
 
@@ -62,15 +60,29 @@ public class AtomRepresentation implements Representation {
         return false;
     }
 
-    private String createAtomHeader(Register register) {
+    private String createAtomHeader(Register register, List<Record> records) {
+        DateTime mostRecentlyUpdated = mostRecentlyUpdated(records);
+
         return "<feed " + FIELD_REGISTER_NAMESPACE + "\n" +
                 " " + DATATYPE_REGISTER_NAMESPACE + "\n" +
         " xmlns=\"http://www.w3.org/2005/Atom\">\n" +
                 " <title>" + "TODO" + "</title>\n" +
                 " <id>" + curieResolver.resolve(new Curie(register.name(), "latest.atom")) + "</id>\n" +
                 "<link rel=\"self\" href=\"" + curieResolver.resolve(new Curie(register.name(), "")) + "\" />\n" +
-                "<updated>" + DateTime.now().toString(RFC3339_DATETIME_FORMAT) + "</updated>\n" +
+                "<updated>" + mostRecentlyUpdated.toString(RFC3339_DATETIME_FORMAT) + "</updated>\n" +
                 "<author><name>openregister.org</name></author>\n";
+    }
+
+    private DateTime mostRecentlyUpdated(List<Record> records) {
+        Optional<Record> mostRecentlyUpdatedRecordO = records.stream()
+                .max((a, b) ->
+                        Long.valueOf(a.getMetadata().get().creationTime.getMillis() - b.getMetadata().get().creationTime.getMillis()).intValue());
+        if(mostRecentlyUpdatedRecordO.isPresent()){
+            return mostRecentlyUpdatedRecordO.get().getMetadata().get().creationTime;
+        }
+
+        // Every record should have a metadata with a creationtime - if not something bad has happened and we shouldnt carry on.
+        return null;
     }
 
     private String createAtomFooter() {
