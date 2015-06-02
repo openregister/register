@@ -16,6 +16,6 @@ public class RegisterInitTest extends ApplicationTests {
 
     @Test
     public void testFriendlyNameIsReadOnStartup() throws Exception {
-        assertThat(App.getRegister("test-register").friendlyName()).isEqualTo("Test-register");
+        assertThat(App.getRegister("test-register").friendlyName()).isEqualTo("Test register");
     }
 }

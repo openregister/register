@@ -10,7 +10,7 @@ import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseException;
-import uk.gov.openregister.store.SortType;
+import uk.gov.openregister.store.SearchSpec;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
@@ -107,14 +107,14 @@ public class Rest extends BaseController {
         return findByQuery(
                 format,
                 pager,
-                Optional.of(store.getSortType().getDefault()));
+                Optional.of(store.getSearchSpec().getDefault()));
     }
 
     public F.Promise<Result> latest(String format, Pager pager) throws Exception {
         return findByQuery(
                 format,
                 pager,
-                Optional.of(store.getSortType().getLastUpdate()));
+                Optional.of(store.getSearchSpec().getLastUpdate()));
     }
 
     public F.Promise<Result> search(Pager pager) throws Exception {
@@ -124,7 +124,7 @@ public class Rest extends BaseController {
                 Optional.empty());
     }
 
-    private F.Promise<Result> findByQuery(String format, Pager pager, Optional<SortType.SortBy> sortBy) throws Exception {
+    private F.Promise<Result> findByQuery(String format, Pager pager, Optional<SearchSpec.SearchHelper> sortBy) throws Exception {
         Representation representation = representationFrom(format);
 
         int effectiveOffset = representation.isPaginated() ? pager.page * pager.pageSize : 0;

@@ -71,7 +71,8 @@ public class ImportData extends BaseController {
     }
 
     private void importStream(String url, InputStream inputStream, WebSocket.Out<JsonNode> out) throws java.io.IOException {
-        char cs = url.endsWith(".tsv") ? '\t' : ',';
+        boolean isTsv = url.endsWith(".tsv");
+        char cs = isTsv ? '\t' : ',';
 
         notifyProgress("Downloading raw data", false, false, 0, out);
 
@@ -80,6 +81,9 @@ public class ImportData extends BaseController {
 
         CsvMapper mapper = new CsvMapper();
         CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(cs).withHeader();
+        if (isTsv) {
+            schema = schema.withoutQuoteChar();
+        }
         MappingIterator<JsonNode> it = mapper.reader(JsonNode.class)
                 .with(schema)
                 .readValues(br);

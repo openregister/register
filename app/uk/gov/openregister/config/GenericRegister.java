@@ -22,7 +22,7 @@ public class GenericRegister extends Register {
 
     public GenericRegister(String name) {
         this.name = name;
-        this.friendlyName = WordUtils.capitalize(name);
+        this.friendlyName = WordUtils.capitalize(name).replace('-',' ');
         this.fields = Collections.singletonList(new Field(name));
         initialise();
     }
