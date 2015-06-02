@@ -38,14 +38,21 @@ public class PostgresqlStore implements Store {
         public String sortBy() {
             return sqlTemplate.replace("%s", dbInfo.primaryKey);
         }
+
+        public boolean isHistoric() {
+            return false;
+        }
     };
 
     public final SortBy sortByUpdateTime = new SortBy() {
-
-        private final String sqlTemplate = "  ORDER BY metadata ->> 'creationTime' DESC ";
+        private final String sqlTemplate = "  ORDER BY entry ->> '%s' DESC, to_timestamp(metadata ->> 'creationTime', 'YYYY-MM-DD HH24:MI:SS.MSZ') DESC ";
 
         public String sortBy() {
-            return sqlTemplate;
+            return sqlTemplate.replace("%s", dbInfo.primaryKey);
+        }
+
+        public boolean isHistoric() {
+            return true;
         }
     };
     private SortType sortType = new SortType() {
@@ -227,7 +234,22 @@ public class PostgresqlStore implements Store {
     }
 
     private List<Record> executeSearch(String where, int offset, int limit, Optional<SortBy> sortBy) {
-        String sql = "SELECT * FROM " + dbInfo.tableName;
+        String sql;
+        if(sortBy.isPresent()) {
+            if (sortBy.get().isHistoric()) {
+                sql = createQuery(where, offset, limit, sortBy, dbInfo.historyTableName);
+            } else {
+                sql = createQuery(where, offset, limit, sortBy, dbInfo.tableName);
+            }
+        } else {
+            sql = createQuery(where, offset, limit, sortBy, dbInfo.tableName);
+        }
+
+        return database.<List<Record>>select(sql).andThen(this::getRecords);
+    }
+
+    private String createQuery(String where, int offset, int limit, Optional<SortBy> sortBy, String tableName) {
+        String sql = "SELECT * FROM " + tableName;
 
         sql += where;
 
@@ -237,8 +259,9 @@ public class PostgresqlStore implements Store {
         sql += " LIMIT " + limit;
         sql += " OFFSET " + offset;
 
-        return database.<List<Record>>select(sql).andThen(this::getRecords);
+        return sql;
     }
+
 
     @Override
     public long count() {
