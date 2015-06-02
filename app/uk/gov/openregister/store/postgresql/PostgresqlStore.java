@@ -79,7 +79,6 @@ public class PostgresqlStore implements Store {
     }
 
 
-
     @Override
     public void save(Record record) {
 
@@ -201,7 +200,7 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<Record> search(Map<String, String> map, int offset, int limit, SortBy sortBy) {
+    public List<Record> search(Map<String, String> map, int offset, int limit, Optional<SortBy> sortBy) {
         String sql = "";
         if (!map.isEmpty()) {
             List<String> where = map.keySet().stream()
@@ -215,7 +214,7 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<Record> search(String query, int offset, int limit, SortBy sortBy) {
+    public List<Record> search(String query, int offset, int limit, Optional<SortBy> sortBy) {
         String sql = "";
         if (!dbInfo.keys.isEmpty()) {
             List<String> where = dbInfo.keys.stream()
@@ -227,12 +226,14 @@ public class PostgresqlStore implements Store {
         return executeSearch(sql, offset, limit, sortBy);
     }
 
-    private List<Record> executeSearch(String where, int offset, int limit, SortBy sortBy) {
+    private List<Record> executeSearch(String where, int offset, int limit, Optional<SortBy> sortBy) {
         String sql = "SELECT * FROM " + dbInfo.tableName;
 
         sql += where;
 
-        sql += sortBy.sortBy();
+        if (sortBy.isPresent()) {
+            sql += sortBy.get().sortBy();
+        }
         sql += " LIMIT " + limit;
         sql += " OFFSET " + offset;
 
@@ -254,7 +255,7 @@ public class PostgresqlStore implements Store {
 
 
             try (PreparedStatement st1 = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, metadata) VALUES(?, ?, ?)");
-                    PreparedStatement st2 = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry,metadata) VALUES(?, ?, ?)")) {
+                 PreparedStatement st2 = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry,metadata) VALUES(?, ?, ?)")) {
 
                 for (Record record : records) {
                     String hash = record.getHash();
