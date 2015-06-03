@@ -253,11 +253,6 @@ h2 {
 .data-representations a {
   font-weight: normal;
   font-size: 1.0rem;
-  padding-left: 5px;
-}
-
-.data-representations a.no-padding-left {
-  padding-left: 0px;
 }
 
 .data-representations span {
