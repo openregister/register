@@ -25,7 +25,7 @@ public class AtomSanityTest extends ApplicationTests {
     public static final String EXPECTED_ATOM = "<feed xmlns:f=\"http://fields.openregister.org/field/\"\n" +
             " xmlns:dt=\"http://fields.openregister.org/datatype/\"\n" +
             " xmlns=\"http://www.w3.org/2005/Atom\">\n" +
-            " <title>TODO</title>\n" +
+            " <title>Test register register updates</title>\n" +
             " <id>http://localhost:8888/test-register/latest.atom</id>\n" +
             "<link rel=\"self\" href=\"http://localhost:8888/test-register/\" />\n" +
             "<updated>2015-06-02T17:14:09+01:00</updated>\n" +

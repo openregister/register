@@ -29,7 +29,7 @@ public class AtomRepresentation implements Representation {
             "xmlns:" + DATATYPE_REGISTER_NAMESPACE_PREFIX + "=\"http://fields.openregister.org/datatype/\"";
 
     public static final String TEXT_ATOM = "application/atom+xml; charset=utf-8";
-    public static final String RFC3339_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZ";
+    public static final String RFC3339_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.msZZ";
     private final CurieResolver curieResolver;
 
     public AtomRepresentation() {
@@ -66,7 +66,7 @@ public class AtomRepresentation implements Representation {
         return "<feed " + FIELD_REGISTER_NAMESPACE + "\n" +
                 " " + DATATYPE_REGISTER_NAMESPACE + "\n" +
         " xmlns=\"http://www.w3.org/2005/Atom\">\n" +
-                " <title>" + "TODO" + "</title>\n" +
+                " <title>" + register.friendlyName() + " register updates</title>\n" +
                 " <id>" + curieResolver.resolve(new Curie(register.name(), "latest.atom")) + "</id>\n" +
                 "<link rel=\"self\" href=\"" + curieResolver.resolve(new Curie(register.name(), "")) + "\" />\n" +
                 "<updated>" + mostRecentlyUpdated.toString(RFC3339_DATETIME_FORMAT) + "</updated>\n" +
