@@ -55,20 +55,9 @@
             </form>
 
             <ul class="side-nav">
-                <li class="data-representations">Download all entries as:
-                    <span style="display : inline-flex">
-                    @controllers.api.Representations.Format.values().filter(rep =>
-                        rep != controllers.api.Representations.Format.html).map(rep =>
-                        rep.name()).map { repname =>
-                            <a class="no-padding-left" download href=@controllers.api.routes.Rest.all(s".$repname", controllers.api.Pager.DEFAULT_PAGER)>@repname</a> &nbsp;
-                    }
-                    </span>
-                </li>
-            </ul>
-
-            <ul class="side-nav">
                 <li><a href="http://www.openregister.org/">About registers</a></li>
                 <li><a href="http://www.openregister.org/developer">Developer documentation</a></li>
+                <li><a href="/download">Download all entries</a></li>
             </ul>
 
 

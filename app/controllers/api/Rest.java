@@ -112,6 +112,16 @@ public class Rest extends BaseController {
                 Optional.of(store.getSearchSpec().getDefault()));
     }
 
+    public F.Promise<Result> bulkDownloadInfo() throws Exception {
+        return F.Promise.promise(() ->
+                ok(views.html.bulkDownloadInfo.render(register,"")));
+    }
+
+    public F.Promise<Result> bulkDownloadTorrent() throws Exception {
+        return F.Promise.promise(() ->
+                status(501, views.html.notImplemented.render(register)));
+    }
+
     public F.Promise<Result> latest(String format, Pager pager) throws Exception {
         return findByQuery(
                 format,
