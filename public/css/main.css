@@ -178,6 +178,24 @@ input.postfix {
 }
 
 
+.block-label {
+  display: block;
+  float: none;
+  clear: left;
+  position: relative;
+  background: #dee0e2;
+  border: 1px solid #dee0e2;
+  padding: 5px 0px 5px 20px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+span.field-label {
+  margin-left: 10px;
+  vertical-align: middle;
+
+}
+
 .nav h4 {
   font-size: 1.2rem;
 }
