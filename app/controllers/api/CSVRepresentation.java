@@ -1,6 +1,7 @@
 package controllers.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import controllers.html.Pagination;
 import play.mvc.Result;
 import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.config.Register;
@@ -30,7 +31,7 @@ public class CSVRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, String previousPageLink, String nextPageLink) {
+    public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, Pagination pagination) {
         return ok(header(register) + records.stream()
                         .map(r -> renderRecord(r, register))
                         .collect(Collectors.joining("\n"))

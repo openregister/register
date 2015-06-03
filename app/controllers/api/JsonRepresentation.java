@@ -1,5 +1,6 @@
 package controllers.api;
 
+import controllers.html.Pagination;
 import play.mvc.Result;
 import play.mvc.Results;
 import uk.gov.openregister.JsonObjectMapper;
@@ -37,8 +38,7 @@ public class JsonRepresentation implements Representation {
                                   List<Record> records,
                                   Map<String, String[]> requestParams,
                                   Map<String, String> representationsMap,
-                                  String previousPageLink,
-                                  String nextPageLink) {
+                                  Pagination pagination) {
         Results.Status ok = ok(asString(requestParams, records));
         return requestParams.get("_callback") != null ? ok.as(JSONP_CONTENT_TYPE) : ok.as(JSON_CONTENT_TYPE);
     }

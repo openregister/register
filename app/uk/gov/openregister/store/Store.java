@@ -26,7 +26,7 @@ public interface Store {
 
     Optional<Record> findByHash(String hash);
 
-    List<Record> search(Map<String, String> map, int offset, int limit, Optional<SearchHelper> Key);
+    List<Record> search(Map<String, String> map, int offset, int limit, Optional<SearchHelper> Key, boolean exact);
 
     List<Record> search(String query, int offset, int limit, Optional<SearchHelper> sortBy);
 

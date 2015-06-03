@@ -2,6 +2,7 @@ package controllers.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import controllers.html.Pagination;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.joda.time.DateTime;
 import play.mvc.Result;
@@ -37,7 +38,7 @@ public class AtomRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, String previousPageLink, String nextPageLink) {
+    public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, Pagination pagination) {
         String atomHeader = createAtomHeader(register, records);
         String entries = records.stream()
                 .map(r -> renderRecord(r, register))
@@ -76,9 +77,9 @@ public class AtomRepresentation implements Representation {
     private DateTime mostRecentlyUpdated(List<Record> records) {
         Optional<Record> mostRecentlyUpdatedRecordO = records.stream()
                 .max((a, b) ->
-                        Long.valueOf(a.getMetadata().get().creationTime.getMillis() - b.getMetadata().get().creationTime.getMillis()).intValue());
-        if(mostRecentlyUpdatedRecordO.isPresent()){
-            return mostRecentlyUpdatedRecordO.get().getMetadata().get().creationTime;
+                        Long.valueOf(a.getLastUpdated().getMillis() - b.getLastUpdated().getMillis()).intValue());
+        if(mostRecentlyUpdatedRecordO.isPresent()) {
+            return mostRecentlyUpdatedRecordO.get().getLastUpdated();
         }
 
         // Every record should have a metadata with a creationtime - if not something bad has happened and we shouldnt carry on.
@@ -151,9 +152,7 @@ public class AtomRepresentation implements Representation {
     }
 
     private String renderCreationTime(Record record) {
-        return record.getMetadata().isPresent()
-                ? record.getMetadata().get().creationTime.toString(RFC3339_DATETIME_FORMAT)
-                : null;
+        return record.getLastUpdated().toString(RFC3339_DATETIME_FORMAT);
     }
 
     public static Representation instance = new AtomRepresentation();

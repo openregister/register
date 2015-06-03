@@ -1,16 +1,19 @@
 package helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import uk.gov.openregister.domain.Metadata;
+import org.joda.time.DateTime;
 
 public class DataRow {
     public String hash;
     public JsonNode entry;
-    public Metadata metadata;
+    public DateTime lastUpdated;
+    public String previousHash;
 
-    public DataRow(String hash, JsonNode entry, Metadata metadata) {
+    public DataRow(String hash, JsonNode entry, DateTime lastUpdated, String previousHash) {
         this.hash = hash;
         this.entry = entry;
-        this.metadata = metadata;
+        this.lastUpdated = lastUpdated;
+        this.previousHash = previousHash;
     }
+
 }

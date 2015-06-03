@@ -47,16 +47,16 @@ public class PostgresqlStoreTest {
         assertThat(rows.size()).isEqualTo(1);
         assertThat(rows.get(0).hash).isEqualTo(expectedhash);
         assertEquals("{\"key2\":\"value2\",\"store_tests\":\"va'lue1\"}", rows.get(0).entry.toString());
-        assertNotNull(rows.get(0).metadata.creationTime);
-        assertEquals("", rows.get(0).metadata.previousEntryHash);
+        assertNotNull(rows.get(0).lastUpdated);
+        assertEquals(null, rows.get(0).previousHash);
 
         List<DataRow> historyRows = PostgresqlStoreForTesting.findAll(HISTORY_TABLE_NAME);
 
         assertThat(historyRows.size()).isEqualTo(1);
         assertThat(historyRows.get(0).hash).isEqualTo(expectedhash);
         assertEquals("{\"key2\":\"value2\",\"store_tests\":\"va'lue1\"}", rows.get(0).entry.toString());
-        assertNotNull(historyRows.get(0).metadata.creationTime);
-        assertEquals("", historyRows.get(0).metadata.previousEntryHash);
+        assertNotNull(historyRows.get(0).lastUpdated);
+        assertEquals(null, historyRows.get(0).previousHash);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class PostgresqlStoreTest {
         Record newRecord = new Record(json1.replaceAll("anotherValue", "newValue"));
         store.update(oldRecord.getHash(), newRecord);
 
-        String actualPreviousEntryHash = PostgresqlStoreForTesting.findAll(HISTORY_TABLE_NAME).stream().filter(row -> row.hash.equals(newRecord.getHash())).map(row -> row.metadata.previousEntryHash).findFirst().get();
+        String actualPreviousEntryHash = PostgresqlStoreForTesting.findAll(HISTORY_TABLE_NAME).stream().filter(row -> row.hash.equals(newRecord.getHash())).map(row -> row.previousHash).findFirst().get();
         assertEquals(oldRecord.getHash(), actualPreviousEntryHash);
     }
 
@@ -192,8 +192,8 @@ public class PostgresqlStoreTest {
 
         List<RecordVersionInfo> resultValues = store.previousVersions(retrievedRecord3.getHash());
 
-        RecordVersionInfo expectedVersion1 = new RecordVersionInfo(retrievedRecord1.getHash(), retrievedRecord1.getMetadata().get().creationTime);
-        RecordVersionInfo expectedVersion2 = new RecordVersionInfo(retrievedRecord2.getHash(), retrievedRecord2.getMetadata().get().creationTime);
+        RecordVersionInfo expectedVersion1 = new RecordVersionInfo(retrievedRecord1.getHash(), retrievedRecord1.getLastUpdated());
+        RecordVersionInfo expectedVersion2 = new RecordVersionInfo(retrievedRecord2.getHash(), retrievedRecord2.getLastUpdated());
         assertThat(resultValues).isEqualTo(Arrays.asList(expectedVersion2, expectedVersion1));
     }
 
@@ -208,7 +208,7 @@ public class PostgresqlStoreTest {
         HashMap<String, String> q = new HashMap<>();
 
         q.put("store_tests", "aV");
-        List<Record> records = store.search(q, 0, 100, Optional.of(store.getSearchSpec().getDefault()));
+        List<Record> records = store.search(q, 0, 100, Optional.of(store.getSearchSpec().getDefault()), false);
         assertThat(records.size()).isEqualTo(1);
         JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
         assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
@@ -225,7 +225,7 @@ public class PostgresqlStoreTest {
         HashMap<String, String> q = new HashMap<>();
 
         q.put("store_tests", "Val");
-        List<Record> records = store.search(q, 0, 100, Optional.of(store.getSearchSpec().getDefault()));
+        List<Record> records = store.search(q, 0, 100, Optional.of(store.getSearchSpec().getDefault()), false);
         assertThat(records.size()).isEqualTo(1);
         JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
         assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
@@ -242,7 +242,7 @@ public class PostgresqlStoreTest {
         HashMap<String, String> q = new HashMap<>();
 
         q.put("store_tests", "aval");
-        List<Record> records = store.search(q, 0, 100, Optional.of(store.getSearchSpec().getDefault()));
+        List<Record> records = store.search(q, 0, 100, Optional.of(store.getSearchSpec().getDefault()), false);
         assertThat(records.size()).isEqualTo(1);
         JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
         assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
@@ -260,7 +260,7 @@ public class PostgresqlStoreTest {
 
         q.put("store_tests", "aval");
         q.put("anotherKey", "anotherValue");
-        List<Record> records = store.search(q, 0, 100, Optional.of(store.getSearchSpec().getDefault()));
+        List<Record> records = store.search(q, 0, 100, Optional.of(store.getSearchSpec().getDefault()), false);
         assertThat(records.size()).isEqualTo(1);
         JSONAssert.assertEquals(json1,  records.get(0).getEntry().toString(), true);
         assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
@@ -276,7 +276,7 @@ public class PostgresqlStoreTest {
 
         HashMap<String, String> q = new HashMap<>();
 
-        List<Record> records = store.search(q, 0, 100, Optional.of(store.getSearchSpec().getDefault()));
+        List<Record> records = store.search(q, 0, 100, Optional.of(store.getSearchSpec().getDefault()), false);
         assertThat(records.size()).isEqualTo(2);
     }
 

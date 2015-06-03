@@ -1,4 +1,4 @@
-@(register: uk.gov.openregister.config.Register, records: List[uk.gov.openregister.domain.Record], representationsMap: Map[String, String], previousPage: String, nextPage: String)
+@(register: uk.gov.openregister.config.Register, records: List[uk.gov.openregister.domain.Record], representationsMap: Map[String, String], pagination: controllers.html.Pagination)
 
 @main(register.friendlyName + " register") {
 
@@ -43,9 +43,9 @@
         </div>
     </div>
 
-    <div class="row pagination">
-        <div class="small-11 large-12 columns">
-            @page_links(previousPage, nextPage)
+    <div class="row">
+        <div class="large-12 columns">
+            @page_links(pagination)
         </div>
     </div>
 

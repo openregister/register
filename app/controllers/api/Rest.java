@@ -2,6 +2,7 @@ package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import controllers.BaseController;
+import controllers.html.Pagination;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import play.libs.F;
@@ -15,6 +16,7 @@ import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -131,27 +133,33 @@ public class Rest extends BaseController {
         int effectiveLimit = representation.isPaginated() ? pager.pageSize : ALL_ENTRIES_LIMIT;
 
         List<Record> records;
-
+        int total;
         Map<String, String[]> queryParameters = request.queryString();
         if (queryParameters.containsKey("_query")) {
-            records = store.search(queryParameters.get("_query")[0], effectiveOffset, effectiveLimit, sortBy);
+            records = store.search(queryParameters.get("_query")[0], 0, ALL_ENTRIES_LIMIT, sortBy);
+            total = records.size();
         } else {
             Map<String, String> searchParamsMap = queryParameters.keySet().stream().filter(k -> !k.startsWith("_")).collect(Collectors.toMap(key -> key, key -> queryParameters.get(key)[0]));
 
-            records = store.search(searchParamsMap, effectiveOffset, effectiveLimit, sortBy);
+            records = store.search(searchParamsMap, 0, ALL_ENTRIES_LIMIT, sortBy, queryParameters.containsKey("_exact") && queryParameters.get("_exact")[0].equals("true"));
+            total = records.size();
         }
 
         URIBuilder uriBuilder = new URIBuilder(request.uri());
 
         String urlTemplate = new URIBuilder(uriBuilder.build()).setParameter(REPRESENTATION_QUERY_PARAM, "__FORMAT__").build().toString();
+        Pagination pagination = new Pagination(uriBuilder, pager.page, total, pager.pageSize);
 
-        return F.Promise.promise(() -> representation.toListOfRecords(
-                register, records,
-                queryParameters,
-                representationsMap(urlTemplate),
-                pager.page > 0 ? uriBuilder.setParameter(Pager.PAGE_PARAM, "" + (pager.page - 1)).build().toString() : null,
-                records.size() == pager.pageSize ? uriBuilder.setParameter(Pager.PAGE_PARAM, "" + (pager.page + 1)).build().toString() : null
-        ));
+        return F.Promise.promise(() -> {
+            if(pagination.pageDoesNotExist()) return HtmlRepresentation.instance.toResponse(404, "Page not found", register.friendlyName());
+            else return representation.toListOfRecords(
+                    register,
+                    records.subList(effectiveOffset, (effectiveOffset + effectiveLimit < total ? effectiveOffset + effectiveLimit : total)),
+                    queryParameters,
+                    representationsMap(urlTemplate),
+                    pagination
+            );
+        });
     }
 
     private Representation representationFrom(String format) {
