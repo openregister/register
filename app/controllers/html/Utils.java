@@ -52,17 +52,24 @@ public class Utils {
 
 
     public static Html checkbox(Field field, List<String> checkedElements, List<String> options) {
-        String html = String.format("<label for=\"%s\">%s</label>", field.getName(), field.getName());
+        String html = "<fieldset>";
+        html += "<legend class=\"form-label-bold\">Fields</legend>";
         for (String option : options) {
             String checked = (checkedElements == null) ? "" : (checkedElements.contains(option) ? "checked" : "");
-            html += String.format("<input type=\"checkbox\" name=\"%s\", value=\"%s\" %s>%s<br/>", field.getName(), option, checked, option);
+            html += String.format("<label class=\"block-label\" for=\"%s\">", option);
+            html += String.format("<input id=\"%s\" name=\"%s\" type=\"checkbox\" value=\"%s\">", option, field.getName(), option);
+            html += String.format("<span class=\"field-label\">%s</span></label>", option);
+
+
         }
+        html += "</fieldset>";
         return Html.apply(html);
     }
 
     public static Html inputText(String name, List<String> value, String error) {
-        String html = String.format("<label for=\"%s\">%s</label>", name, name);
-        html += String.format("<input type=\"text\" name=\"%s\", value=\"%s\">", name, (value == null || value.isEmpty()) ? "" : value.get(0));
+        String html = "";
+        html += String.format("<label for=\"%s\">%s</label>", name, name);
+        html += String.format("<input type=\"text\" id=\"%s\" name=\"%s\" value=\"%s\">", name, name, (value == null || value.isEmpty()) ? "" : value.get(0));
         if (!StringUtils.isEmpty(error)) {
             html += String.format("<label for=\"%s\">%s</label>", name + "_error", error);
         }
