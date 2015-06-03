@@ -57,7 +57,7 @@ public class Utils {
         for (String option : options) {
             String checked = (checkedElements == null) ? "" : (checkedElements.contains(option) ? "checked" : "");
             html += String.format("<label class=\"block-label\" for=\"%s\">", option);
-            html += String.format("<input id=\"%s\" name=\"%s\" type=\"checkbox\" value=\"%s\">", option, field.getName(), option);
+            html += String.format("<input id=\"%s\" name=\"%s\" type=\"checkbox\" value=\"%s\" %s>", option, field.getName(), option, checked);
             html += String.format("<span class=\"field-label\">%s</span></label>", option);
 
 
