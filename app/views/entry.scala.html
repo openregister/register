@@ -50,6 +50,7 @@
                 }
             }
 
+            <div class="section">
             @defining(org.joda.time.format.DateTimeFormat.forPattern("dd MMMM yyyy")) { dayFormat =>
             @defining(org.joda.time.format.DateTimeFormat.forPattern("dd MMMM yyyy HH:mm:ss z")) { timeFormat =>
             <h2>History</h2>
@@ -88,9 +89,9 @@
             }
             }
             }
+            </div>
         </div>
     </div>
 </div>
-@license()
 
 }
