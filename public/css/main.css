@@ -337,6 +337,60 @@ dl dd {
   margin-bottom: 30px;
 }
 
+a.tooltips {
+  position: relative;
+  display: inline;
+}
+a.tooltips span.tooltips-text {
+  position: absolute;
+  width:140px;
+  color: #FFFFFF;
+  top: 100%;
+  left: 50%;
+  bottom: 40px;
+  margin-left: -65px;
+  background: #000000;
+  font-size: 0.8rem;
+  height: 70px;
+  line-height: 1.1rem;
+  text-align: center;
+  visibility: hidden;
+  border-radius: 2px;
+  padding: 10px;
+  z-index: 999;
+}
+
+
+/*a.tooltips span:after {
+  content: '';
+  position: absolute;
+  border-top: 8px solid #000000;
+  border-right: 8px solid transparent;
+  border-left: 8px solid transparent;
+}*/
+
+a:hover.tooltips span.tooltips-text {
+  visibility: visible;
+  opacity: 0.8;
+  z-index: 999;
+} 
+
+span.tooltips-icon {
+  background: #f9f9f9;
+  border-radius: 0.8em;
+  border: solid 1px #ddd;
+  -moz-border-radius: 0.8em;
+  -webkit-border-radius: 0.8em;
+  color: #2372b5;
+  display: inline-block;
+  font-weight: bold;
+  line-height: 1.6em;
+  margin-right: 5px;
+  margin-left: 5px;
+  text-align: center;
+  width: 1.6em; 
+}
+
 .search {
   padding-bottom: 10px;
   visibility: hidden;
