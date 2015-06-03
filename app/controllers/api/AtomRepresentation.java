@@ -2,6 +2,7 @@ package controllers.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import controllers.html.Pagination;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.joda.time.DateTime;
 import play.mvc.Result;
@@ -37,7 +38,7 @@ public class AtomRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, String previousPageLink, String nextPageLink) {
+    public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, Pagination pagination) {
         String atomHeader = createAtomHeader(register, records);
         String entries = records.stream()
                 .map(r -> renderRecord(r, register))
