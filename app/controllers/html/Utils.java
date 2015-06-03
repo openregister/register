@@ -46,8 +46,12 @@ public class Utils {
     }
 
     public static Html toRegisterLink(String registerName) {
+        return toRegisterLink(registerName, registerName);
+    }
+
+    public static Html toRegisterLink(String registerName, String displayText) {
         String registerUri = ApplicationConf.getRegisterServiceTemplateUrl().replace("__REGISTER__", registerName);
-        return Html.apply("<a class=\"link_to_register\" href=\"" + registerUri + "\">" + registerName + "</a>");
+        return Html.apply("<a class=\"link_to_register\" href=\"" + registerUri + "\">" + displayText + "</a>");
     }
 
 

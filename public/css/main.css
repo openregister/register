@@ -214,6 +214,15 @@ h2 {
   font-size: 1rem;
 }
 
+.visit-the-register {
+  font-family: helvetica;
+  border: none;
+  border-radius: 0;
+  border-width: 1px;
+  margin-bottom: 1.25rem;
+  margin-left: 0px;
+}
+
 /* entries in registers*/
 .entry {
   background: #eceded;

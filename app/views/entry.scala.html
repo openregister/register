@@ -39,12 +39,16 @@
 <div class="row">
     <div class="small-12 large-12 columns">
         <div class="history">
-            <!-- Little hack to show registers using a field, on field register only-->
-            @{register match {
-            case fr: uk.gov.openregister.config.FieldRegister =>
-            fieldUsage(fr.getRegisterNamesFor(record.getEntry.get("field").textValue))
-            case _ => {}
-            }}
+            <!-- Little hack to show registers using a field, on field register and visit register link on register register-->
+            @{
+                register match {
+                    case fr: uk.gov.openregister.config.FieldRegister =>
+                            fieldUsage(fr.getRegisterNamesFor(record.getEntry.get("field").textValue))
+                    case fr: uk.gov.openregister.config.RegisterRegister =>
+                            visitTheRegister(record.getEntry.get("register").textValue)
+                    case _ => {}
+                }
+            }
 
             @defining(org.joda.time.format.DateTimeFormat.forPattern("dd MMMM yyyy")) { dayFormat =>
             @defining(org.joda.time.format.DateTimeFormat.forPattern("dd MMMM yyyy HH:mm:ss z")) { timeFormat =>
