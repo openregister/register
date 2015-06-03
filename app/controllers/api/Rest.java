@@ -112,6 +112,16 @@ public class Rest extends BaseController {
                 Optional.of(store.getSearchSpec().getDefault()));
     }
 
+    public F.Promise<Result> bulkDownloadInfo() throws Exception {
+        return F.Promise.promise(() ->
+                ok(views.html.bulkDownloadInfo.render(register, "", representationsMap(routes.Rest.all(".__FORMAT__", controllers.api.Pager.DEFAULT_PAGER).url()))));
+    }
+
+    public F.Promise<Result> bulkDownloadTorrent() throws Exception {
+        return F.Promise.promise(() ->
+                status(501, views.html.notImplemented.render(register)));
+    }
+
     public F.Promise<Result> latest(String format, Pager pager) throws Exception {
         return findByQuery(
                 format,
@@ -151,7 +161,8 @@ public class Rest extends BaseController {
         Pagination pagination = new Pagination(uriBuilder, pager.page, total, pager.pageSize);
 
         return F.Promise.promise(() -> {
-            if(pagination.pageDoesNotExist()) return HtmlRepresentation.instance.toResponse(404, "Page not found", register.friendlyName());
+            if (pagination.pageDoesNotExist())
+                return HtmlRepresentation.instance.toResponse(404, "Page not found", register.friendlyName());
             else return representation.toListOfRecords(
                     register,
                     records.subList(effectiveOffset, (effectiveOffset + effectiveLimit < total ? effectiveOffset + effectiveLimit : total)),

@@ -1,0 +1,25 @@
+@(register: uk.gov.openregister.config.Register)
+
+@main(register.friendlyName + " register") {
+
+    @header(register.friendlyName)
+
+
+    <div class="row">
+        <div class="small-12 large-8 columns">
+            <main>
+                <h1>This page has not been implemented</h1>
+                <p>We haven't prioritised this work yet.  If you are interested in this feature, please let us know so we can adjust our priorities.</p>
+            </main>
+            @if(register.copyright()) {
+                <div class="copyright">
+                    <p class="label-text">Copyright:</p>
+                    <div class="copyright-details">@Html(register.copyright())</div>
+
+                </div>
+            }
+
+        </div>
+    </div>
+
+}
