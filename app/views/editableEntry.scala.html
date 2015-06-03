@@ -20,22 +20,23 @@
 		<fieldset>
         	<legend class="form-label-bold">Register</legend>
 
-	    @register.fields.map{ aField =>
-	        @{
-	            if(!aField.getName().equals("fields"))
-	                controllers.html.Utils.inputText(aField.getName, requestParam.get(aField.getName), errors.get(aField.getName));
-
-	        }
+	    @register.fields.filter(_.getName() != "fields").map{ aField =>
+				@controllers.html.Utils.inputText(aField.getName, requestParam.get(aField.getName), errors.get(aField.getName))
 	    }
 		</fieldset>
 
-	    @register.fields.map{ aField =>
-	        @{
-	            if(register.name.equals("register") && aField.getName().equals("fields"))
-	                controllers.html.Utils.checkbox(aField, requestParam.get(aField.getName), aField.getAllowedValues.get);
+		@defining({
+			register.fields.filter(_.getName() == "fields" && register.name == "register").headOption
+		})( _ match {
+				case Some(fieldsField) => controllers.html.Utils.checkbox(
+													fieldsField,
+													requestParam.get(fieldsField.getName),
+													fieldsField.getAllowedValues.get.filter(!register.fields.map(_.getName).contains(_))
+											)
+				case None => ""
+			}
+		)
 
-	        }
-	    }
 
 
 	    <input type="submit" name="submit" value="@submitButtonValue" class="button"/>
