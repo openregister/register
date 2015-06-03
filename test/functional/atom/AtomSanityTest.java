@@ -1,5 +1,6 @@
-package functional;
+package functional.atom;
 
+import functional.ApplicationTests;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
