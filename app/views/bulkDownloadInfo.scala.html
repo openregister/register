@@ -1,0 +1,37 @@
+@(register: uk.gov.openregister.config.Register, lastUpdated: String)
+
+@main(register.friendlyName + " register") {
+
+    @header(register.friendlyName)
+
+
+    <div class="row">
+        <div class="small-12 large-8 columns">
+            <main>
+                <h1>Bulk download</h1>
+                <p>Download the current contents of this register as: <span style="display : inline-flex">
+                    @controllers.api.Representations.Format.values().filter(rep =>
+                        rep != controllers.api.Representations.Format.html).map(rep =>
+                        rep.name()).map { repname =>
+                            <a class="no-padding-left" download href=@controllers.api.routes.Rest.all(s".$repname", controllers.api.Pager.DEFAULT_PAGER)>@repname</a> &nbsp;
+                    }
+                    </span></p>
+                <p><a href="/download.torrent">Download the whole history of this register</a> as a CSV by bittorrent.</p>
+                <p>Once you have downloaded your copy of the register, you can keep your local copy up to date with the <a href="/latest">latest changes.</a></p>
+            </main>
+            @if(register.copyright()) {
+                <div class="copyright">
+                    <p class="label-text">Copyright:</p>
+                    <div class="copyright-details">@Html(register.copyright())</div>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+    @license()
+
+
+}
