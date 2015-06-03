@@ -5,39 +5,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
 import controllers.api.HtmlRepresentation;
 import org.joda.time.DateTime;
-import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
 import play.mvc.BodyParser;
 import play.mvc.Result;
 import uk.gov.openregister.JsonObjectMapper;
-import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.domain.Record;
-import uk.gov.openregister.linking.Curie;
-import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.store.DatabaseConflictException;
 import uk.gov.openregister.store.DatabaseException;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class UI extends BaseController {
 
     public Result index() {
         long count = store.count();
-        String lastUpdatedUI = "";
-        try {
-            CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
-            String rrUrl = curieResolver.resolve(new Curie("register", register.name())) + "?_representation=json";
-
-            final WSResponse wsResponse = WS.client().url(rrUrl).execute().get(30000L);
-            final String lastUpdatedStr = wsResponse.asJson().get("last-updated").textValue();
-            final DateTime lastUpdated = DateTime.parse(lastUpdatedStr);
-            lastUpdatedUI = lastUpdated.toString("dd MMM yyyy");
-        } catch (Exception e) {
-            //ignore
-        }
+        Optional<DateTime> lastUpdated = store.search("", 0, 1, Optional.empty())
+                .stream().findFirst().map(Record::getLastUpdated);
+        String lastUpdatedUI = lastUpdated
+                .map(datetime -> datetime.toString("dd MMM yyyy"))
+                .orElse("");
 
         return ok(views.html.index.render(register, count, lastUpdatedUI));
     }
