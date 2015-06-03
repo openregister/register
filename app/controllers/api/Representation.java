@@ -1,5 +1,6 @@
 package controllers.api;
 
+import controllers.html.Pagination;
 import play.mvc.Result;
 import uk.gov.openregister.config.Register;
 import uk.gov.openregister.domain.Record;
@@ -13,8 +14,7 @@ public interface Representation {
                            List<Record> records,
                            Map<String, String[]> requestParams,
                            Map<String, String> representationsMap,
-                           String previousPageLink,
-                           String nextPageLink
+                           Pagination pagination
     );
 
     Result toRecord(Register register,

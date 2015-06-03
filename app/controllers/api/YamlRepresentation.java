@@ -3,6 +3,7 @@ package controllers.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import controllers.html.Pagination;
 import play.mvc.Result;
 import uk.gov.openregister.JsonObjectMapper;
 import uk.gov.openregister.config.Register;
@@ -24,8 +25,7 @@ public class YamlRepresentation implements Representation {
                                   List<Record> records,
                                   Map<String, String[]> requestParams,
                                   Map<String, String> representationsMap,
-                                  String previousPageLink,
-                                  String nextPageLink) {
+                                  Pagination pagination) {
         return ok(asString(records)).as(CONTENT_TYPE);
     }
 

@@ -1,5 +1,6 @@
 package controllers.api;
 
+import controllers.html.Pagination;
 import play.mvc.Result;
 import uk.gov.openregister.config.Register;
 import uk.gov.openregister.domain.Record;
@@ -31,9 +32,8 @@ public class HtmlRepresentation implements Representation {
                                   List<Record> records,
                                   Map<String, String[]> requestParams,
                                   Map<String, String> representationsMap,
-                                  String previousPageLink,
-                                  String nextPageLink) {
-        return ok(views.html.entries.render(register, records, representationsMap, previousPageLink, nextPageLink));
+                                  Pagination pagination) {
+        return ok(views.html.entries.render(register, records, representationsMap, pagination));
     }
 
     @Override
