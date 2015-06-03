@@ -141,7 +141,7 @@ public class Rest extends BaseController {
         } else {
             Map<String, String> searchParamsMap = queryParameters.keySet().stream().filter(k -> !k.startsWith("_")).collect(Collectors.toMap(key -> key, key -> queryParameters.get(key)[0]));
 
-            records = store.search(searchParamsMap, 0, ALL_ENTRIES_LIMIT, sortBy);
+            records = store.search(searchParamsMap, 0, ALL_ENTRIES_LIMIT, sortBy, queryParameters.containsKey("_exact") && queryParameters.get("_exact")[0].equals("true"));
             total = records.size();
         }
 

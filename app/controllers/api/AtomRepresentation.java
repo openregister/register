@@ -77,9 +77,9 @@ public class AtomRepresentation implements Representation {
     private DateTime mostRecentlyUpdated(List<Record> records) {
         Optional<Record> mostRecentlyUpdatedRecordO = records.stream()
                 .max((a, b) ->
-                        Long.valueOf(a.getMetadata().get().creationTime.getMillis() - b.getMetadata().get().creationTime.getMillis()).intValue());
-        if(mostRecentlyUpdatedRecordO.isPresent()){
-            return mostRecentlyUpdatedRecordO.get().getMetadata().get().creationTime;
+                        Long.valueOf(a.getLastUpdated().getMillis() - b.getLastUpdated().getMillis()).intValue());
+        if(mostRecentlyUpdatedRecordO.isPresent()) {
+            return mostRecentlyUpdatedRecordO.get().getLastUpdated();
         }
 
         // Every record should have a metadata with a creationtime - if not something bad has happened and we shouldnt carry on.
@@ -152,9 +152,7 @@ public class AtomRepresentation implements Representation {
     }
 
     private String renderCreationTime(Record record) {
-        return record.getMetadata().isPresent()
-                ? record.getMetadata().get().creationTime.toString(RFC3339_DATETIME_FORMAT)
-                : null;
+        return record.getLastUpdated().toString(RFC3339_DATETIME_FORMAT);
     }
 
     public static Representation instance = new AtomRepresentation();

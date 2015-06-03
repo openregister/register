@@ -57,8 +57,8 @@ public class RdfSanityTest extends ApplicationTests {
 
     @Test
     public void testSearchAndRenderListOfResults() throws Exception {
-        postJson("/create", "{\"test-register\":\"testregisterkey1\",\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
         postJson("/create", "{\"test-register\":\"testregisterkey2\",\"name\":\"The Entry2\",\"key1\": \"value2\",\"key2\": [\"C\",\"D\"]}");
+        postJson("/create", "{\"test-register\":\"testregisterkey1\",\"name\":\"The Entry1\",\"key1\": \"value1\",\"key2\": [\"A\",\"B\"]}");
 
         WSResponse response = get("/search?_query=&_representation=ttl");
         assertThat(response.getStatus()).isEqualTo(OK);

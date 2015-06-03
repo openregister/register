@@ -1,24 +1,25 @@
 package uk.gov.openregister.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import play.libs.Json;
 import uk.gov.openregister.JsonObjectMapper;
 import uk.gov.openregister.crypto.Digest;
 
 import java.util.Map;
-import java.util.Optional;
 
 public class Record {
     public Record(JsonNode json) {
-        this(json, Optional.empty());
+        this(json, DateTime.now(DateTimeZone.UTC));
     }
 
-    public Record(JsonNode json, Optional<Metadata> metadata) {
+    public Record(JsonNode json, DateTime lastUpdated) {
         this.entry = json;
         this.hash = Digest.shasum(normalisedEntry());
-        this.metadata = metadata;
+        this.lastUpdated = lastUpdated;
     }
 
     public Record(String jsonString) {
@@ -27,13 +28,22 @@ public class Record {
 
     private String hash;
     private JsonNode entry;
+    @JsonProperty("last-updated")
+    private DateTime lastUpdated;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String previousEntryHash;
 
-    public Optional<Metadata> getMetadata() {
-        return metadata;
+    public String getPreviousEntryHash() {
+        return previousEntryHash;
     }
 
-    @JsonIgnore
-    private Optional<Metadata> metadata;
+    public void setPreviousEntryHash(String previousEntryHash) {
+        this.previousEntryHash = previousEntryHash;
+    }
+
+    public DateTime getLastUpdated() {
+        return lastUpdated;
+    }
 
     public String getHash() {
         return hash;
@@ -42,11 +52,6 @@ public class Record {
     @SuppressWarnings("unused")
     public JsonNode getEntry() {
         return entry;
-    }
-
-    @JsonProperty("last-updated")
-    public String getLastUpdated() {
-        return metadata.map(m -> m.creationTime.toString()).orElse("");
     }
 
     public String normalisedEntry() {

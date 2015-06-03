@@ -20,6 +20,7 @@ libraryDependencies ++= Seq(
   "org.markdownj" % "markdownj-core" % "0.4",
   "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
   "org.mongodb" % "mongo-java-driver" % "3.0.0",
+  "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.5.2",
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-csv" % "2.5.2",
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.5.2",
   "org.apache.httpcomponents" % "httpclient" % "4.3.1",

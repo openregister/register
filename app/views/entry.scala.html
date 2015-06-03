@@ -60,7 +60,7 @@
             <h3>This version:</h3>
 
             <p><a href="/hash/@{record.getHash}">@{record.getHash}</a>
-                @{timeFormat.print(record.getMetadata.get.creationTime)}</p>
+                @{timeFormat.print(record.getLastUpdated)}</p>
             @if(!history.isEmpty) {
             <h3>Previous versions:</h3>
             <table id="history" class="responsive">
