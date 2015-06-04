@@ -1,10 +1,10 @@
 @(registerNames: List[String])
 
 @if(!registerNames.isEmpty()){
-<div id="field-usage">
+<div id="field-usage" class="section">
     <h2>This field appears in the following registers: </h2>
 
-    <div class="panel entry">
+    <div>
         <ul>
             @registerNames.map{ registerName =>
             <li>@controllers.html.Utils.toRegisterLink(registerName)</li>
