@@ -16,7 +16,6 @@ import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
 import java.net.URLDecoder;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -109,7 +108,8 @@ public class Rest extends BaseController {
         return findByQuery(
                 format,
                 pager,
-                Optional.of(store.getSearchSpec().getDefault()));
+                Optional.of(store.getSearchSpec().getDefault()),
+                routes.Rest.all(".__FORMAT__", pager).url());
     }
 
     public F.Promise<Result> bulkDownloadInfo() throws Exception {
@@ -126,17 +126,19 @@ public class Rest extends BaseController {
         return findByQuery(
                 format,
                 pager,
-                Optional.of(store.getSearchSpec().getLastUpdate()));
+                Optional.of(store.getSearchSpec().getLastUpdate()),
+                routes.Rest.latest(".__FORMAT__", pager).url());
     }
 
     public F.Promise<Result> search(Pager pager) throws Exception {
         return findByQuery(
                 request.getQueryString(REPRESENTATION_QUERY_PARAM),
                 pager,
-                Optional.empty());
+                Optional.empty(),
+                new URIBuilder(request.uri()).setParameter(REPRESENTATION_QUERY_PARAM, "__FORMAT__").build().toString());
     }
 
-    private F.Promise<Result> findByQuery(String format, Pager pager, Optional<SearchSpec.SearchHelper> sortBy) throws Exception {
+    private F.Promise<Result> findByQuery(String format, Pager pager, Optional<SearchSpec.SearchHelper> sortBy, String representationUrlTemplate) throws Exception {
         Representation representation = representationFrom(format);
 
         int effectiveOffset = representation.isPaginated() ? pager.page * pager.pageSize : 0;
@@ -157,7 +159,6 @@ public class Rest extends BaseController {
 
         URIBuilder uriBuilder = new URIBuilder(request.uri());
 
-        String urlTemplate = new URIBuilder(uriBuilder.build()).setParameter(REPRESENTATION_QUERY_PARAM, "__FORMAT__").build().toString();
         Pagination pagination = new Pagination(uriBuilder, pager.page, total, pager.pageSize);
 
         return F.Promise.promise(() -> {
@@ -167,7 +168,7 @@ public class Rest extends BaseController {
                     register,
                     records.subList(effectiveOffset, (effectiveOffset + effectiveLimit < total ? effectiveOffset + effectiveLimit : total)),
                     queryParameters,
-                    representationsMap(urlTemplate),
+                    representationsMap(representationUrlTemplate),
                     pagination
             );
         });
