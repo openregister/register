@@ -20,10 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toMap;
 
 public class Rest extends BaseController {
 
@@ -40,13 +38,13 @@ public class Rest extends BaseController {
             try {
                 store.save(r);
             } catch (DatabaseException e) {
-                return HtmlRepresentation.instance.toResponse(400, e.getMessage(), register.friendlyName());
+                return new HtmlRepresentation(register).toResponse(400, e.getMessage());
             }
 
-            return JsonRepresentation.instance.createdResponse();
+            return new JsonRepresentation(register).createdResponse();
         }
 
-        return HtmlRepresentation.instance.toResponseWithErrors(400, validationErrors, register.friendlyName());
+        return new HtmlRepresentation(register).toResponseWithErrors(400, validationErrors);
 
     }
 
@@ -59,12 +57,12 @@ public class Rest extends BaseController {
             try {
                 store.update(hash, r);
             } catch (DatabaseException e) {
-                return HtmlRepresentation.instance.toResponse(400, e.getMessage(), register.friendlyName());
+                return new HtmlRepresentation(register).toResponse(400, e.getMessage());
             }
-            return JsonRepresentation.instance.createdResponse();
+            return new JsonRepresentation(register).createdResponse();
         }
 
-        return HtmlRepresentation.instance.toResponseWithErrors(400, validationErrors, register.friendlyName());
+        return new HtmlRepresentation(register).toResponseWithErrors(400, validationErrors);
     }
 
     public F.Promise<Result> findByKey(String key, String value, String format) {
@@ -73,14 +71,11 @@ public class Rest extends BaseController {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByKV(key, URLDecoder.decode(value, "utf-8")));
         return recordF.map(optionalRecord ->
                         optionalRecord.map(record -> representationFrom(format).toRecord(
-                                        register,
                                         record,
-                                        request.queryString(),
-                                        //todo: . with format is required at this moment because the controller methods receives format starts with '.'
-                                        representationsMap(routes.Rest.findByKey(key, value, ".__FORMAT__").url()),
+                                        request,
                                         getHistoryFor(record)
                                 )
-                        ).orElse(HtmlRepresentation.instance.toResponse(404, "Entry not found", register.friendlyName())
+                        ).orElse(new HtmlRepresentation(register).toResponse(404, "Entry not found")
                         )
         );
     }
@@ -91,15 +86,12 @@ public class Rest extends BaseController {
         F.Promise<Optional<Record>> recordF = F.Promise.promise(() -> store.findByHash(hash));
         return recordF.map(optionalRecord ->
                         optionalRecord.map(record -> representationFrom(format).toRecord(
-                                        register,
                                         record,
-                                        request.queryString(),
-                                        //todo: . with format is required at this moment because the controller methods receives format starts with '.'
-                                        representationsMap(routes.Rest.findByHash(hash, ".__FORMAT__").url()),
+                                        request,
                                         getHistoryFor(record)
                                 )
                         ).orElse(
-                                HtmlRepresentation.instance.toResponse(404, "Entry not found", register.friendlyName())
+                                new HtmlRepresentation(register).toResponse(404, "Entry not found")
                         )
         );
     }
@@ -108,13 +100,13 @@ public class Rest extends BaseController {
         return findByQuery(
                 format,
                 pager,
-                Optional.of(store.getSearchSpec().getDefault()),
-                routes.Rest.all(".__FORMAT__", pager).url());
+                Optional.of(store.getSearchSpec().getDefault())
+        );
     }
 
     public F.Promise<Result> bulkDownloadInfo() throws Exception {
         return F.Promise.promise(() ->
-                ok(views.html.bulkDownloadInfo.render(register, "", representationsMap(routes.Rest.all(".__FORMAT__", controllers.api.Pager.DEFAULT_PAGER).url()))));
+                ok(views.html.bulkDownloadInfo.render(register, "", request)));
     }
 
     public F.Promise<Result> bulkDownloadTorrent() throws Exception {
@@ -126,19 +118,19 @@ public class Rest extends BaseController {
         return findByQuery(
                 format,
                 pager,
-                Optional.of(store.getSearchSpec().getLastUpdate()),
-                routes.Rest.latest(".__FORMAT__", pager).url());
+                Optional.of(store.getSearchSpec().getLastUpdate())
+        );
     }
 
     public F.Promise<Result> search(Pager pager) throws Exception {
         return findByQuery(
                 request.getQueryString(REPRESENTATION_QUERY_PARAM),
                 pager,
-                Optional.empty(),
-                new URIBuilder(request.uri()).setParameter(REPRESENTATION_QUERY_PARAM, "__FORMAT__").build().toString());
+                Optional.empty()
+        );
     }
 
-    private F.Promise<Result> findByQuery(String format, Pager pager, Optional<SearchSpec.SearchHelper> sortBy, String representationUrlTemplate) throws Exception {
+    private F.Promise<Result> findByQuery(String format, Pager pager, Optional<SearchSpec.SearchHelper> sortBy) throws Exception {
         Representation representation = representationFrom(format);
 
         int effectiveOffset = representation.isPaginated() ? pager.page * pager.pageSize : 0;
@@ -163,12 +155,10 @@ public class Rest extends BaseController {
 
         return F.Promise.promise(() -> {
             if (pagination.pageDoesNotExist())
-                return HtmlRepresentation.instance.toResponse(404, "Page not found", register.friendlyName());
+                return new HtmlRepresentation(register).toResponse(404, "Page not found");
             else return representation.toListOfRecords(
-                    register,
                     records.subList(effectiveOffset, (effectiveOffset + effectiveLimit < total ? effectiveOffset + effectiveLimit : total)),
-                    queryParameters,
-                    representationsMap(representationUrlTemplate),
+                    request,
                     pagination
             );
         });
@@ -178,21 +168,16 @@ public class Rest extends BaseController {
         if (StringUtils.isEmpty(format)) {
             String representationQueryValue = request.getQueryString(REPRESENTATION_QUERY_PARAM);
             if (representationQueryValue == null) {
-                return Representations.Format.html.representation;
+                return Representations.Format.html.createRepresentation(register);
             } else {
-                return Representations.representationFor(representationQueryValue);
+                return Representations.representationFor(register, representationQueryValue);
             }
         } else {
-            return Representations.representationFor(format.replaceAll("\\.(.*)", "$1"));
+            return Representations.representationFor(register, format.replaceAll("\\.(.*)", "$1"));
         }
     }
 
     private List<RecordVersionInfo> getHistoryFor(Record r) {
         return store.previousVersions(r.getHash());
-    }
-
-    @SuppressWarnings("Convert2MethodRef")
-    private Map<String, String> representationsMap(String urlTemplate) {
-        return Stream.of(Representations.Format.values()).collect(toMap(fmt -> fmt.name(), fmt -> urlTemplate.replace("__FORMAT__", fmt.name())));
     }
 }

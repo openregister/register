@@ -2,6 +2,7 @@ package controllers.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.html.Pagination;
+import play.mvc.Http;
 import play.mvc.Result;
 import uk.gov.openregister.StreamUtils;
 import uk.gov.openregister.config.Register;
@@ -11,29 +12,34 @@ import uk.gov.openregister.model.Cardinality;
 import uk.gov.openregister.model.Field;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static play.mvc.Results.ok;
 
 public class CSVRepresentation implements Representation {
-
-    public static CSVRepresentation csvInstance = new CSVRepresentation(",", "text/csv; charset=utf-8");
-    public static CSVRepresentation tsvInstance = new CSVRepresentation("\t", "text/tab-separated-values; charset=utf-8");
-
+    private final Register register;
     private String separator;
     private String mediaType;
 
-    public CSVRepresentation(String separator, String mediaType) {
+    private CSVRepresentation(Register register, String separator, String mediaType) {
+        this.register = register;
         this.separator = separator;
         this.mediaType = mediaType;
     }
 
+    public static CSVRepresentation csvInstance(Register register) {
+        return new CSVRepresentation(register, ",", "text/csv; charset=utf-8");
+    }
+
+    public static CSVRepresentation tsvInstance(Register register) {
+        return new CSVRepresentation(register, "\t", "text/tab-separated-values; charset=utf-8");
+    }
+
     @Override
-    public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, Pagination pagination) {
+    public Result toListOfRecords(List<Record> records, Http.Request request, Pagination pagination) {
         return ok(header(register) + records.stream()
-                        .map(r -> renderRecord(r, register))
+                        .map(this::renderRecord)
                         .collect(Collectors.joining("\n"))
         ).as(mediaType);
     }
@@ -43,20 +49,16 @@ public class CSVRepresentation implements Representation {
     }
 
     @Override
-    public Result toRecord(Register register, Record record, Map<String, String[]> requestParams, Map<String, String> representationsMap, List<RecordVersionInfo> history) {
-        return ok(header(register) + renderRecord(record, register)).as(mediaType);
+    public Result toRecord(Record record, Http.Request request, List<RecordVersionInfo> history) {
+        return ok(header(register) + renderRecord(record)).as(mediaType);
     }
 
-    private String renderRecord(Record r, Register register) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(r.getHash());
-        sb.append(separator);
-        sb.append(register.fields().stream()
-                .map(field -> renderValue(r.getEntry().get(field.getName()), field))
-                .collect(Collectors.joining(separator)));
-        sb.append(separator);
-        sb.append(r.getLastUpdated());
-        return sb.toString();
+    private String renderRecord(Record r) {
+        return r.getHash() +
+                separator +
+                register.fields().stream().map(field -> renderValue(r.getEntry().get(field.getName()), field)).collect(Collectors.joining(separator)) +
+                separator +
+                r.getLastUpdated();
     }
 
     private String renderValue(JsonNode fieldValue, Field field) {

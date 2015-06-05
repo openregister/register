@@ -1,4 +1,4 @@
-@(register: uk.gov.openregister.config.Register, record: uk.gov.openregister.domain.Record, history: List[uk.gov.openregister.domain.RecordVersionInfo], representationsMap: Map[String, String])
+@(register: uk.gov.openregister.config.Register, record: uk.gov.openregister.domain.Record, history: List[uk.gov.openregister.domain.RecordVersionInfo], request: play.mvc.Http.Request)
 
 @main(register.friendlyName + " register") {
 
@@ -32,7 +32,7 @@
 
 <div class="row">
     <div class="small-12 large-6 columns">
-        @data_formats(representationsMap)
+        @data_formats(request)
     </div>
 </div>
 

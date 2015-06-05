@@ -1,4 +1,4 @@
-@(register: uk.gov.openregister.config.Register, lastUpdated: String, representationsMap: Map[String, String])
+@(register: uk.gov.openregister.config.Register, lastUpdated: String, request: play.mvc.Http.Request)
 
 @main(register.friendlyName + " register") {
 
@@ -10,7 +10,7 @@
             <main>
                 <h1>Bulk download</h1>
                 <p>Download the current contents of this register as:
-                    @controllers.html.Utils.toRepresentationLinks(representationsMap).
+                    @controllers.html.Utils.toRepresentationLinks("/all").
                 </p>
                 <p><a href="/download.torrent">Download the whole history of this register</a> as a CSV by bittorrent.</p>
                 <p>Once you have downloaded your copy of the register, you can keep your local copy up to date with the <a href="/latest">latest changes.</a></p>

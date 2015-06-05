@@ -1,4 +1,4 @@
-@(register: uk.gov.openregister.config.Register, records: List[uk.gov.openregister.domain.Record], representationsMap: Map[String, String], pagination: controllers.html.Pagination)
+@(register: uk.gov.openregister.config.Register, records: List[uk.gov.openregister.domain.Record], request: play.mvc.Http.Request, pagination: controllers.html.Pagination)
 
 @main(register.friendlyName + " register") {
 
@@ -51,7 +51,7 @@
 
     <div class="row">
         <div class="small-12 columns">
-            @data_formats(representationsMap)
+            @data_formats(request)
         </div>
     </div>
 

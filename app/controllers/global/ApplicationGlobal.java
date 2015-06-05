@@ -1,12 +1,13 @@
 package controllers.global;
 
-import controllers.api.HtmlRepresentation;
 import org.apache.commons.lang3.StringUtils;
 import play.GlobalSettings;
 import play.Logger;
 import play.libs.F;
 import play.mvc.Http;
 import play.mvc.Result;
+
+import static play.mvc.Results.status;
 
 public class ApplicationGlobal extends GlobalSettings {
     @Override
@@ -15,21 +16,20 @@ public class ApplicationGlobal extends GlobalSettings {
 
         //Can have specific responses based on error type
         return F.Promise.pure(
-                HtmlRepresentation.instance.toResponse(500, throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage(), registerName(requestHeader))
-        );
+                status(500, views.html.error.render(registerName(requestHeader), throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage())));
     }
 
     @Override
     public F.Promise<Result> onHandlerNotFound(Http.RequestHeader requestHeader) {
         return F.Promise.pure(
-                HtmlRepresentation.instance.toResponse(404, "Page not found", registerName(requestHeader))
+                status(404, views.html.error.render(registerName(requestHeader), "Page not found"))
         );
     }
 
     @Override
     public F.Promise<Result> onBadRequest(Http.RequestHeader requestHeader, String s) {
         return F.Promise.pure(
-                HtmlRepresentation.instance.toResponse(400, s, registerName(requestHeader))
+                status(400, views.html.error.render(registerName(requestHeader), s))
         );
     }
 
