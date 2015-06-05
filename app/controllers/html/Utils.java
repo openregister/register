@@ -14,6 +14,7 @@ import uk.gov.openregister.model.Field;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -22,7 +23,7 @@ public class Utils {
     public static Html toRepresentationLinks(Map<String, String> representationMap) {
         final StringBuilder linksHtml = new StringBuilder("");
 
-        representationMap.forEach((k,v) -> linksHtml.append(String.format("<a href=\"%s\" rel=\"alternate\">%s</a>, ", v, k)));
+        representationMap.forEach((k, v) -> linksHtml.append(String.format("<a href=\"%s\" rel=\"alternate\">%s</a>, ", v, k)));
 
         return Html.apply(linksHtml.toString().replaceAll(", $", "").replaceAll(",([^,]+)$", " and$1"));
     }
@@ -112,7 +113,13 @@ public class Utils {
             return "";
         } else if (value.isArray()) {
             return join(StreamUtils.asStream(value.elements()).map(e -> toRawValue(field, e)).collect(Collectors.toList()));
-        } else if (field.getRegister().isPresent()) return toLink(field.getRegister().get(), value.textValue()).text();
-        else return value.textValue();
+        } else if (field.getRegister().isPresent()) {
+            return toLink(field.getRegister().get(), value.textValue()).text();
+        } else if (field.getDatatype() == Datatype.CURIE) {
+            Optional<Curie> curie = Curie.of(value.textValue());
+            return curie.map(c -> toLink(c.namespace, c.identifier).text()).orElse(value.textValue());
+        } else {
+            return value.textValue();
+        }
     }
 }

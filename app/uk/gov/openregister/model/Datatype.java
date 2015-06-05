@@ -19,7 +19,14 @@ public abstract class Datatype {
         }
     };
 
-    private static final List<Datatype> knownTypes = Arrays.asList(STRING, TEXT);
+    public static final Datatype CURIE = new Datatype() {
+        @Override
+        public String getName() {
+            return "curie";
+        }
+    };
+
+    private static final List<Datatype> knownTypes = Arrays.asList(STRING, TEXT, CURIE);
 
 
     public abstract String getName();
