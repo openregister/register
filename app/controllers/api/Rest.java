@@ -138,6 +138,14 @@ public class Rest extends BaseController {
                 new URIBuilder(request.uri()).setParameter(REPRESENTATION_QUERY_PARAM, "__FORMAT__").build().toString());
     }
 
+    public F.Promise<Result> corsPreflight(String all) {
+        response().setHeader("Access-Control-Allow-Origin", "*");
+        response().setHeader("Allow", "*");
+        response().setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+        response().setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Referer, User-Agent");
+        return F.Promise.pure(ok());
+    }
+
     private F.Promise<Result> findByQuery(String format, Pager pager, Optional<SearchSpec.SearchHelper> sortBy, String representationUrlTemplate) throws Exception {
         Representation representation = representationFrom(format);
 
