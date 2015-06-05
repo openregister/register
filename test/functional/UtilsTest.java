@@ -15,6 +15,7 @@ public class UtilsTest extends ApplicationTests {
 
     public static final Field A_FIELD = new Field("aField");
     public static final Field FIELD_WITH_REGISTER = new Field("fields", "Field", Datatype.of("list"), Cardinality.ONE, Optional.of("field"));
+    public static final Field FIELD_WITH_CURIE = new Field("person-or-company", "A person or a company", Datatype.CURIE, Cardinality.ONE, Optional.empty());
 
     @Test
     public void testRenderAStringValue() throws Exception {
@@ -26,6 +27,12 @@ public class UtilsTest extends ApplicationTests {
     public void testRenderALinkToRegister() throws Exception {
 
         assertThat(Utils.toValue(FIELD_WITH_REGISTER, Json.parse("\"value\"")).text()).isEqualTo("<a class=\"link_to_register\" href=\"http://localhost:8888/field/value\">value</a>");
+    }
+
+    @Test
+    public void testRenderACurie() throws Exception {
+
+        assertThat(Utils.toValue(FIELD_WITH_CURIE, Json.parse("\"person-or-company:an-id\"")).text()).isEqualTo("<a class=\"link_to_register\" href=\"http://localhost:8888/person-or-company/an-id\">an-id</a>");
     }
 
     @Test
