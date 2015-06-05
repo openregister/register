@@ -13,8 +13,9 @@ public class Curie {
 
     public static Optional<Curie> of(String raw) {
         try {
-            String namespace = raw.split(":")[0];
-            String identifier = raw.split(":")[1];
+            String[] split = raw.split(":", 2);
+            String namespace = split[0];
+            String identifier = split[1];
             return Optional.of(new Curie(namespace, identifier));
         } catch (Exception e) {
             return Optional.empty();
