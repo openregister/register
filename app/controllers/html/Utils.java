@@ -1,7 +1,7 @@
 package controllers.html;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import controllers.api.Format;
+import controllers.api.representation.Format;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;

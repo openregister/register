@@ -2,6 +2,10 @@ package controllers.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import controllers.BaseController;
+import controllers.api.representation.Format;
+import controllers.api.representation.HtmlRepresentation;
+import controllers.api.representation.JsonRepresentation;
+import controllers.api.representation.Representation;
 import controllers.html.Pagination;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
@@ -41,7 +45,7 @@ public class Rest extends BaseController {
                 return new HtmlRepresentation(register).toResponse(400, e.getMessage());
             }
 
-            return new JsonRepresentation(register).createdResponse();
+            return new JsonRepresentation().createdResponse();
         }
 
         return new HtmlRepresentation(register).toResponseWithErrors(400, validationErrors);
@@ -59,7 +63,7 @@ public class Rest extends BaseController {
             } catch (DatabaseException e) {
                 return new HtmlRepresentation(register).toResponse(400, e.getMessage());
             }
-            return new JsonRepresentation(register).createdResponse();
+            return new JsonRepresentation().createdResponse();
         }
 
         return new HtmlRepresentation(register).toResponseWithErrors(400, validationErrors);
