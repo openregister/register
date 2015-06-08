@@ -2,8 +2,7 @@ package controllers.api;
 
 import uk.gov.openregister.config.Register;
 
-public class Representations {
-    public enum Format {
+public enum Format {
         json {
             @Override
             Representation createRepresentation(Register register) {
@@ -48,14 +47,13 @@ public class Representations {
         };
 
 
-        abstract Representation createRepresentation(Register register);
-    }
+    abstract Representation createRepresentation(Register register);
 
-    public static Representation representationFor(Register register, String representation){
+    public static Representation representationFor(Register register, String format){
         try{
-            return Format.valueOf(representation).createRepresentation(register);
+            return Format.valueOf(format).createRepresentation(register);
         }catch(Exception e){
-            throw new RuntimeException("Format '" + representation + "' not supported");
+            throw new RuntimeException("Format '" + format + "' not supported");
         }
     }
 }

@@ -174,14 +174,14 @@ public class Rest extends BaseController {
 
     private Representation representationFrom(String format) {
         if (StringUtils.isEmpty(format)) {
-            String representationQueryValue = request.getQueryString(REPRESENTATION_QUERY_PARAM);
-            if (representationQueryValue == null) {
-                return Representations.Format.html.createRepresentation(register);
+            String formatQueryValue = request.getQueryString(REPRESENTATION_QUERY_PARAM);
+            if (formatQueryValue == null) {
+                return Format.html.createRepresentation(register);
             } else {
-                return Representations.representationFor(register, representationQueryValue);
+                return Format.representationFor(register, formatQueryValue);
             }
         } else {
-            return Representations.representationFor(register, format.replaceAll("\\.(.*)", "$1"));
+            return Format.representationFor(register, format.replaceAll("\\.(.*)", "$1"));
         }
     }
 
