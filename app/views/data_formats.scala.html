@@ -1,7 +1,7 @@
-@(representationsMap: Map[String, String])
+@(request: play.mvc.Http.Request)
 <p class="data-representations">This data is available as:
      <span>
-        @controllers.html.Utils.toRepresentationLinks(representationsMap)
+        @controllers.html.Utils.toRepresentationLinks(request.uri())
     </span>
 </p>
 

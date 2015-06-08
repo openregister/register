@@ -1,7 +1,10 @@
 package controllers.html;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import controllers.api.Representations;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import org.markdownj.MarkdownProcessor;
 import play.twirl.api.Html;
 import uk.gov.openregister.StreamUtils;
@@ -12,18 +15,29 @@ import uk.gov.openregister.model.Datatype;
 import uk.gov.openregister.model.Field;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 
 public class Utils {
 
-    public static Html toRepresentationLinks(Map<String, String> representationMap) {
-        final StringBuilder linksHtml = new StringBuilder("");
+    public static Html toRepresentationLinks(String uri) throws URISyntaxException {
 
-        representationMap.forEach((k, v) -> linksHtml.append(String.format("<a href=\"%s\" rel=\"alternate\">%s</a>, ", v, k)));
+        Representations.Format[] formats = Representations.Format.values();
+
+        List<NameValuePair> queryParams = new URIBuilder(uri).getQueryParams();
+
+        String uriWithoutRepresentation = uri.replaceAll("([^\\?]+)(.*)", "$1").replaceAll("(.*?)(\\.[a-z]+)?$", "$1");
+
+        StringBuilder linksHtml = new StringBuilder("");
+
+        for (Representations.Format format : formats) {
+            URIBuilder uriBuilder = createUriWithFormat(uriWithoutRepresentation, format);
+            queryParams.forEach(nvPair -> uriBuilder.setParameter(nvPair.getName(), nvPair.getValue()));
+            linksHtml.append(String.format("<a href=\"%s\" rel=\"alternate\">%s</a>, ", uriBuilder.build().toString(), format.name()));
+        }
 
         return Html.apply(linksHtml.toString().replaceAll(", $", "").replaceAll(",([^,]+)$", " and$1"));
     }
@@ -120,6 +134,16 @@ public class Utils {
             return curie.map(c -> toLink(c.namespace, c.identifier).text()).orElse(value.textValue());
         } else {
             return value.textValue();
+        }
+    }
+
+    private static URIBuilder createUriWithFormat(String uriWithoutRepresentation, Representations.Format format) throws URISyntaxException {
+        if (uriWithoutRepresentation.endsWith("search")) {
+            URIBuilder uriBuilder = new URIBuilder(uriWithoutRepresentation);
+            uriBuilder.setParameter("_representation", format.name());
+            return uriBuilder;
+        } else {
+            return new URIBuilder(uriWithoutRepresentation + "." + format.name());
         }
     }
 }

@@ -84,7 +84,7 @@ public class UI extends BaseController {
                 register.store().update(hash, record);
                 return redirect("/hash/" + record.getHash());
             } catch (DatabaseConflictException e) {
-                return HtmlRepresentation.instance.toResponse(409, e.getMessage(), register.friendlyName());
+                return new HtmlRepresentation(register).toResponse(409, e.getMessage());
             }
         }
         Map<String, String> errors = validationErrors.stream().collect(Collectors.toMap(error -> error.key, error -> error.message));

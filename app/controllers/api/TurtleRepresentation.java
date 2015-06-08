@@ -3,6 +3,7 @@ package controllers.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import controllers.html.Pagination;
+import play.mvc.Http;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.config.Register;
@@ -14,7 +15,6 @@ import uk.gov.openregister.model.Field;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -28,13 +28,15 @@ public class TurtleRepresentation implements Representation {
             "\n";
     public static final String TEXT_TURTLE = "text/turtle; charset=utf-8";
     private final CurieResolver curieResolver;
+    private final Register register;
 
-    public TurtleRepresentation() {
+    public TurtleRepresentation(Register register) {
+        this.register = register;
         curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
     }
 
     @Override
-    public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, Pagination pagination) {
+    public Result toListOfRecords(List<Record> records, Http.Request request, Pagination pagination) {
         return ok(records.stream()
                         .map(r -> renderRecord(r, register))
                         .collect(Collectors.joining("\n", TURTLE_HEADER, ""))
@@ -42,7 +44,7 @@ public class TurtleRepresentation implements Representation {
     }
 
     @Override
-    public Result toRecord(Register register, Record record, Map<String, String[]> requestParams, Map<String, String> representationsMap, List<RecordVersionInfo> history) {
+    public Result toRecord(Record record, Http.Request request, List<RecordVersionInfo> history) {
         return ok(TURTLE_HEADER + renderRecord(record, register)).as(TEXT_TURTLE);
     }
 
@@ -89,6 +91,4 @@ public class TurtleRepresentation implements Representation {
                 .collect(Collectors.joining(", "));
 
     }
-
-    public static Representation instance = new TurtleRepresentation();
 }
