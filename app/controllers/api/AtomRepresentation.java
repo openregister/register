@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import controllers.html.Pagination;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.joda.time.DateTime;
-import play.mvc.Http;
 import play.mvc.Result;
 import uk.gov.openregister.config.ApplicationConf;
 import uk.gov.openregister.config.Register;
@@ -33,19 +32,14 @@ public class AtomRepresentation implements Representation {
     public static final String TEXT_ATOM = "application/atom+xml; charset=utf-8";
     public static final String RFC3339_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.msZZ";
     private final CurieResolver curieResolver;
-    private final Register register;
 
-    public AtomRepresentation(Register register) {
-        this.register = register;
+    public AtomRepresentation() {
         curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records,
-                                  Http.Request request,
-                                  Pagination pagination
-    ) {
-        String atomHeader = createAtomHeader(records);
+    public Result toListOfRecords(Register register, List<Record> records, Map<String, String[]> requestParams, Map<String, String> representationsMap, Pagination pagination) {
+        String atomHeader = createAtomHeader(register, records);
         String entries = records.stream()
                 .map(r -> renderRecord(r, register))
                 .collect(Collectors.joining());
@@ -54,11 +48,8 @@ public class AtomRepresentation implements Representation {
     }
 
     @Override
-    public Result toRecord(Record record,
-                           Http.Request request,
-                           List<RecordVersionInfo> history
-    ) {
-        String atomHeader = createAtomHeader(Collections.singletonList(record));
+    public Result toRecord(Register register, Record record, Map<String, String[]> requestParams, Map<String, String> representationsMap, List<RecordVersionInfo> history) {
+        String atomHeader = createAtomHeader(register, Collections.singletonList(record));
         String entry = renderRecord(record, register);
         String atomFooter = createAtomFooter();
 
@@ -70,13 +61,13 @@ public class AtomRepresentation implements Representation {
         return false;
     }
 
-    private String createAtomHeader(List<Record> records) {
+    private String createAtomHeader(Register register, List<Record> records) {
         DateTime mostRecentlyUpdated = mostRecentlyUpdated(records);
         String mostRecentUpdatedString = mostRecentlyUpdated == null ? "" : mostRecentlyUpdated.toString(RFC3339_DATETIME_FORMAT);
 
         return "<feed " + FIELD_REGISTER_NAMESPACE + "\n" +
                 " " + DATATYPE_REGISTER_NAMESPACE + "\n" +
-                " xmlns=\"http://www.w3.org/2005/Atom\">\n" +
+        " xmlns=\"http://www.w3.org/2005/Atom\">\n" +
                 " <title>" + register.friendlyName() + " register updates</title>\n" +
                 " <id>" + curieResolver.resolve(new Curie(register.name(), "latest.atom")) + "</id>\n" +
                 "<link rel=\"self\" href=\"" + curieResolver.resolve(new Curie(register.name(), "")) + "\" />\n" +
@@ -88,7 +79,8 @@ public class AtomRepresentation implements Representation {
         Optional<Record> mostRecentlyUpdatedRecordO = records.stream()
                 .max((a, b) ->
                         Long.valueOf(a.getLastUpdated().getMillis() - b.getLastUpdated().getMillis()).intValue());
-        if (mostRecentlyUpdatedRecordO.isPresent()) {
+
+        if(mostRecentlyUpdatedRecordO.isPresent()) {
             return mostRecentlyUpdatedRecordO.get().getLastUpdated();
         }
 
@@ -102,6 +94,10 @@ public class AtomRepresentation implements Representation {
 
     private String renderRecord(Record record, Register register) {
         URI hashUri = curieResolver.resolve(new Curie(register.name() + "_hash", record.getHash()));
+
+        Map<String, String> keyValue = register.fields().stream()
+                .map(field -> new HashMap.SimpleEntry<String, String>(field.getName(), renderValue(record, field)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         String entry = "<entry>\n";
         entry += "<id>urn:hash:" + record.getHash() + "</id>\n";
@@ -160,4 +156,6 @@ public class AtomRepresentation implements Representation {
     private String renderCreationTime(Record record) {
         return record.getLastUpdated().toString(RFC3339_DATETIME_FORMAT);
     }
+
+    public static Representation instance = new AtomRepresentation();
 }
