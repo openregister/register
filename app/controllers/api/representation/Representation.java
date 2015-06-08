@@ -1,4 +1,4 @@
-package controllers.api;
+package controllers.api.representation;
 
 import controllers.html.Pagination;
 import play.mvc.Http;
