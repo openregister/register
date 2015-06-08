@@ -72,6 +72,7 @@ public class AtomRepresentation implements Representation {
 
     private String createAtomHeader(List<Record> records) {
         DateTime mostRecentlyUpdated = mostRecentlyUpdated(records);
+        String mostRecentUpdatedString = mostRecentlyUpdated == null ? "" : mostRecentlyUpdated.toString(RFC3339_DATETIME_FORMAT);
 
         return "<feed " + FIELD_REGISTER_NAMESPACE + "\n" +
                 " " + DATATYPE_REGISTER_NAMESPACE + "\n" +

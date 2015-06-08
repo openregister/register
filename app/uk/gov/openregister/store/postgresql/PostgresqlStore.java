@@ -66,16 +66,21 @@ public class PostgresqlStore implements Store {
     }
 
     public void createTables(String tableName) {
-        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40))");
-        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + "_history (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40))");
-        if(database.select("SELECT to_regclass('public." + tableName + "_lastUpdated_idx')").andThen(r -> { r.next(); return r.getString(1);}) == null) {
+        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40), searchable tsvector)");
+        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + "_history (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40), searchable tsvector)");
+        if (database.select("SELECT to_regclass('public." + tableName + "_lastUpdated_idx')")
+                .andThen(r -> {
+                    r.next();
+                    return r.getString(1);
+                }) == null) {
+            database.execute("CREATE INDEX " + tableName + "_entry_text_idx ON " + tableName + " USING gin(searchable)");
             database.execute("CREATE INDEX " + tableName + "_lastUpdated_idx ON " + tableName + " (lastUpdated DESC)");
             database.execute("CLUSTER " + tableName + " using " + tableName + "_lastUpdated_idx");
+            database.execute("CREATE INDEX " + tableName + "_history_entry_text_idx ON " + tableName + "_history USING gin(searchable)");
             database.execute("CREATE INDEX " + tableName + "_history_lastUpdated_idx ON " + tableName + "_history (lastUpdated DESC)");
             database.execute("CLUSTER " + tableName + "_history using " + tableName + "_history_lastUpdated_idx");
         }
     }
-
 
     @Override
     public void save(Record record) {
@@ -86,23 +91,26 @@ public class PostgresqlStore implements Store {
         try (Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
-            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, lastUpdated) " +
-                    "( select ?,?,?  where not exists ( select 1 from " + dbInfo.tableName + " where entry ->>?=?))")) {
+            final String searchableText = canonicalizeEntryText(record.normalisedEntry());
+            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, lastUpdated, searchable) " +
+                    "( select ?,?,?,to_tsvector(?)  where not exists ( select 1 from " + dbInfo.tableName + " where entry ->>?=?))")) {
                 st.setObject(1, hash);
                 st.setObject(2, entryObject);
                 st.setTimestamp(3, new Timestamp(record.getLastUpdated().getMillis()));
-                st.setObject(4, dbInfo.primaryKey);
-                st.setObject(5, primaryKeyValue(record));
+                st.setString(4, searchableText);
+                st.setObject(5, dbInfo.primaryKey);
+                st.setObject(6, primaryKeyValue(record));
                 int result = st.executeUpdate();
                 if (result == 0) {
                     throw new DatabaseException("No record inserted, a record with primary key value already exists");
                 }
             }
 
-            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry, lastUpdated) VALUES(?, ?, ?)")) {
+            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry, lastUpdated, searchable) VALUES(?, ?, ?, to_tsvector(?))")) {
                 st.setObject(1, hash);
                 st.setObject(2, entryObject);
                 st.setTimestamp(3, new Timestamp(record.getLastUpdated().getMillis()));
+                st.setString(4, searchableText);
                 st.executeUpdate();
             }
 
@@ -121,17 +129,18 @@ public class PostgresqlStore implements Store {
             PGobject entryObject = createPGObject(record.normalisedEntry());
             entryObject.setType("jsonb");
             Timestamp timestamp = new Timestamp(record.getLastUpdated().getMillis());
+            String searchableText = canonicalizeEntryText(record.normalisedEntry());
 
-
-            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, lastUpdated, previousEntryHash) " +
-                    "( select ?,?,?,?  where exists ( select 1 from " + dbInfo.tableName + " where hash=? and entry ->>?=?))")) {
+            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, lastUpdated, previousEntryHash, searchable) " +
+                    "( select ?,?,?,?,to_tsvector(?)  where exists ( select 1 from " + dbInfo.tableName + " where hash=? and entry ->>?=?))")) {
                 st.setObject(1, newHash);
                 st.setObject(2, entryObject);
                 st.setTimestamp(3, timestamp);
                 st.setObject(4, oldhash);
-                st.setObject(5, oldhash);
-                st.setObject(6, dbInfo.primaryKey);
-                st.setObject(7, primaryKeyValue(record));
+                st.setString(5, searchableText);
+                st.setObject(6, oldhash);
+                st.setObject(7, dbInfo.primaryKey);
+                st.setObject(8, primaryKeyValue(record));
 
                 int result = st.executeUpdate();
                 if (result == 0) {
@@ -144,11 +153,12 @@ public class PostgresqlStore implements Store {
                 st.executeUpdate();
             }
 
-            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry, lastUpdated, previousEntryHash) VALUES(?, ?, ?, ?)")) {
+            try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry, lastUpdated, previousEntryHash, searchable) VALUES(?, ?, ?, ?, to_tsvector(?))")) {
                 st.setObject(1, newHash);
                 st.setObject(2, entryObject);
                 st.setTimestamp(3, timestamp);
                 st.setObject(4, oldhash);
+                st.setString(5, searchableText);
                 st.executeUpdate();
             }
 
@@ -215,14 +225,13 @@ public class PostgresqlStore implements Store {
     }
 
     private String toMatchStatement(Map<String, String> map, String k, boolean exact) {
-        if(exact)
+        if (exact)
             return "entry->>'" + k + "'='" + map.get(k) + "'";
         else
             return "entry->>'" + k + "' ILIKE '%" + map.get(k) + "%'";
     }
 
-    @Override
-    public List<Record> search(String query, int offset, int limit, Optional<SearchHelper> sortBy) {
+    public List<Record> searchOld(String query, int offset, int limit, Optional<SearchHelper> sortBy) {
         String sql = "";
         if (!dbInfo.keys.isEmpty()) {
             List<String> where = dbInfo.keys.stream()
@@ -234,9 +243,21 @@ public class PostgresqlStore implements Store {
         return executeSearch(sql, offset, limit, sortBy);
     }
 
+    @Override
+    public List<Record> search(String query, int offset, int limit, Optional<SearchHelper> sortBy) {
+        String sql = "";
+        if (!dbInfo.keys.isEmpty()) {
+            String where = fullTrim(query);
+            if(!query.trim().isEmpty())
+                sql += " WHERE searchable @@ to_tsquery('" + where + "')";
+        }
+
+        return executeSearch(sql, offset, limit, sortBy);
+    }
+
     private List<Record> executeSearch(String where, int offset, int limit, Optional<SearchHelper> sortBy) {
         String sql;
-        if(sortBy.isPresent() && sortBy.get().isHistoric()) {
+        if (sortBy.isPresent() && sortBy.get().isHistoric()) {
             sql = createQuery(where, offset, limit, sortBy, dbInfo.historyTableName);
         } else {
             sql = createQuery(where, offset, limit, sortBy, dbInfo.tableName);
@@ -276,22 +297,25 @@ public class PostgresqlStore implements Store {
             connection.setAutoCommit(false);
 
 
-            try (PreparedStatement st1 = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, lastUpdated) VALUES(?, ?, ?)");
-                 PreparedStatement st2 = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry, lastUpdated) VALUES(?, ?, ?)")) {
+            try (PreparedStatement st1 = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, lastUpdated, searchable) VALUES(?, ?, ?, to_tsvector(?))");
+                 PreparedStatement st2 = connection.prepareStatement("INSERT INTO " + dbInfo.historyTableName + "(hash, entry, lastUpdated, searchable) VALUES(?, ?, ?, to_tsvector(?))")) {
 
                 for (Record record : records) {
                     String hash = record.getHash();
+                    String searchableText = canonicalizeEntryText(record.normalisedEntry());
                     PGobject entryObject = createPGObject(record.normalisedEntry());
                     entryObject.setType("jsonb");
                     Timestamp timestamp = new Timestamp(record.getLastUpdated().getMillis());
                     st1.setObject(1, hash);
                     st1.setObject(2, entryObject);
                     st1.setTimestamp(3, timestamp);
+                    st1.setString(4, searchableText);
                     st1.addBatch();
 
                     st2.setObject(1, hash);
                     st2.setObject(2, entryObject);
                     st2.setObject(3, timestamp);
+                    st2.setString(4, searchableText);
                     st2.addBatch();
                 }
 
@@ -305,6 +329,18 @@ public class PostgresqlStore implements Store {
         }
     }
 
+    private String canonicalizeEntryText(String entryText) {
+        return entryText.replaceAll("[\\{\\}-]", " ")
+                .replaceAll(",?\"[^\"]+\":", " ")
+                .replaceAll("[\"']", " ")
+                .replaceAll("[ \\t]{2,}", " ")
+                .toLowerCase();
+    }
+
+    private String fullTrim(String toTrim) {
+        return toTrim.replaceAll("[\\p{Blank}\\p{Punct}]+", " & ")
+                    .toLowerCase();
+    }
     //TODO: this will be deleted when we know the datatype of primary key
     private Object primaryKeyValue(Record record) {
         JsonNode jsonNode = record.getEntry().get(dbInfo.primaryKey);
@@ -339,7 +375,6 @@ public class PostgresqlStore implements Store {
     private Record toRecord(ResultSet resultSet) throws SQLException, IOException {
         final String entry = resultSet.getString("entry");
         final Timestamp lastUpdated = resultSet.getTimestamp("lastUpdated");
-
 
         return new Record(new ObjectMapper().readValue(entry, JsonNode.class), new DateTime(lastUpdated.getTime()));
     }
