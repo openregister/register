@@ -16,20 +16,13 @@ import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.model.Field;
 
 import java.net.URI;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static play.mvc.Results.ok;
 
 public class AtomRepresentation implements Representation {
-    public static final String FIELD_REGISTER_NAMESPACE_PREFIX = "f";
-    public static final String DATATYPE_REGISTER_NAMESPACE_PREFIX = "dt";
-    public static final String FIELD_REGISTER_NAMESPACE =
-            "xmlns:" + FIELD_REGISTER_NAMESPACE_PREFIX + "=\"http://fields.openregister.org/field/\"";
-    public static final String DATATYPE_REGISTER_NAMESPACE =
-            "xmlns:" + DATATYPE_REGISTER_NAMESPACE_PREFIX + "=\"http://fields.openregister.org/datatype/\"";
-
     public static final String TEXT_ATOM = "application/atom+xml; charset=utf-8";
     public static final String RFC3339_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.msZZ";
     private final CurieResolver curieResolver;
@@ -41,28 +34,24 @@ public class AtomRepresentation implements Representation {
     }
 
     @Override
-    public Result toListOfRecords(List<Record> records,
-                                  Http.Request request,
-                                  Pagination pagination
-    ) {
-        String atomHeader = createAtomHeader(records);
+    public Result toListOfRecords(List<Record> records, Http.Request request, Pagination pagination) {
+        DateTime latestUpdate = records
+                .stream()
+                .map(Record::getLastUpdated)
+                .sorted((dt1, dt2) -> dt1.isAfter(dt2) ? -1 : 1)
+                .findFirst()
+                .get();
+
         String entries = records.stream()
                 .map(r -> renderRecord(r, register))
                 .collect(Collectors.joining());
-        String atomFooter = createAtomFooter();
-        return ok(atomHeader + entries + atomFooter).as(TEXT_ATOM);
+
+        return createAtomFeed(entries, latestUpdate);
     }
 
     @Override
-    public Result toRecord(Record record,
-                           Http.Request request,
-                           List<RecordVersionInfo> history
-    ) {
-        String atomHeader = createAtomHeader(Collections.singletonList(record));
-        String entry = renderRecord(record, register);
-        String atomFooter = createAtomFooter();
-
-        return ok(atomHeader + entry + atomFooter).as(TEXT_ATOM);
+    public Result toRecord(Record record, Http.Request request, List<RecordVersionInfo> history) {
+        return createAtomFeed(renderRecord(record, register), record.getLastUpdated());
     }
 
     @Override
@@ -70,61 +59,51 @@ public class AtomRepresentation implements Representation {
         return false;
     }
 
-    private String createAtomHeader(List<Record> records) {
-        DateTime mostRecentlyUpdated = mostRecentlyUpdated(records);
+    private Result createAtomFeed(String entries, DateTime lastUpdated) {
+        return ok(createAtomHeader(lastUpdated) + entries + "</feed>").as(TEXT_ATOM);
+    }
 
-        return "<feed " + FIELD_REGISTER_NAMESPACE + "\n" +
-                " " + DATATYPE_REGISTER_NAMESPACE + "\n" +
-                " xmlns=\"http://www.w3.org/2005/Atom\">\n" +
-                " <title>" + register.friendlyName() + " register updates</title>\n" +
-                " <id>" + curieResolver.resolve(new Curie(register.name(), "latest.atom")) + "</id>\n" +
-                "<link rel=\"self\" href=\"" + curieResolver.resolve(new Curie(register.name(), "")) + "\" />\n" +
-                "<updated>" + mostRecentlyUpdated.toString(RFC3339_DATETIME_FORMAT) + "</updated>\n" +
+    private String createAtomHeader(DateTime dateTime) {
+
+        String feedTemplate = "<feed xmlns:f=\"http://fields.openregister.org/field/\" xmlns:dt=\"http://fields.openregister.org/datatype/\" xmlns=\"http://www.w3.org/2005/Atom\">" +
+                " <title>%s</title>" +
+                " <id>%s</id>" +
+                "<link rel=\"self\" href=\"%s\"/>" +
+                "<updated>%s</updated>" +
                 "<author><name>openregister.org</name></author>\n";
-    }
 
-    private DateTime mostRecentlyUpdated(List<Record> records) {
-        Optional<Record> mostRecentlyUpdatedRecordO = records.stream()
-                .max((a, b) ->
-                        Long.valueOf(a.getLastUpdated().getMillis() - b.getLastUpdated().getMillis()).intValue());
-        if (mostRecentlyUpdatedRecordO.isPresent()) {
-            return mostRecentlyUpdatedRecordO.get().getLastUpdated();
-        }
-
-        // Every record should have a metadata with a creationtime - if not something bad has happened and we shouldnt carry on.
-        return null;
-    }
-
-    private String createAtomFooter() {
-        return "</feed>";
+        return String.format(feedTemplate,
+                register.friendlyName() + " register updates",
+                curieResolver.resolve(new Curie(register.name(), "latest.atom")),
+                curieResolver.resolve(new Curie(register.name(), "")),
+                dateTime.toString(RFC3339_DATETIME_FORMAT));
     }
 
     private String renderRecord(Record record, Register register) {
         URI hashUri = curieResolver.resolve(new Curie(register.name() + "_hash", record.getHash()));
 
-        String entry = "<entry>\n";
-        entry += "<id>urn:hash:" + record.getHash() + "</id>\n";
-        entry += "<title>" + hashUri.toString() + "</title>\n";
-        entry += "<updated>" + renderCreationTime(record) + "</updated>\n";
-        entry += "<author><name>openregister.org</name></author>\n";
-        entry += "<link href=\"" + hashUri.toString() + "\"></link>";
-        entry += "<content type=\"application/xml\">\n" + fieldEntriesForRecord(register, record) + "</content>\n";
-        entry += "</entry>\n";
+        String entryTemplate = "<entry>" +
+                "<id>urn:hash:%s</id>" +
+                "<title>%s</title>" +
+                "<updated>%s</updated>" +
+                "<author>" +
+                "<name>openregister.org</name>" +
+                "</author>" +
+                "<link href=\"%s\"></link>" +
+                "<content type=\"application/xml\">%s</content>" +
+                "</entry>\n";
 
-        return entry;
+        String content = register.fields().stream().map(f -> String.format("<f:%s>%s</f:%s>", f.getName(), renderValue(record, f), f.getName())).collect(Collectors.joining(""));
+
+        return String.format(entryTemplate,
+                record.getHash(),
+                hashUri,
+                record.getLastUpdated().toString(RFC3339_DATETIME_FORMAT),
+                hashUri,
+                content
+        );
+
     }
-
-    private String fieldEntriesForRecord(Register register, Record record) {
-        return register.fields().stream()
-                .map(f -> {
-                    String fieldOpenTag = "<" + FIELD_REGISTER_NAMESPACE_PREFIX + ":" + f.getName() + ">";
-                    String fieldCloseTag = "</" + FIELD_REGISTER_NAMESPACE_PREFIX + ":" + f.getName() + ">";
-                    String fieldValue = renderValue(record, f);
-                    return fieldOpenTag + fieldValue + fieldCloseTag;
-                })
-                .collect(Collectors.joining("\n")) + "\n";
-    }
-
 
     private String renderValue(Record record, Field field) {
         JsonNode jsonNode = record.getEntry().get(field.getName());
@@ -154,9 +133,5 @@ public class AtomRepresentation implements Representation {
         return StreamSupport.stream(arrayNode.spliterator(), false)
                 .map(val -> renderScalar(field, val))
                 .collect(Collectors.joining(", "));
-    }
-
-    private String renderCreationTime(Record record) {
-        return record.getLastUpdated().toString(RFC3339_DATETIME_FORMAT);
     }
 }
