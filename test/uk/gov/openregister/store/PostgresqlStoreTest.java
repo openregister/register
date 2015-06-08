@@ -288,7 +288,7 @@ public class PostgresqlStoreTest {
         store.save(new Record(json1));
         store.save(new Record(json2));
 
-        List<Record> records = store.search("value", 0, 100, Optional.of(store.getSearchSpec().getDefault()));
+        List<Record> records = store.search("avalue1", 0, 100, Optional.of(store.getSearchSpec().getDefault()));
         assertThat(records.size()).isEqualTo(2);
     }
 

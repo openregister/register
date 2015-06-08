@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.joda.time.DateTime;
-import uk.gov.openregister.domain.Record;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -37,8 +36,8 @@ public class PostgresqlStoreForTesting {
     public static void createTables(String tableName) throws SQLException, ClassNotFoundException {
 
         try (Connection conn = DriverManager.getConnection(POSTGRESQL_URI); Statement st = conn.createStatement()) {
-            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40))");
-            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + "_history (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40))");
+            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40), searchable tsvector)");
+            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + "_history (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40), searchable tsvector)");
         }
     }
 
