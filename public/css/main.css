@@ -596,6 +596,12 @@ table.responsive  th  {
     width: 100%;
     padding-left: 0;
 }
+
+div.colour-value {
+  width: 20px;
+  height: 20px;
+}
+
 @media only screen and  (max-width: 64em) {
     .previous-next-navigation {
         width: 90%;
