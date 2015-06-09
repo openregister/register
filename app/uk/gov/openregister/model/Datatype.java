@@ -33,26 +33,10 @@ public abstract class Datatype {
         }
     };
 
-    private static final List<Datatype> knownTypes = Arrays.asList(STRING, TEXT, CURIE);
+    private static final List<Datatype> knownTypes = Arrays.asList(STRING, TEXT, COLOUR, CURIE);
 
 
     public abstract String getName();
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Datatype)) return false;
-
-        Datatype datatype = (Datatype) o;
-
-        return getName().equals(datatype.getName());
-
-    }
-
-    @Override
-    public int hashCode() {
-        return getName().hashCode();
-    }
 
     public static Datatype of(String s) {
         return knownTypes.stream().filter(dt -> dt.getName().equals(s)).findFirst().orElse(new Datatype() {
