@@ -95,6 +95,8 @@ public class Utils {
     public static Html toValue(Field field, JsonNode value) {
         if (field.getDatatype() == Datatype.TEXT) {
             return Html.apply(new MarkdownProcessor().markdown(toRawValue(field, value)));
+        } else if (field.getDatatype() == Datatype.COLOUR) {
+            return Html.apply(new MarkdownProcessor().markdown(toColourValue(field, value)));
         } else {
             return Html.apply(toRawValue(field, value));
         }
@@ -131,6 +133,15 @@ public class Utils {
             return curie.map(c -> toLink(c.namespace, c.identifier).text()).orElse(value.textValue());
         } else {
             return value.textValue();
+        }
+    }
+
+    public final static String DEFAULT_COLOUR = "#000000";
+    private static String toColourValue(Field field, JsonNode value) {
+        if (value == null) {
+            return DEFAULT_COLOUR;
+        } else {
+            return "<div class=\"colour-value\" style=\"background-color: " + value.textValue() + "\" />";
         }
     }
 

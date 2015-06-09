@@ -19,6 +19,13 @@ public abstract class Datatype {
         }
     };
 
+    public static final Datatype COLOUR = new Datatype() {
+        @Override
+        public String getName() {
+            return "colour";
+        }
+    };
+
     public static final Datatype CURIE = new Datatype() {
         @Override
         public String getName() {
@@ -26,7 +33,7 @@ public abstract class Datatype {
         }
     };
 
-    private static final List<Datatype> knownTypes = Arrays.asList(STRING, TEXT, CURIE);
+    private static final List<Datatype> knownTypes = Arrays.asList(STRING, TEXT, COLOUR, CURIE);
 
 
     public abstract String getName();
