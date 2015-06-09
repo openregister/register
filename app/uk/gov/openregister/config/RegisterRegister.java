@@ -20,8 +20,6 @@ public class RegisterRegister extends Register {
             new Field("text", Datatype.TEXT),
             new Field("registry", Optional.of("public-body")),
             new Field("copyright", Datatype.TEXT),
-            new Field("registry", Datatype.STRING),
-            new Field("registryName", Datatype.STRING),
             new Field("crest", Datatype.STRING)
     );
 
