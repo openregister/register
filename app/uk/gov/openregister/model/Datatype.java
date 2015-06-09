@@ -1,9 +1,15 @@
 package uk.gov.openregister.model;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Datatype {
+    private static final List<Datatype> knownTypes = new ArrayList<>();
+
+
+    private Datatype() {
+        knownTypes.add(this);
+    }
 
     public static final Datatype STRING = new Datatype() {
         @Override
@@ -32,9 +38,6 @@ public abstract class Datatype {
             return "curie";
         }
     };
-
-    private static final List<Datatype> knownTypes = Arrays.asList(STRING, TEXT, COLOUR, CURIE);
-
 
     public abstract String getName();
 
