@@ -20,7 +20,7 @@ import static play.mvc.Results.status;
 public class JsonRepresentation implements Representation {
 
     public static final String JSON_CONTENT_TYPE = "application/json";
-    public static final String JSONP_CONTENT_TYPE = "application/javascript; charset=utf-8";
+    public static final String JSONP_CONTENT_TYPE = "application/javascript";
 
     public Result createdResponse() {
         Map<String, Object> result = new HashMap<>();
