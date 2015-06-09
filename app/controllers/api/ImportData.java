@@ -36,7 +36,8 @@ public class ImportData extends BaseController {
         return WebSocket.whenReady((in, out) -> new Thread(() -> {
             in.onMessage(urlj -> {
                 JsonNode url = urlj.get("url");
-                if (url == null || url.asText().isEmpty()) notifyProgress("Failed. Invalid url provided", true, true, 0,  out);
+                if (url == null || url.asText().isEmpty())
+                    notifyProgress("Failed. Invalid url provided", true, true, 0, out);
                 else readAndSaveToDb(url.asText(), out);
             });
 
@@ -44,44 +45,36 @@ public class ImportData extends BaseController {
     }
 
     private void readAndSaveToDb(String url, WebSocket.Out<JsonNode> out) {
+        try {
 
-        new Thread(() -> {
+            if (url.endsWith(".zip")) {
+                ZipInputStream zipInputStream = new ZipInputStream(new URL(url).openStream());
+                ZipEntry entry;
 
-            try {
-
-                if(url.endsWith(".zip")) {
-                    ZipInputStream zipInputStream = new ZipInputStream(new URL(url).openStream());
-                    ZipEntry entry;
-
-                    while ((entry = zipInputStream.getNextEntry()) != null)
-                    {
-                        if(!entry.isDirectory()) {
-                            notifyProgress("Found '" + entry.getName() + "' in zip file, importing....", false, false, 0, out);
-                            importStream(entry.getName(), zipInputStream, out);
-                        }
+                while ((entry = zipInputStream.getNextEntry()) != null) {
+                    if (!entry.isDirectory()) {
+                        notifyProgress("Found '" + entry.getName() + "' in zip file, importing....", false, false, 0, out);
+                        importStream(entry.getName(), zipInputStream, out);
                     }
-                } else {
-                    importStream(url, new URL(url).openStream(), out);
                 }
-
-            } catch (Exception e) {
-                notifyProgress("Failed. " + e.getMessage(), true, false, 0, out);
-                throw new RuntimeException(e);
+            } else {
+                importStream(url, new URL(url).openStream(), out);
             }
-        }).run();
 
+        } catch (Exception e) {
+            notifyProgress("Failed. " + e.getMessage(), true, false, 0, out);
+            throw new RuntimeException(e);
+        }
     }
 
     private void importStream(String url, InputStream inputStream, WebSocket.Out<JsonNode> out) throws java.io.IOException {
 
         notifyProgress("Downloading raw data", false, false, 0, out);
 
-        InputStreamReader isr = new InputStreamReader(inputStream);
-        BufferedReader br = new BufferedReader(isr);
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
-        CsvMapper mapper = new CsvMapper();
         CsvSchema schema = getSchema(url.endsWith(".tsv"));
-        MappingIterator<JsonNode> it = mapper.reader(JsonNode.class)
+        MappingIterator<JsonNode> it = new CsvMapper().reader(JsonNode.class)
                 .with(schema)
                 .readValues(br);
         long counter = 0;
@@ -89,6 +82,7 @@ public class ImportData extends BaseController {
         notifyProgress("Dropping existing data", false, false, counter, out);
         store.deleteAll();
         List<Record> records = new ArrayList<>();
+
         while (it.hasNext()) {
             JsonNode rowAsNode = it.next();
             records.add(new Record(rowAsNode));
@@ -119,7 +113,7 @@ public class ImportData extends BaseController {
         return builder.build();
     }
 
-    private static void notifyProgress(String message, boolean done, boolean success, long count,  WebSocket.Out<JsonNode> out) {
+    private static void notifyProgress(String message, boolean done, boolean success, long count, WebSocket.Out<JsonNode> out) {
 
         Map<String, Object> result = new HashMap<>();
         result.put("text", message);
