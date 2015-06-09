@@ -96,7 +96,7 @@ public class Utils {
         if (field.getDatatype() == Datatype.TEXT) {
             return Html.apply(new MarkdownProcessor().markdown(toRawValue(field, value)));
         } else if (field.getDatatype() == Datatype.COLOUR) {
-            return Html.apply(new MarkdownProcessor().markdown(toColourValue(field, value)));
+            return Html.apply(new MarkdownProcessor().markdown(toColourValue(value)));
         } else {
             return Html.apply(toRawValue(field, value));
         }
@@ -136,13 +136,8 @@ public class Utils {
         }
     }
 
-    public final static String DEFAULT_COLOUR = "#000000";
-    private static String toColourValue(Field field, JsonNode value) {
-        if (value == null) {
-            return DEFAULT_COLOUR;
-        } else {
-            return "<div class=\"colour-value\" style=\"background-color: " + value.textValue() + "\" />";
-        }
+    private static String toColourValue(JsonNode value) {
+        return "<div class=\"colour-value\" style=\"background-color: " + value.textValue() + "\" />";
     }
 
     private static URIBuilder createUriWithFormat(String uriWithoutRepresentation, Format format) throws URISyntaxException {
