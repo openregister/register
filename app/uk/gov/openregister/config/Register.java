@@ -68,7 +68,7 @@ public abstract class Register {
 
     private void getOfficialTextForRegister() {
         CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
-        String rrUrl = curieResolver.resolve(new Curie("register", name())) + "?_representation=json";
+        String rrUrl = curieResolver.resolve(new Curie("register", name())) + ".json";
         WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
 
         if (rr.getStatus() == 200) {
