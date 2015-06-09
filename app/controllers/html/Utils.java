@@ -95,6 +95,8 @@ public class Utils {
     public static Html toValue(Field field, JsonNode value) {
         if (field.getDatatype() == Datatype.TEXT) {
             return Html.apply(new MarkdownProcessor().markdown(toRawValue(field, value)));
+        } else if (field.getDatatype() == Datatype.COLOUR) {
+            return Html.apply("<div class=\"colour-value\" style=\"background-color: " + value.textValue() + "\" />");
         } else {
             return Html.apply(toRawValue(field, value));
         }
