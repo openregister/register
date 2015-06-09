@@ -96,7 +96,7 @@ public class Utils {
         if (field.getDatatype() == Datatype.TEXT) {
             return Html.apply(new MarkdownProcessor().markdown(toRawValue(field, value)));
         } else if (field.getDatatype() == Datatype.COLOUR) {
-            return Html.apply(new MarkdownProcessor().markdown(toColourValue(value)));
+            return Html.apply("<div class=\"colour-value\" style=\"background-color: " + value.textValue() + "\" />");
         } else {
             return Html.apply(toRawValue(field, value));
         }
@@ -134,10 +134,6 @@ public class Utils {
         } else {
             return value.textValue();
         }
-    }
-
-    private static String toColourValue(JsonNode value) {
-        return "<div class=\"colour-value\" style=\"background-color: " + value.textValue() + "\" />";
     }
 
     private static URIBuilder createUriWithFormat(String uriWithoutRepresentation, Format format) throws URISyntaxException {
