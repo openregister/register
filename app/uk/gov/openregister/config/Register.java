@@ -43,7 +43,9 @@ public abstract class Register {
 
     private String officialText;
     private String copyright;
-
+    private String registry;
+    private String registryName;
+    private String crestName;
 
     public final Store store() {
         if (store == null) {
@@ -66,6 +68,27 @@ public abstract class Register {
         return copyright;
     }
 
+    public synchronized String registry() {
+        if(registry == null) {
+            getOfficialTextForRegister();
+        }
+        return registry;
+    }
+
+    public synchronized String registryName() {
+        if(registryName == null) {
+            getRegistryDetails();
+        }
+        return registryName;
+    }
+
+    public synchronized String crestName() {
+        if(crestName == null) {
+            getRegistryDetails();
+        }
+        return crestName;
+    }
+
     private void getOfficialTextForRegister() {
         CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
         String rrUrl = curieResolver.resolve(new Curie("register", name())) + ".json";
@@ -80,6 +103,25 @@ public abstract class Register {
             if (rEntry.get("copyright") != null) {
                 final String markdownText = rEntry.get("copyright").textValue();
                 copyright = new MarkdownProcessor().markdown(markdownText);
+            }
+            if (rEntry.get("registry") != null) {
+                registry = rEntry.get("registry").textValue();
+            }
+        }
+    }
+
+    private void getRegistryDetails() {
+        CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
+        String rrUrl = curieResolver.resolve(new Curie("public-body", registry())) + "?_representation=json";
+        WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
+
+        if (rr.getStatus() == 200) {
+            JsonNode rEntry = rr.asJson().get("entry");
+            if (rEntry.get("name") != null) {
+                registryName = rEntry.get("name").textValue();
+            }
+            if (rEntry.get("crest") != null) {
+                crestName = rEntry.get("crest").textValue();
             }
         }
     }
