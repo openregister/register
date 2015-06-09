@@ -13,7 +13,9 @@
 
             <div class="registry">
                  <p class="registry-label">Provided by:</p>
-                 <img class="crest" src="@routes.Assets.at({s"images/crests/${register.crestName}.png"})"/>
+                 @if(register.crestName()) {
+                     <img class="crest" src="@routes.Assets.at({s"images/crests/${register.crestName}.png"})"/>
+                 }
                  <span class="registry-name"><a href="https://www.gov.uk/government/organisations/@register.registry()">@Html(register.registryName())</a></span>
             </div>
 

@@ -309,12 +309,12 @@ h2 {
 
 img.crest {
   width: 40px;
+  margin-right: 5px;
 }
 
 .registry-name {
   vertical-align: middle;
   font-size: 24px;
-  margin-left: 5px;
 }
 
 .registry-label {
