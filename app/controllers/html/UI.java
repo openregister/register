@@ -3,7 +3,7 @@ package controllers.html;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
-import controllers.api.HtmlRepresentation;
+import controllers.api.representation.HtmlRepresentation;
 import org.joda.time.DateTime;
 import play.mvc.BodyParser;
 import play.mvc.Result;
@@ -94,18 +94,20 @@ public class UI extends BaseController {
                 hash));
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, List<String>> convertToMapOfListValues(Map<String, ?> requestParams) {
-        Map<String, List<String>> stringListHashMap = new HashMap<>();
+        Map<String, List<String>> map = new HashMap<>();
         for (String key : requestParams.keySet()) {
-            if (requestParams.get(key) instanceof String[]) {
-                stringListHashMap.put(key, Arrays.asList((String[]) requestParams.get(key)));
-            } else if (requestParams.get(key) instanceof List) {
-                stringListHashMap.put(key, (List) requestParams.get(key));
+            Object qpValue = requestParams.get(key);
+            if (qpValue instanceof String[]) {
+                map.put(key, Arrays.asList((String[]) qpValue));
+            } else if (qpValue instanceof List) {
+                map.put(key, (List) qpValue);
             } else {
-                stringListHashMap.put(key, Arrays.asList((String) requestParams.get(key)));
+                map.put(key, Collections.singletonList((String) qpValue));
             }
         }
-        return stringListHashMap;
+        return map;
     }
 
     private Record createRecordFromQueryParams(Map<String, String[]> formParameters) {

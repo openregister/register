@@ -10,6 +10,8 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.model.Cardinality;
+import uk.gov.openregister.model.Field;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -71,8 +73,6 @@ public class ImportData extends BaseController {
     }
 
     private void importStream(String url, InputStream inputStream, WebSocket.Out<JsonNode> out) throws java.io.IOException {
-        boolean isTsv = url.endsWith(".tsv");
-        char cs = isTsv ? '\t' : ',';
 
         notifyProgress("Downloading raw data", false, false, 0, out);
 
@@ -80,10 +80,7 @@ public class ImportData extends BaseController {
         BufferedReader br = new BufferedReader(isr);
 
         CsvMapper mapper = new CsvMapper();
-        CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(cs).withHeader();
-        if (isTsv) {
-            schema = schema.withoutQuoteChar();
-        }
+        CsvSchema schema = getSchema(url.endsWith(".tsv"));
         MappingIterator<JsonNode> it = mapper.reader(JsonNode.class)
                 .with(schema)
                 .readValues(br);
@@ -105,6 +102,21 @@ public class ImportData extends BaseController {
         store.fastImport(records);
 
         notifyProgress("Imported successfully " + (int) counter + " records", true, true, counter, out);
+    }
+
+    private CsvSchema getSchema(boolean isTsv) {
+        CsvSchema.Builder builder = CsvSchema.builder().setColumnSeparator(isTsv ? '\t' : ',').setUseHeader(true);
+        if (isTsv) {
+            builder = builder.disableQuoteChar();
+        }
+        for (Field field : register.fields()) {
+            if (field.getCardinality() == Cardinality.MANY) {
+                builder = builder.addArrayColumn(field.getName(), ';');
+            } else {
+                builder = builder.addColumn(field.getName());
+            }
+        }
+        return builder.build();
     }
 
     private static void notifyProgress(String message, boolean done, boolean success, long count,  WebSocket.Out<JsonNode> out) {

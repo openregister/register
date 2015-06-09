@@ -1,4 +1,4 @@
-package controllers.api;
+package controllers.api.representation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.html.Pagination;
