@@ -19,6 +19,13 @@ public abstract class Datatype {
         }
     };
 
+    public static final Datatype COLOUR = new Datatype() {
+        @Override
+        public String getName() {
+            return "colour";
+        }
+    };
+
     public static final Datatype CURIE = new Datatype() {
         @Override
         public String getName() {
@@ -30,6 +37,22 @@ public abstract class Datatype {
 
 
     public abstract String getName();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Datatype)) return false;
+
+        Datatype datatype = (Datatype) o;
+
+        return getName().equals(datatype.getName());
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getName().hashCode();
+    }
 
     public static Datatype of(String s) {
         return knownTypes.stream().filter(dt -> dt.getName().equals(s)).findFirst().orElse(new Datatype() {
