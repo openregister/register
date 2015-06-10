@@ -31,7 +31,7 @@
                 </p>
 
                 <p class="label-text">
-                    Fields in this register:</p><p class="homepage-field-labels">@Html(register.fieldNames.map(f => controllers.html.Utils.toLink("field", f).body).mkString(", "))</p>
+                    Fields in this register:</p><p class="homepage-field-labels">@Html(register.fields.map(f => controllers.html.Utils.toLink(f).body).mkString(", "))</p>
             </div>
 
             @if(register.copyright()) {

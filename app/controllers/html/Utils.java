@@ -40,21 +40,24 @@ public class Utils {
     }
 
     public static Html toLink(Field field) {
-        return toLink("field", field.getName());
+        return toLink(Curie.of("field", field.getName()), field.getName());
     }
 
     public static Html toLink(Datatype datatype) {
-        return toLink("datatype", datatype.getName());
+        return toLink(Curie.of("datatype", datatype.getName()), datatype.getName());
     }
 
-    public static Html toLink(String register, String value) {
-        URI uri = toUri(register, value);
-        return Html.apply("<a class=\"link_to_register\" href=\"" + uri + "\">" + value + "</a>");
+    public static Html toLink(Curie curie, String linkText) {
+        URI uri = curieResolver().resolve(curie);
+        return toLink(uri, linkText);
     }
 
-    public static URI toUri(String register, String value) {
-        CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
-        return curieResolver.resolve(new Curie(register, value));
+    private static Html toLink(URI uri, String linkText) {
+        return Html.apply("<a class=\"link_to_register\" href=\"" + uri + "\">" + linkText + "</a>");
+    }
+
+    public static CurieResolver curieResolver() {
+        return new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
     }
 
     public static Html toRegisterLink(String registerName) {
@@ -127,10 +130,10 @@ public class Utils {
         } else if (value.isArray()) {
             return join(StreamUtils.asStream(value.elements()).map(e -> toRawValue(field, e)).collect(Collectors.toList()));
         } else if (field.getRegister().isPresent()) {
-            return toLink(field.getRegister().get(), value.textValue()).text();
+            return toLink(Curie.of(field.getRegister().get(), value.textValue()), value.textValue()).text();
         } else if (field.getDatatype() == Datatype.CURIE) {
             Optional<Curie> curie = Curie.of(value.textValue());
-            return curie.map(c -> toLink(c.namespace, c.identifier).text()).orElse(value.textValue());
+            return curie.map(c -> toLink(c, value.textValue()).text()).orElse(value.textValue());
         } else {
             return value.textValue();
         }

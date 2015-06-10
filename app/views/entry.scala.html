@@ -57,8 +57,8 @@
 
             <h3>Latest version:</h3>
             @defining({
-            val registerName = register.name;
-            controllers.html.Utils.toUri(registerName, record.getEntry.get(registerName).textValue)
+            val recordCurie = uk.gov.openregister.linking.Curie.of(register.name, record.getEntry.get(register.name).textValue)
+            controllers.html.Utils.curieResolver.resolve(recordCurie)
             }) { latestVersionUrl =>
             <p><a href="@latestVersionUrl">@latestVersionUrl</a></p>
             }

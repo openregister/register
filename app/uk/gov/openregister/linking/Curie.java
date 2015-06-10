@@ -11,6 +11,10 @@ public class Curie {
         this.identifier = identifier;
     }
 
+    public static Curie of(String namespace, String identifier) {
+        return new Curie(namespace, identifier);
+    }
+
     public static Optional<Curie> of(String raw) {
         try {
             String[] split = raw.split(":", 2);
