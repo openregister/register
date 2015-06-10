@@ -1,7 +1,7 @@
 package controllers.html;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import controllers.api.Representations;
+import controllers.api.representation.Format;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
@@ -25,15 +25,12 @@ public class Utils {
 
     public static Html toRepresentationLinks(String uri) throws URISyntaxException {
 
-        Representations.Format[] formats = Representations.Format.values();
-
-        List<NameValuePair> queryParams = new URIBuilder(uri).getQueryParams();
-
         String uriWithoutRepresentation = uri.replaceAll("([^\\?]+)(.*)", "$1").replaceAll("(.*?)(\\.[a-z]+)?$", "$1");
 
         StringBuilder linksHtml = new StringBuilder("");
 
-        for (Representations.Format format : formats) {
+        List<NameValuePair> queryParams = new URIBuilder(uri).getQueryParams();
+        for (Format format : Format.values()) {
             URIBuilder uriBuilder = createUriWithFormat(uriWithoutRepresentation, format);
             queryParams.forEach(nvPair -> uriBuilder.setParameter(nvPair.getName(), nvPair.getValue()));
             linksHtml.append(String.format("<a href=\"%s\" rel=\"alternate\">%s</a>, ", uriBuilder.build().toString(), format.name()));
@@ -98,6 +95,8 @@ public class Utils {
     public static Html toValue(Field field, JsonNode value) {
         if (field.getDatatype() == Datatype.TEXT) {
             return Html.apply(new MarkdownProcessor().markdown(toRawValue(field, value)));
+        } else if (field.getDatatype() == Datatype.COLOUR) {
+            return Html.apply("<div class=\"colour-value\" style=\"background-color: " + value.textValue() + "\" />");
         } else {
             return Html.apply(toRawValue(field, value));
         }
@@ -137,7 +136,7 @@ public class Utils {
         }
     }
 
-    private static URIBuilder createUriWithFormat(String uriWithoutRepresentation, Representations.Format format) throws URISyntaxException {
+    private static URIBuilder createUriWithFormat(String uriWithoutRepresentation, Format format) throws URISyntaxException {
         if (uriWithoutRepresentation.endsWith("search")) {
             URIBuilder uriBuilder = new URIBuilder(uriWithoutRepresentation);
             uriBuilder.setParameter("_representation", format.name());

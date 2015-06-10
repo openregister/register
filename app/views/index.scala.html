@@ -9,7 +9,14 @@
         <div class="small-12 large-8 columns">
             <div class="official-text">
                 @Html(register.officialText())
+            </div>
 
+            <div class="registry">
+                 <p class="registry-label">Provided by:</p>
+                 @if(register.crestName()) {
+                     <img class="crest" src="@routes.Assets.at({s"images/crests/${register.crestName}.png"})"/>
+                 }
+                 <span class="registry-name"><a href="https://www.gov.uk/government/organisations/@register.registry()">@Html(register.registryName())</a></span>
             </div>
 
             <div class="meta-entries">
@@ -62,6 +69,6 @@
 
 
         </div>
-    </div>   
+    </div>
 
 }

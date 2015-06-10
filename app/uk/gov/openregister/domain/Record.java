@@ -1,6 +1,5 @@
 package uk.gov.openregister.domain;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.joda.time.DateTime;
@@ -30,16 +29,6 @@ public class Record {
     private JsonNode entry;
     @JsonProperty("last-updated")
     private DateTime lastUpdated;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String previousEntryHash;
-
-    public String getPreviousEntryHash() {
-        return previousEntryHash;
-    }
-
-    public void setPreviousEntryHash(String previousEntryHash) {
-        this.previousEntryHash = previousEntryHash;
-    }
 
     public DateTime getLastUpdated() {
         return lastUpdated;

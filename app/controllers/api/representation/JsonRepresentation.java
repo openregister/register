@@ -1,11 +1,10 @@
-package controllers.api;
+package controllers.api.representation;
 
 import controllers.html.Pagination;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import uk.gov.openregister.JsonObjectMapper;
-import uk.gov.openregister.config.Register;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 
@@ -20,9 +19,8 @@ import static play.mvc.Results.status;
 
 public class JsonRepresentation implements Representation {
 
-    public static final String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
-    public static final String JSONP_CONTENT_TYPE = "application/javascript; charset=utf-8";
-    private final Register register;
+    public static final String JSON_CONTENT_TYPE = "application/json";
+    public static final String JSONP_CONTENT_TYPE = "application/javascript";
 
     public Result createdResponse() {
         Map<String, Object> result = new HashMap<>();
@@ -31,10 +29,6 @@ public class JsonRepresentation implements Representation {
         result.put("errors", emptyList());
 
         return status(202, asString(emptyMap(), result)).as(JSON_CONTENT_TYPE);
-    }
-
-    public JsonRepresentation(Register register) {
-        this.register = register;
     }
 
     @Override

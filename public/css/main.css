@@ -43,6 +43,7 @@ p.total {
   font-size: 24px;
   line-height: 30px;
   padding-right: 10px;
+  margin-bottom: 50px;
 }
 
 .official-text h1 {
@@ -60,7 +61,7 @@ p.total {
 }
 
 .meta-entries {
-  margin-top: 50px;
+  margin-top: 35px;
 }
 
 input.postfix {
@@ -150,7 +151,7 @@ input.postfix {
 
 }
 
-.footer { 
+.footer {
   padding-top: 150px;
   padding-bottom: 50px;
   margin-top: 60px;
@@ -303,6 +304,23 @@ h2 {
   margin-left: 0px;
 }
 
+
+/* registry */
+
+img.crest {
+  width: 40px;
+  margin-right: 5px;
+}
+
+.registry-name {
+  vertical-align: middle;
+  font-size: 24px;
+}
+
+.registry-label {
+  margin-bottom: 10px;
+}
+
 /* entries in registers*/
 .entry {
   background: #eceded;
@@ -448,7 +466,7 @@ a:hover.tooltips span.tooltips-text {
   visibility: visible;
   opacity: 0.8;
   z-index: 999;
-} 
+}
 
 span.tooltips-icon {
   background: #f9f9f9;
@@ -463,7 +481,7 @@ span.tooltips-icon {
   margin-right: 5px;
   margin-left: 5px;
   text-align: center;
-  width: 1.6em; 
+  width: 1.6em;
 }
 
 .search {
@@ -596,6 +614,12 @@ table.responsive  th  {
     width: 100%;
     padding-left: 0;
 }
+
+div.colour-value {
+  width: 20px;
+  height: 20px;
+}
+
 @media only screen and  (max-width: 64em) {
     .previous-next-navigation {
         width: 90%;
