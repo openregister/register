@@ -231,18 +231,6 @@ public class PostgresqlStore implements Store {
             return "entry->>'" + k + "' ILIKE '%" + map.get(k) + "%'";
     }
 
-    public List<Record> searchOld(String query, int offset, int limit, Optional<SearchHelper> sortBy) {
-        String sql = "";
-        if (!dbInfo.keys.isEmpty()) {
-            List<String> where = dbInfo.keys.stream()
-                    .map(k -> "entry->>'" + k + "' ILIKE '%" + query + "%'")
-                    .collect(Collectors.toList());
-            sql += " WHERE " + StringUtils.join(where, " OR ");
-        }
-
-        return executeSearch(sql, offset, limit, sortBy);
-    }
-
     @Override
     public List<Record> search(String query, int offset, int limit, Optional<SearchHelper> sortBy) {
         String sql = "";
