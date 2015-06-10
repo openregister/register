@@ -308,8 +308,10 @@ h2 {
 /* registry */
 
 img.crest {
-  width: 40px;
+  width: 45px;
   margin-right: 5px;
+  border-left: solid 0.17rem;
+  padding-left: 5px;
 }
 
 .registry-name {
