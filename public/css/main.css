@@ -323,6 +323,10 @@ img.crest {
   margin-bottom: 10px;
 }
 
+.registry-name a {
+  color: #000;
+}
+
 /* entries in registers*/
 .entry {
   background: #eceded;
