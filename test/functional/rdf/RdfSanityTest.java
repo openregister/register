@@ -41,19 +41,22 @@ public class RdfSanityTest extends ApplicationTests {
         assertThat(response.getBody()).isEqualTo(EXPECTED_TURTLE);
     }
 
-    public static final String EXPECTED_TURTLE_LIST = "@prefix field: <http://fields.openregister.org/field/>.\n" +
-            "\n" +
-            "<http://localhost:8888/hash/39837068f586ab19bcb2b5f2408b024438e75c43>\n" +
+    private static final String firstDoc = "<http://localhost:8888/hash/39837068f586ab19bcb2b5f2408b024438e75c43>\n" +
             "  field:test-register <http://localhost:8888/test-register/testregisterkey1> ;\n" +
             "  field:name \"The Entry1\" ;\n" +
             "  field:key1 \"value1\" ;\n" +
-            "  field:key2 \"A\", \"B\" .\n" +
-            "\n" +
-            "<http://localhost:8888/hash/b0c762fd934019b14a3ec88d775c6a037a09a74e>\n" +
+            "  field:key2 \"A\", \"B\" .\n";
+    private static final String secondDoc = "<http://localhost:8888/hash/b0c762fd934019b14a3ec88d775c6a037a09a74e>\n" +
             "  field:test-register <http://localhost:8888/test-register/testregisterkey2> ;\n" +
             "  field:name \"The Entry2\" ;\n" +
             "  field:key1 \"value2\" ;\n" +
             "  field:key2 \"C\", \"D\" .\n";
+    private static final String ttlPrefix = "@prefix field: <http://fields.openregister.org/field/>.\n";
+    public static final String EXPECTED_TURTLE_LIST = ttlPrefix +
+            "\n" +
+            firstDoc +
+            "\n" +
+            secondDoc;
 
     @Test
     public void testSearchAndRenderListOfResults() throws Exception {
@@ -63,6 +66,8 @@ public class RdfSanityTest extends ApplicationTests {
         WSResponse response = get("/search?_query=&_representation=ttl");
         assertThat(response.getStatus()).isEqualTo(OK);
         assertThat(response.getHeader("Content-type")).isEqualTo(TEXT_TURTLE);
-        assertThat(response.getBody()).isEqualTo(EXPECTED_TURTLE_LIST);
+        assertThat(response.getBody()).contains(firstDoc);
+        assertThat(response.getBody()).contains(secondDoc);
+        assertThat(response.getBody()).contains(ttlPrefix);
     }
 }
