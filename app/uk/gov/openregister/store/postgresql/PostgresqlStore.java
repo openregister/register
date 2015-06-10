@@ -261,8 +261,8 @@ public class PostgresqlStore implements Store {
 
         if (sortBy.isPresent()) {
             sql += sortBy.get().sortBy();
-        } else {
-            sql += searchSpec.getDefault().sortBy();
+//        } else {
+//            sql += searchSpec.getDefault().sortBy();
         }
         sql += " LIMIT " + limit;
         sql += " OFFSET " + offset;
