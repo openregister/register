@@ -282,15 +282,10 @@ public class PostgresqlStore implements Store {
         return sql;
     }
 
-    public long slowCount() {
-        return database.<Long>select("SELECT count(hash) FROM " + dbInfo.tableName + " AS count")
-                .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
-    }
-
     @Override
     public long count() {
-        return database.<Long>select("select to_char(reltuples, '9999999999') from pg_class where oid = 'public." + dbInfo.tableName + "'::regclass")
-                .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
+        return database.<Long>select("select to_char(reltuples, '9999999999')  from pg_class where oid = 'public." + dbInfo.tableName + "'::regclass")
+                .andThen(rs -> rs.next() ? rs.getLong(1) : 0);
     }
 
     @Override

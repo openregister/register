@@ -293,17 +293,6 @@ public class PostgresqlStoreTest {
     }
 
     @Test
-    public void testCount() {
-        String json1 = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
-        String json2 = "{\"store_tests\":\"differentValue\",\"anotherKey\":\"anotherValue\"}";
-
-        store.save(new Record(json1));
-        store.save(new Record(json2));
-
-        assertThat(store.count()).isEqualTo(2);
-    }
-
-    @Test
     public void testFastImport() throws JSONException {
         String json = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
         String json2 = "{\"store_tests\":\"aValue2\",\"anotherKey\":\"anotherValue2\"}";
