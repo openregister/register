@@ -133,7 +133,7 @@ public class Utils {
             return toLink(Curie.of(field.getRegister().get(), value.textValue()), value.textValue()).text();
         } else if (field.getDatatype() == Datatype.CURIE) {
             Optional<Curie> curie = Curie.of(value.textValue());
-            return curie.map(c -> toLink(c, c.identifier).text()).orElse(value.textValue());
+            return curie.map(c -> toLink(c, value.textValue()).text()).orElse(value.textValue());
         } else {
             return value.textValue();
         }
