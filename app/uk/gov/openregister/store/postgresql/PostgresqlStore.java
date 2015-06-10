@@ -73,10 +73,10 @@ public class PostgresqlStore implements Store {
                     r.next();
                     return r.getString(1);
                 }) == null) {
-            database.execute("CREATE INDEX " + tableName + "_entry_text_idx ON " + tableName + " USING gin(searchable)");
+            database.execute("CREATE INDEX " + tableName + "_searchable_idx ON " + tableName + " USING gin(searchable)");
             database.execute("CREATE INDEX " + tableName + "_lastUpdated_idx ON " + tableName + " (lastUpdated DESC)");
             database.execute("CLUSTER " + tableName + " using " + tableName + "_lastUpdated_idx");
-            database.execute("CREATE INDEX " + tableName + "_history_entry_text_idx ON " + tableName + "_history USING gin(searchable)");
+            database.execute("CREATE INDEX " + tableName + "_history_searchable_idx ON " + tableName + "_history USING gin(searchable)");
             database.execute("CREATE INDEX " + tableName + "_history_lastUpdated_idx ON " + tableName + "_history (lastUpdated DESC)");
             database.execute("CLUSTER " + tableName + "_history using " + tableName + "_history_lastUpdated_idx");
         }
@@ -282,10 +282,14 @@ public class PostgresqlStore implements Store {
         return sql;
     }
 
+    public long slowCount() {
+        return database.<Long>select("SELECT count(hash) FROM " + dbInfo.tableName + " AS count")
+                .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
+    }
 
     @Override
     public long count() {
-        return database.<Long>select("SELECT count(hash) FROM " + dbInfo.tableName + " AS count")
+        return database.<Long>select("select to_char(reltuples, '9999999999') from pg_class where oid = 'public." + dbInfo.tableName + "'::regclass")
                 .andThen(rs -> rs.next() ? rs.getLong("count") : 0);
     }
 
