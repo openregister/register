@@ -152,7 +152,7 @@ input.postfix {
 }
 
 .footer {
-  padding-top: 150px;
+  padding-top: 55px;
   padding-bottom: 50px;
   margin-top: 60px;
   vertical-align: baseline;
@@ -176,6 +176,7 @@ input.postfix {
  display: inline-block;
  position: relative;
  padding-left: 53px;
+ margin-top: 14%;
 }
 
 .open-government-licence p {
@@ -206,19 +207,12 @@ input.postfix {
   height: 100%;
 }
 
-.footer .copyright {
-  display: inline-block;
-  _margin-left: 5%;
-  _margin-top: 40px;
+.copyright img {
+  margin-bottom: 10px;
 }
 
-.footer .copyright a {
-  background-image: url(https://assets.digital.cabinet-office.gov.uk/static/images/govuk-crest-b077f42faf60948830e5d3347716d60b.png);
-  background-repeat: no-repeat;
-  background-position: 100% 0%;
-  text-align: right;
-  text-decoration: none;
-  padding: 115px 0 0 0;
+.copyright p {
+  font-size: 16px;
 }
 
 /* intro */
@@ -314,17 +308,23 @@ img.crest {
   padding-left: 5px;
 }
 
-.registry-name {
-  vertical-align: middle;
-  font-size: 24px;
-}
-
 .registry-label {
   margin-bottom: 10px;
 }
 
-.registry-name a {
+.registry-with-crest {
+  vertical-align: middle;
+  font-size: 24px;
+}
+
+.registry-with-crest a {
   color: #000;
+}
+
+.registry-no-crest {
+  vertical-align: middle;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 /* entries in registers*/
@@ -531,24 +531,6 @@ span.tooltips-icon {
   padding-left: 10em;
 }
 
-/*.footer {
-  margin-top: 30px;
-  padding-top: 15px;
-}
-
-#ogl-logo {
-  margin-top: 3px;
-}
-
-.open-government-licence {
-  margin-top: 35px;
-}
-
-.open-government-licence p {
-  font-size: 0.7rem;
-  margin-left: -10px;
-  line-height: 0.9rem;
-}*/
 
 hr.divider {
   border: solid #2372b5 !important;
@@ -789,4 +771,21 @@ div.colour-value {
   .intro p {
     margin-bottom: 4px;
   }
+
+  .copyright img {
+    margin-top: 25px;
+  }
+
 }
+
+@media only screen and (max-width: 64em) {
+  .intro p {
+    margin-bottom: 4px;
+  }
+
+  .copyright img {
+    margin-top: 25px;
+  }
+
+}
+

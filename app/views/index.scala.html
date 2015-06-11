@@ -14,8 +14,11 @@
                  <p class="registry-label">Provided by:</p>
                  @if(register.crestName()) {
                      <img class="crest" src="@routes.Assets.at({s"images/crests/${register.crestName}.png"})" style="border-color: @register.officialColour()"/>
+                     <span class="registry-with-crest"><a href="https://www.gov.uk/government/organisations/@register.registry()">@Html(register.registryName())</a></span>
+                 } else {
+                    <span class="registry-no-crest"><a href="https://www.gov.uk/government/organisations/@register.registry()">@Html(register.registryName())</a></span>
                  }
-                 <span class="registry-name"><a href="https://www.gov.uk/government/organisations/@register.registry()">@Html(register.registryName())</a></span>
+
             </div>
 
             <div class="meta-entries">
