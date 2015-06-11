@@ -19,6 +19,7 @@ public class App {
 
         // This is a hack for unit-tests
         if(host.startsWith("localhost")) return "test-register";
+        else if(host.endsWith("herokuapp.com")) return host.split("-")[0];
         else return host.replaceAll("([^\\.]+)\\.openregister\\..*", "$1");
     }
 
