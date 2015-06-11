@@ -1,6 +1,6 @@
 @(register: uk.gov.openregister.config.Register)
 
-@if(register.copyright()) {
+@if(org.apache.commons.lang3.StringUtils.isNotBlank(register.copyright())) {
 <div class="copyright">
     <p class="label-text">Copyright:</p>
     <div class="copyright-details">@Html(register.copyright())</div>
