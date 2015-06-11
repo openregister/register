@@ -99,7 +99,16 @@ public class Utils {
         if (field.getDatatype() == Datatype.TEXT) {
             return Html.apply(new MarkdownProcessor().markdown(toRawValue(field, value)));
         } else if (field.getDatatype() == Datatype.COLOUR) {
-            return Html.apply("<div class=\"colour-value\" style=\"background-color: " + value.textValue() + "\" />");
+            if(value.textValue().trim().isEmpty()) {
+                return Html.apply("");
+            } else {
+                return Html.apply(
+                    "<div class=\"colour-container\">" +
+                    "<div class=\"colour-value\" style=\"background-color: " + value.textValue() + "\" />" + 
+                    "<p class=\"colour-value\">" + value.textValue() + "</p>" +
+                    "</div>"
+                    );
+            }
         } else {
             return Html.apply(toRawValue(field, value));
         }
