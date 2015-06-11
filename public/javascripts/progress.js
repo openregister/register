@@ -2,18 +2,21 @@
 var myApp = angular.module('progressApp', [
            'mm.foundation'
     ])
-    .controller('progressCtrl', function ($rootScope) {
+    .controller('progressCtrl', ['$scope', function ($scope) {
 
-        $rootScope.isReadonly = false;
+        $scope.isReadonly = false;
 
-        $rootScope.dynamicObject = {
+        $scope.dynamicObject = {
             value: 0,
             text : "",
             type: ''
         };
 
-        $rootScope.loadData = function() {
-            $rootScope.isReadonly = true;
+        $scope.overwriteData = true;
+        $scope.dataSourceUrl = '';
+
+        $scope.loadData = function() {
+            $scope.isReadonly = true;
 
             //using play framework we get the absolute URL
             var wsUrl = jsRoutes.controllers.api.ImportData.progress().absoluteURL();
@@ -25,8 +28,9 @@ var myApp = angular.module('progressApp', [
 
             ws.onopen = function () {
                 console.log("Socket has been opened!");
-                var msg = { url: angular.element(document.querySelector('#url')).val() };
-                ws.send(JSON.stringify(msg))
+                var msg = { url: $scope.dataSourceUrl,
+                    overwriteData: $scope.overwriteData};
+                ws.send(JSON.stringify(msg));
                 console.log("Sent data to websocket: ", msg);
             };
 
@@ -38,14 +42,14 @@ var myApp = angular.module('progressApp', [
                 var messageObj = data;
                 console.log("Received data from websocket: ", messageObj);
                 //update the progress bar
-                $rootScope.dynamicObject.type = messageObj.success ? '' : 'alert';
-                $rootScope.dynamicObject.text = messageObj.text;
-                $rootScope.isReadonly = !messageObj.done;
-                $rootScope.$apply()
+                $scope.dynamicObject.type = messageObj.success ? '' : 'alert';
+                $scope.dynamicObject.text = messageObj.text;
+                $scope.isReadonly = !messageObj.done;
+                $scope.$apply()
             }
         }
 
-    })
+    }]);
 
 
 
