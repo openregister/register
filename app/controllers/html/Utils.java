@@ -99,7 +99,6 @@ public class Utils {
         if (field.getDatatype() == Datatype.TEXT) {
             return Html.apply(new MarkdownProcessor().markdown(toRawValue(field, value)));
         } else if (field.getDatatype() == Datatype.COLOUR) {
-            System.out.println(value);
             if(value.textValue().trim().isEmpty()) {
                 return Html.apply("");
             } else {
