@@ -18,7 +18,8 @@ var myApp = angular.module('progressApp', [
             //using play framework we get the absolute URL
             var wsUrl = jsRoutes.controllers.api.ImportData.progress().absoluteURL();
             //replace the protocol to http ws
-            wsUrl = wsUrl.replace("http", "ws");
+            wsUrl = wsUrl.replace("https", "wss");
+//            wsUrl = wsUrl.replace("http", "ws");
 
             // Create our websocket object with the address to the websocket
             var ws = new WebSocket(wsUrl);
