@@ -24,7 +24,7 @@ import static play.mvc.Results.ok;
 // data injection problems.
 public class TurtleRepresentation implements Representation {
 
-    public static final String TURTLE_HEADER = "@prefix field: <http://fields.openregister.org/field/>.\n" +
+    public static final String TURTLE_HEADER = "@prefix field: <http://field.openregister.org/field/>.\n" +
             "\n";
     public static final String TEXT_TURTLE = "text/turtle; charset=utf-8";
     private final CurieResolver curieResolver;
