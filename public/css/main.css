@@ -610,6 +610,10 @@ div.colour-container p {
   margin-left: 25px;
 }
 
+span.load-option {
+  margin-left: 5px;
+  font-weight: 400;
+}
 @media only screen and  (max-width: 64em) {
     .previous-next-navigation {
         width: 90%;

@@ -3,41 +3,46 @@
 
 @main(title) {
 
-@header(register.friendlyName)
-<div class="row">
-    <div class="small-12 large-12 columns">
+    @header(register.friendlyName)
+    <div class="row">
+        <div class="small-12 large-12 columns">
 
-        <h3>Import register data</h3>
+            <h3>Import register data</h3>
 
 
-        <div data-ng-app="progressApp">
-            <div ng-controller="progressCtrl">
+            <div data-ng-app="progressApp">
+                <div ng-controller="progressCtrl">
 
-                <form id="myform" data-abide>
+                    <form id="myform" data-abide>
+
+                        <div class="row collapse">
+                            <div class="small-9 columns">
+                                <input id="url" type="url" ng-model="dataSourceUrl" placeholder="Data source url (supports csv or tsv)" >
+                            </div>
+
+                            <div class="small-3 columns">
+                                <button ng-disabled="isReadonly" ng-click="isReadonly || loadData()" class="button postfix">
+                                    Import</button>
+                            </div>
+
+                        </div>
+                        <div>
+                            <input type="checkbox" ng-model="overwriteData" class="load-option" id="overwrite-data" name="overwrite-data" >
+                                <span class="load-option">Overwrite existing data?</span>
+                        </div>
+                    </form>
 
                     <div class="row collapse">
-                        <div class="small-9 columns">
-                            <input id="url" type="url" placeholder="Data source url (supports csv or tsv)" >
-                        </div>
-
-                        <div class="small-3 columns">
-                            <button ng-disabled="isReadonly" ng-click="isReadonly || loadData()" class="button postfix">Import</button>
-                        </div>
-
+                        <p class="progressState">{{dynamicObject.text}}</p>
                     </div>
-                </form>
-
-                <div class="row collapse">
-                    <p class="progressState">{{dynamicObject.text}}</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js"></script>
-<script src="//pineconellc.github.io/angular-foundation/mm-foundation-tpls-0.6.0.js"></script>
-<script type="text/javascript" src="@api.routes.ImportData.javascriptRoutes"></script>
-<script type="text/javascript" src="@routes.Assets.at("javascripts/progress.js")")"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js"></script>
+    <script src="//pineconellc.github.io/angular-foundation/mm-foundation-tpls-0.6.0.js"></script>
+    <script type="text/javascript" src="@api.routes.ImportData.javascriptRoutes"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/progress.js")" )"></script>
 
 
 }
