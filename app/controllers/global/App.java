@@ -19,7 +19,7 @@ public class App {
 
         // This is a hack for unit-tests
         if(host.startsWith("localhost")) return "test-register";
-        else return host.replaceAll("([^\\.]+)\\.openregister\\..*", "$1");
+        else return host.replaceAll("([^\\.]+)\\.(openregister|arknoon)\\..*", "$1");
     }
 
     private Register __getRegister(String registerName) {

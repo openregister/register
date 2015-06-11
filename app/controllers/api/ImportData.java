@@ -26,7 +26,7 @@ import java.util.zip.ZipInputStream;
 
 public class ImportData extends BaseController {
 
-    public static final int BATCH_SIZE = 1000;
+    public static final int BATCH_SIZE = 20000;
 
     public Result loadWithProgress() {
         return ok(views.html.load.render(register, "Data import"));
@@ -73,6 +73,8 @@ public class ImportData extends BaseController {
 
     private void importStream(String url, InputStream inputStream, WebSocket.Out<JsonNode> out, boolean overwriteData) throws java.io.IOException {
 
+        long startTime = System.currentTimeMillis();
+
         notifyProgress("Downloading raw data", false, false, 0, out);
 
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
@@ -100,8 +102,8 @@ public class ImportData extends BaseController {
             }
         }
         store.fastImport(records);
-
-        notifyProgress("Imported successfully " + (int) counter + " records", true, true, counter, out);
+        long timeTaken = System.currentTimeMillis() - startTime;
+        notifyProgress("Imported successfully " + (int) counter + " records, time taken: " + timeTaken + " millis" , true, true, counter, out);
     }
 
     private CsvSchema getSchema(boolean isTsv) {
