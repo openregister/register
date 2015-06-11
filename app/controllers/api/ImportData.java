@@ -26,7 +26,7 @@ import java.util.zip.ZipInputStream;
 
 public class ImportData extends BaseController {
 
-    public static final int BATCH_SIZE = 1000;
+    public static final int BATCH_SIZE = 20000;
 
     public Result loadWithProgress() {
         return ok(views.html.load.render(register, "Data import"));
