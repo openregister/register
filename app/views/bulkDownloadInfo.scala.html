@@ -15,13 +15,8 @@
                 <p><a href="/download.torrent">Download the whole history of this register</a> as a CSV by bittorrent.</p>
                 <p>Once you have downloaded your copy of the register, you can keep your local copy up to date with the <a href="/latest">latest changes.</a></p>
             </main>
-            @if(register.copyright()) {
-                <div class="copyright">
-                    <p class="label-text">Copyright:</p>
-                    <div class="copyright-details">@Html(register.copyright())</div>
 
-                </div>
-            }
+            @copyright(register)
 
         </div>
 
