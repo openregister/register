@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
+import play.libs.Json;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseConflictException;
@@ -61,7 +62,7 @@ public class PostgresqlStore implements Store {
         try (Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
-            final String searchableText = canonicalizeEntryText(record.normalisedEntry());
+            final String searchableText = canonicalizeEntryText(record.getEntry());
             try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, lastUpdated, searchable) " +
                     "( select ?,?,?,to_tsvector(?)  where not exists ( select 1 from " + dbInfo.tableName + " where entry ->>?=?))")) {
                 st.setObject(1, hash);
@@ -98,7 +99,7 @@ public class PostgresqlStore implements Store {
             PGobject entryObject = createPGObject(record.normalisedEntry());
             entryObject.setType("jsonb");
             Timestamp timestamp = new Timestamp(record.getLastUpdated().getMillis());
-            String searchableText = canonicalizeEntryText(record.normalisedEntry());
+            String searchableText = canonicalizeEntryText(record.getEntry());
 
             try (PreparedStatement st = connection.prepareStatement("INSERT INTO " + dbInfo.tableName + " (hash, entry, lastUpdated, previousEntryHash, searchable) " +
                     "( select ?,?,?,?,to_tsvector(?)  where exists ( select 1 from " + dbInfo.tableName + " where hash=? and entry ->>?=?))")) {
@@ -217,7 +218,7 @@ public class PostgresqlStore implements Store {
         sql += where;
 
         if (historic) {
-            sql+= "  ORDER BY lastUpdated DESC";
+            sql += "  ORDER BY lastUpdated DESC";
         }
         sql += " LIMIT " + limit;
         sql += " OFFSET " + offset;
@@ -250,7 +251,7 @@ public class PostgresqlStore implements Store {
                     st1.setObject(1, hash);
                     st1.setObject(2, entryObject);
                     st1.setTimestamp(3, timestamp);
-                    st1.setString(4, canonicalizeEntryText(record.normalisedEntry()));
+                    st1.setString(4, canonicalizeEntryText(record.getEntry()));
                     st1.addBatch();
 
                     st2.setObject(1, hash);
@@ -269,13 +270,19 @@ public class PostgresqlStore implements Store {
         }
     }
 
-    private String canonicalizeEntryText(String entryText) {
-        return entryText.replaceAll("[\\{\\}-]", " ")
-                .replaceAll(",?\"[^\"]+\":", " ")
-                .replaceAll("[\"']", " ")
-                .replaceAll("[ \\t]{2,}", " ")
-                .toLowerCase();
+    @SuppressWarnings("unchecked")
+    public static String canonicalizeEntryText(JsonNode entry) {
+        return ((Map<String, Object>) Json.fromJson(entry, Map.class))
+                .values()
+                .stream()
+                .map(v -> {
+                    if (v instanceof List) return String.join(" ", (List<String>) v);
+                    else return v.toString();
+                })
+                .filter(s -> !s.trim().equals(""))
+                .collect(Collectors.joining(" "));
     }
+
 
     private String fullTrim(String toTrim) {
         return toTrim.replaceAll("[\\p{Blank}\\p{Punct}]+", " & ")

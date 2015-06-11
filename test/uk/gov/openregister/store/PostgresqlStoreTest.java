@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import play.libs.Json;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.postgresql.DBInfo;
@@ -262,7 +263,7 @@ public class PostgresqlStoreTest {
         q.put("anotherKey", "anotherValue");
         List<Record> records = store.search(q, 0, 100, false, false);
         assertThat(records.size()).isEqualTo(1);
-        JSONAssert.assertEquals(json1,  records.get(0).getEntry().toString(), true);
+        JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
         assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
     }
 
@@ -308,5 +309,12 @@ public class PostgresqlStoreTest {
         Optional<Record> r2 = store.findByKV("store_tests", "aValue2");
         JSONAssert.assertEquals(json2, r2.get().getEntry().toString(), true);
         assertThat(r2.get().getHash()).isEqualTo("21f5b193781e765d07a85fbf9e805aaab5adc375");
+    }
+
+    @Test
+    public void canonicalizeEntryText_convertsTheEntryToSpaceSepareatedDataOnly() {
+        String entry = "{\"key1\": \"value1\", \"key2\" :\"value2\",\"key3\":\"2012-11-11\", \"key4\":[ \"value4\", \"value5\" ]}";
+        String data = PostgresqlStore.canonicalizeEntryText(Json.parse(entry));
+        assertEquals("value1 value2 2012-11-11 value4 value5", data);
     }
 }
