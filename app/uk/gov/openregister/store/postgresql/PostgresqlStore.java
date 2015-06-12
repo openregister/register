@@ -185,9 +185,8 @@ public class PostgresqlStore implements Store {
     public List<Record> search(Map<String, String> map, int offset, int limit, boolean historic, boolean exact) {
         String sql = "";
         if (!map.isEmpty()) {
-            List<String> where = map.keySet().stream()
-                    .map(k -> toMatchStatement(map, k, exact))
-                    .collect(Collectors.toList());
+            List<String> where = map.keySet().stream().map(k -> toMatchStatement(map, k, exact)).collect(Collectors.toList());
+
             sql += " WHERE " + StringUtils.join(where, " AND ");
         }
 
@@ -195,18 +194,18 @@ public class PostgresqlStore implements Store {
 
     }
 
-    private String toMatchStatement(Map<String, String> map, String k, boolean exact) {
+    private String toMatchStatement(Map<String, String> map, String key, boolean exact) {
         if (exact)
-            return "entry->>'" + k + "'='" + map.get(k) + "'";
+            return String.format("entry->>'%s'='%s'", key, map.get(key));
         else
-            return "entry->>'" + k + "' ILIKE '%" + map.get(k) + "%'";
+            return "entry->>'" + key + "' ILIKE '%" + map.get(key) + "%'";
     }
 
     @Override
     public List<Record> search(String query, int offset, int limit, boolean historic) {
         String sql = "";
         if (!dbInfo.keys.isEmpty()) {
-            String where = fullTrim(query);
+            String where = query.replaceAll("[\\p{Blank}]+", " & ");
             if (!query.trim().isEmpty())
                 sql += " WHERE searchable @@ to_tsquery('" + where + "')";
         }
@@ -283,12 +282,6 @@ public class PostgresqlStore implements Store {
                 })
                 .filter(s -> !s.trim().equals(""))
                 .collect(Collectors.joining(" "));
-    }
-
-
-    private String fullTrim(String toTrim) {
-        return toTrim.replaceAll("[\\p{Blank}\\p{Punct}]+", " & ")
-                .toLowerCase();
     }
 
     //TODO: this will be deleted when we know the datatype of primary key
