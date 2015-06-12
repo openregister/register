@@ -9,10 +9,10 @@ import java.util.Optional;
 public class Pagination {
     private URIBuilder uriBuilder;
     int page;
-    long total;
+    int total;
     int pageSize;
 
-    public Pagination(URIBuilder uriBuilder, int page, int pageSize, long total) {
+    public Pagination(URIBuilder uriBuilder, int page, int total, int pageSize) {
         this.uriBuilder = uriBuilder;
         this.page = page;
         this.total = total;
@@ -31,7 +31,11 @@ public class Pagination {
         return page;
     }
 
-    public long getTotalPages() {
+    public int getTotal() {
+        return total;
+    }
+
+    public int getTotalPages() {
         if (total % pageSize != 0) return (total / pageSize) + 1;
         else return total / pageSize;
     }
