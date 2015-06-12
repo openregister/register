@@ -36,15 +36,19 @@ public class ImportData extends BaseController {
         return WebSocket.whenReady((in, out) -> new Thread(() -> {
             in.onMessage(urlj -> {
                 JsonNode url = urlj.get("url");
+                JsonNode overwriteDataNode = urlj.get("overwriteData");
                 if (url == null || url.asText().isEmpty())
                     notifyProgress("Failed. Invalid url provided", true, true, 0, out);
-                else readAndSaveToDb(url.asText(), out);
+                else {
+                    boolean overwriteData = !(overwriteDataNode == null || !overwriteDataNode.asBoolean());
+                    readAndSaveToDb(url.asText(), out, overwriteData);
+                }
             });
 
         }).start());
     }
 
-    private void readAndSaveToDb(String url, WebSocket.Out<JsonNode> out) {
+    private void readAndSaveToDb(String url, WebSocket.Out<JsonNode> out, boolean overwriteData) {
         try {
 
             if (url.endsWith(".zip")) {
@@ -54,11 +58,11 @@ public class ImportData extends BaseController {
                 while ((entry = zipInputStream.getNextEntry()) != null) {
                     if (!entry.isDirectory()) {
                         notifyProgress("Found '" + entry.getName() + "' in zip file, importing....", false, false, 0, out);
-                        importStream(entry.getName(), zipInputStream, out);
+                        importStream(entry.getName(), zipInputStream, out, overwriteData);
                     }
                 }
             } else {
-                importStream(url, new URL(url).openStream(), out);
+                importStream(url, new URL(url).openStream(), out, overwriteData);
             }
 
         } catch (Exception e) {
@@ -67,7 +71,7 @@ public class ImportData extends BaseController {
         }
     }
 
-    private void importStream(String url, InputStream inputStream, WebSocket.Out<JsonNode> out) throws java.io.IOException {
+    private void importStream(String url, InputStream inputStream, WebSocket.Out<JsonNode> out, boolean overwriteData) throws java.io.IOException {
 
         long startTime = System.currentTimeMillis();
 
@@ -81,8 +85,10 @@ public class ImportData extends BaseController {
                 .readValues(br);
         long counter = 0;
 
-        notifyProgress("Dropping existing data", false, false, counter, out);
-        store.deleteAll();
+        if(overwriteData) {
+            notifyProgress("Dropping existing data", false, false, counter, out);
+            store.deleteAll();
+        }
         List<Record> records = new ArrayList<>();
 
         while (it.hasNext()) {

@@ -32,7 +32,7 @@ public class UtilsTest extends ApplicationTests {
     @Test
     public void testRenderACurie() throws Exception {
 
-        assertThat(Utils.toValue(FIELD_WITH_CURIE, Json.parse("\"person-or-company:an-id\"")).text()).isEqualTo("<a class=\"link_to_register\" href=\"http://localhost:8888/person-or-company/an-id\">an-id</a>");
+        assertThat(Utils.toValue(FIELD_WITH_CURIE, Json.parse("\"person-or-company:an-id\"")).text()).isEqualTo("<a class=\"link_to_register\" href=\"http://localhost:8888/person-or-company/an-id\">person-or-company:an-id</a>");
     }
 
     @Test

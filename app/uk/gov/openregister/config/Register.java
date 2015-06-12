@@ -46,6 +46,7 @@ public abstract class Register {
     private String registry;
     private String registryName;
     private String crestName;
+    private String officialColour;
 
     public final Store store() {
         if (store == null) {
@@ -89,6 +90,13 @@ public abstract class Register {
         return crestName;
     }
 
+    public synchronized String officialColour() {
+        if(officialColour == null) {
+            getRegistryDetails();
+        }
+        return officialColour;
+    }
+
     private void getOfficialTextForRegister() {
         CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
         String rrUrl = curieResolver.resolve(new Curie("register", name())) + ".json";
@@ -122,6 +130,9 @@ public abstract class Register {
             }
             if (rEntry.get("crest") != null) {
                 crestName = rEntry.get("crest").textValue();
+            }
+            if (rEntry.get("official-colour") != null) {
+                officialColour = rEntry.get("official-colour").textValue();
             }
         }
     }

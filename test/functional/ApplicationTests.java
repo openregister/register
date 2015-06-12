@@ -23,7 +23,7 @@ import static play.test.Helpers.testServer;
 public class ApplicationTests {
 
     public static final int PORT = 3333;
-    public static final long TIMEOUT = 10000L;
+    public static final long TIMEOUT = 1000000L;
     public static final String REGISTER = "test-register";
     public static final String BASE_URL = String.format("http://localhost:%s", PORT);
 

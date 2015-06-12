@@ -10,13 +10,15 @@
             <div class="official-text">
                 @Html(register.officialText())
             </div>
-
             <div class="registry">
                  <p class="registry-label">Provided by:</p>
                  @if(register.crestName()) {
-                     <img class="crest" src="@routes.Assets.at({s"images/crests/${register.crestName}.png"})"/>
+                     <img class="crest" src="@routes.Assets.at({s"images/crests/${register.crestName}.png"})" style="border-color: @register.officialColour()"/>
+                     <span class="registry-with-crest"><a href="https://www.gov.uk/government/organisations/@register.registry()">@Html(register.registryName())</a></span>
+                 } else {
+                    <span class="registry-no-crest"><a href="https://www.gov.uk/government/organisations/@register.registry()">@Html(register.registryName())</a></span>
                  }
-                 <span class="registry-name"><a href="https://www.gov.uk/government/organisations/@register.registry()">@Html(register.registryName())</a></span>
+
             </div>
 
             <div class="meta-entries">
@@ -32,16 +34,10 @@
                 </p>
 
                 <p class="label-text">
-                    Fields in this register:</p><p class="homepage-field-labels">@Html(register.fieldNames.map(f => controllers.html.Utils.toLink("field", f).body).mkString(", "))</p>
+                    Fields in this register:</p><p class="homepage-field-labels">@Html(register.fields.map(f => controllers.html.Utils.toLink(f).body).mkString(", "))</p>
             </div>
 
-            @if(register.copyright()) {
-                <div class="copyright">
-                    <p class="label-text">Copyright:</p>
-                    <div class="copyright-details">@Html(register.copyright())</div>
-
-                </div>
-            }
+            @copyright(register)
 
         </div>
 

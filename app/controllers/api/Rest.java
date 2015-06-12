@@ -15,6 +15,7 @@ import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseException;
+import uk.gov.openregister.store.SearchSpec;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
@@ -148,27 +149,23 @@ public class Rest extends BaseController {
         int effectiveLimit = representation.isPaginated() ? pager.pageSize : ALL_ENTRIES_LIMIT;
 
         List<Record> records;
-        int total;
         Map<String, String[]> queryParameters = request.queryString();
         if (queryParameters.containsKey("_query")) {
-            records = store.search(queryParameters.get("_query")[0], 0, ALL_ENTRIES_LIMIT, historic);
-            total = records.size();
+            records = store.search(queryParameters.get("_query")[0], effectiveOffset, effectiveLimit, historic);
         } else {
             Map<String, String> searchParamsMap = queryParameters.keySet().stream().filter(k -> !k.startsWith("_")).collect(Collectors.toMap(key -> key, key -> queryParameters.get(key)[0]));
-
-            records = store.search(searchParamsMap, 0, ALL_ENTRIES_LIMIT, historic, queryParameters.containsKey("_exact") && queryParameters.get("_exact")[0].equals("true"));
-            total = records.size();
+            records = store.search(searchParamsMap, effectiveOffset, effectiveLimit, historic, queryParameters.containsKey("_exact") && queryParameters.get("_exact")[0].equals("true"));
         }
 
         URIBuilder uriBuilder = new URIBuilder(request.uri());
 
-        Pagination pagination = new Pagination(uriBuilder, pager.page, total, pager.pageSize);
+        Pagination pagination = new Pagination(uriBuilder, pager.page, pager.pageSize, store.count());
 
         return F.Promise.promise(() -> {
             if (pagination.pageDoesNotExist())
                 return new HtmlRepresentation(register).toResponse(404, "Page not found");
             else return representation.toListOfRecords(
-                    records.subList(effectiveOffset, (effectiveOffset + effectiveLimit < total ? effectiveOffset + effectiveLimit : total)),
+                    records,
                     request,
                     pagination
             );
