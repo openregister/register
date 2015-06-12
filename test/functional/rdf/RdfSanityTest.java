@@ -51,12 +51,7 @@ public class RdfSanityTest extends ApplicationTests {
             "  field:name \"The Entry2\" ;\n" +
             "  field:key1 \"value2\" ;\n" +
             "  field:key2 \"C\", \"D\" .\n";
-    private static final String ttlPrefix = "@prefix field: <http://fields.openregister.org/field/>.\n";
-    public static final String EXPECTED_TURTLE_LIST = ttlPrefix +
-            "\n" +
-            firstDoc +
-            "\n" +
-            secondDoc;
+    private static final String ttlPrefix = "@prefix field: <http://field.openregister.org/field/>.\n";
 
     @Test
     public void testSearchAndRenderListOfResults() throws Exception {

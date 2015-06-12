@@ -15,7 +15,6 @@ import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseException;
-import uk.gov.openregister.store.SearchSpec;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
