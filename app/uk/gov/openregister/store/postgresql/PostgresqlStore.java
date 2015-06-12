@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
 import play.libs.Json;
@@ -181,24 +180,21 @@ public class PostgresqlStore implements Store {
         return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.historyTableName + " WHERE hash = ?", hash).andThen(this::toOptionalRecord);
     }
 
+    @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
     @Override
     public List<Record> search(Map<String, String> map, int offset, int limit, boolean historic, boolean exact) {
-        String sql = "";
+        final StringBuilder sqlBuilder = new StringBuilder("");
         if (!map.isEmpty()) {
-            List<String> where = map.keySet().stream().map(k -> toMatchStatement(map, k, exact)).collect(Collectors.toList());
-
-            sql += " WHERE " + StringUtils.join(where, " AND ");
+            sqlBuilder.append(" WHERE ");
+            if (exact) {
+                sqlBuilder .append(map.keySet().stream().map(k -> String.format("entry @> '{\"%s\"=\"%s\"}'", k, map.get(k))).collect(Collectors.joining(" AND ")));
+            } else {
+                sqlBuilder.append("hash in (SELECT hash FROM " + dbInfo.tableName + " WHERE searchable @@ to_tsquery('" + map.values().stream().collect(Collectors.joining("&")) + "'))");
+                map.forEach((k,v) -> sqlBuilder.append(" AND entry->>'" + k + "' ILIKE '%" + map.get(k) + "%'"));
+            }
         }
 
-        return executeSearch(sql, offset, limit, historic);
-
-    }
-
-    private String toMatchStatement(Map<String, String> map, String key, boolean exact) {
-        if (exact)
-            return String.format("entry->>'%s'='%s'", key, map.get(key));
-        else
-            return "entry->>'" + key + "' ILIKE '%" + map.get(key) + "%'";
+        return executeSearch(sqlBuilder.toString(), offset, limit, historic);
     }
 
     @Override
