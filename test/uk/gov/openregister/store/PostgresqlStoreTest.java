@@ -317,4 +317,25 @@ public class PostgresqlStoreTest {
         String data = PostgresqlStore.canonicalizeEntryText(Json.parse(entry));
         assertEquals("value1 value2 2012-11-11 value4 value5", data);
     }
+
+    @Test
+    public void testCount() {
+        assertEquals(0, store.count());
+
+        String json = "{\"store_tests\":\"aValue\",\"anotherKey\":\"anotherValue\"}";
+        Record record1 = new Record(json);
+        store.save(record1);
+        assertEquals(1, store.count());
+
+        String json2 = "{\"store_tests\":\"aValue2\",\"anotherKey\":\"anotherValue2\"}";
+        Record record2 = new Record(json2);
+        store.save(record2);
+        assertEquals(2, store.count());
+
+        String json3 = "{\"store_tests\":\"aValue2\",\"anotherKey\":\"updatedanotherValue2\"}";
+        Record record3 = new Record(json3);
+        store.update(record2.getHash(), record3);
+        assertEquals(2, store.count());
+
+    }
 }

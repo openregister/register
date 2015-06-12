@@ -25,33 +25,13 @@ import java.util.stream.Collectors;
 public class PostgresqlStore implements Store {
     private final DBInfo dbInfo;
     private Database database;
+    private final DatabaseSchema databaseSchema;
 
     public PostgresqlStore(DBInfo dbInfo, DataSource dataSource) {
         this.dbInfo = dbInfo;
         this.database = new Database(dataSource);
-
-        createTables(dbInfo.tableName);
-    }
-
-    public void createTables(String tableName) {
-        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40), searchable tsvector)");
-        database.execute("CREATE TABLE IF NOT EXISTS " + tableName + "_history (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40))");
-        if (database.select("SELECT to_regclass('public." + tableName + "_lastUpdated_idx')")
-                .andThen(r -> {
-                    r.next();
-                    return r.getString(1);
-                }) == null) {
-
-
-            database.execute("CREATE INDEX " + tableName + "_entry_idx ON " + tableName + " USING gin (entry)");
-            database.execute("CREATE INDEX " + tableName + "_searchable_idx ON " + tableName + " USING gin(searchable)");
-
-            database.execute("CREATE INDEX " + tableName + "_lastUpdated_idx ON " + tableName + " (lastUpdated DESC)");
-            database.execute("CLUSTER " + tableName + " using " + tableName + "_lastUpdated_idx");
-
-            database.execute("CREATE INDEX " + tableName + "_history_lastUpdated_idx ON " + tableName + "_history (lastUpdated DESC)");
-            database.execute("CLUSTER " + tableName + "_history using " + tableName + "_history_lastUpdated_idx");
-        }
+        databaseSchema = new DatabaseSchema(database, dbInfo);
+        databaseSchema.createIfNotExist();
     }
 
     @Override
@@ -140,9 +120,8 @@ public class PostgresqlStore implements Store {
 
     @Override
     public void deleteAll() {
-        database.execute("DROP TABLE IF EXISTS " + dbInfo.tableName);
-        database.execute("DROP TABLE IF EXISTS " + dbInfo.historyTableName);
-        createTables(dbInfo.tableName);
+        databaseSchema.drop();
+        databaseSchema.createIfNotExist();
     }
 
     @Override
@@ -187,10 +166,10 @@ public class PostgresqlStore implements Store {
         if (!map.isEmpty()) {
             sqlBuilder.append(" WHERE ");
             if (exact) {
-                sqlBuilder .append(map.keySet().stream().map(k -> String.format("entry @> '{\"%s\"=\"%s\"}'", k, map.get(k))).collect(Collectors.joining(" AND ")));
+                sqlBuilder.append(map.keySet().stream().map(k -> String.format("entry @> '{\"%s\"=\"%s\"}'", k, map.get(k))).collect(Collectors.joining(" AND ")));
             } else {
                 sqlBuilder.append("hash in (SELECT hash FROM " + dbInfo.tableName + " WHERE searchable @@ to_tsquery('" + map.values().stream().collect(Collectors.joining("&")) + "'))");
-                map.forEach((k,v) -> sqlBuilder.append(" AND entry->>'" + k + "' ILIKE '%" + map.get(k) + "%'"));
+                map.forEach((k, v) -> sqlBuilder.append(" AND entry->>'" + k + "' ILIKE '%" + map.get(k) + "%'"));
             }
         }
 
@@ -225,8 +204,7 @@ public class PostgresqlStore implements Store {
 
     @Override
     public long count() {
-        return database.<Long>select("select to_char(reltuples, '9999999999')  from pg_class where oid = 'public." + dbInfo.tableName + "'::regclass")
-                .andThen(rs -> rs.next() ? rs.getLong(1) : 0);
+        return database.<Long>select("select count from " + dbInfo.tableName + "_row_count").andThen(rs -> rs.next() ? rs.getLong(1) : 0);
     }
 
     @Override
