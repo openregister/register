@@ -133,6 +133,7 @@ public class Rest extends BaseController {
         );
     }
 
+    @SuppressWarnings("UnusedParameters")
     public F.Promise<Result> corsPreflight(String all) {
         response().setHeader("Access-Control-Allow-Origin", "*");
         response().setHeader("Allow", "*");

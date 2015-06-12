@@ -43,7 +43,7 @@ public class PostgresqlStore implements Store {
                     return r.getString(1);
                 }) == null) {
 
-//            database.execute("CREATE INDEX " + tableName + "_searchable_idx ON " + tableName + " USING gin(searchable)");
+            database.execute("CREATE INDEX " + tableName + "_searchable_idx ON " + tableName + " USING gin(searchable)");
 
             database.execute("CREATE INDEX " + tableName + "_lastUpdated_idx ON " + tableName + " (lastUpdated DESC)");
             database.execute("CLUSTER " + tableName + " using " + tableName + "_lastUpdated_idx");
