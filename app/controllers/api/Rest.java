@@ -149,24 +149,27 @@ public class Rest extends BaseController {
         int effectiveLimit = representation.isPaginated() ? pager.pageSize : ALL_ENTRIES_LIMIT;
 
         List<Record> records;
+        int total;
         Map<String, String[]> queryParameters = request.queryString();
         if (queryParameters.containsKey("_query")) {
-            records = store.search(queryParameters.get("_query")[0], effectiveOffset, effectiveLimit, sortBy);
+            records = store.search(queryParameters.get("_query")[0], 0, ALL_ENTRIES_LIMIT, sortBy);
+            total = records.size();
         } else {
             Map<String, String> searchParamsMap = queryParameters.keySet().stream().filter(k -> !k.startsWith("_")).collect(Collectors.toMap(key -> key, key -> queryParameters.get(key)[0]));
 
-            records = store.search(searchParamsMap, effectiveOffset, effectiveLimit, sortBy, queryParameters.containsKey("_exact") && queryParameters.get("_exact")[0].equals("true"));
+            records = store.search(searchParamsMap, 0, ALL_ENTRIES_LIMIT, sortBy, queryParameters.containsKey("_exact") && queryParameters.get("_exact")[0].equals("true"));
+            total = records.size();
         }
 
         URIBuilder uriBuilder = new URIBuilder(request.uri());
 
-        Pagination pagination = new Pagination(uriBuilder, pager.page, pager.pageSize, store.count());
+        Pagination pagination = new Pagination(uriBuilder, pager.page, total, pager.pageSize);
 
         return F.Promise.promise(() -> {
             if (pagination.pageDoesNotExist())
                 return new HtmlRepresentation(register).toResponse(404, "Page not found");
             else return representation.toListOfRecords(
-                    records,
+                    records.subList(effectiveOffset, (effectiveOffset + effectiveLimit < total ? effectiveOffset + effectiveLimit : total)),
                     request,
                     pagination
             );
