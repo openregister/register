@@ -43,6 +43,8 @@ public class PostgresqlStore implements Store {
                     return r.getString(1);
                 }) == null) {
 
+
+            database.execute("CREATE INDEX " + tableName + "_entry_idx ON " + tableName + " USING gin (entry)");
             database.execute("CREATE INDEX " + tableName + "_searchable_idx ON " + tableName + " USING gin(searchable)");
 
             database.execute("CREATE INDEX " + tableName + "_lastUpdated_idx ON " + tableName + " (lastUpdated DESC)");
@@ -146,8 +148,8 @@ public class PostgresqlStore implements Store {
 
     @Override
     public Optional<Record> findByKV(String key, String value) {
-        return database.<Optional<Record>>select("SELECT * FROM " + dbInfo.tableName + " WHERE entry ->>'" + key + "'='" + value + "'")
-                .andThen(this::toOptionalRecord);
+        String query = String.format("SELECT * FROM %s WHERE entry @> '{\"%s\":\"%s\"}'::jsonb", dbInfo.tableName, key, value);
+        return database.<Optional<Record>>select(query).andThen(this::toOptionalRecord);
     }
 
     @Override
