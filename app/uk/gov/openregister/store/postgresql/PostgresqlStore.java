@@ -168,7 +168,7 @@ public class PostgresqlStore implements Store {
             if (exact) {
                 sqlBuilder.append(map.keySet().stream().map(k -> String.format("entry @> '{\"%s\"=\"%s\"}'", k, map.get(k))).collect(Collectors.joining(" AND ")));
             } else {
-                sqlBuilder.append("hash in (SELECT hash FROM " + dbInfo.tableName + " WHERE searchable @@ to_tsquery('" + map.values().stream().collect(Collectors.joining("&")) + "'))");
+                sqlBuilder.append("hash in (SELECT hash FROM " + dbInfo.tableName + " WHERE searchable @@ to_tsquery('" + map.values().stream().collect(Collectors.joining("&")).replaceAll("\\s", "&") + "'))");
                 map.forEach((k, v) -> sqlBuilder.append(" AND entry->>'" + k + "' ILIKE '%" + map.get(k) + "%'"));
             }
         }
