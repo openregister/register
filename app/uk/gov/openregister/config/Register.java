@@ -9,6 +9,8 @@ import uk.gov.openregister.linking.Curie;
 import uk.gov.openregister.linking.CurieResolver;
 import uk.gov.openregister.model.Field;
 import uk.gov.openregister.store.Store;
+import uk.gov.openregister.store.elasticsearch.ESInfo;
+import uk.gov.openregister.store.elasticsearch.ElasticSearchImporter;
 import uk.gov.openregister.store.postgresql.DBInfo;
 import uk.gov.openregister.store.postgresql.PostgresqlStore;
 
@@ -22,6 +24,7 @@ public abstract class Register {
     public static final int TIMEOUT = 30000;
     private static final BasicDataSource dataSource;
     private Store store;
+    private ElasticSearchImporter elasticSearchImporter;
 
     static {
         try {
@@ -52,6 +55,11 @@ public abstract class Register {
         if (store == null) {
             store = new PostgresqlStore(new DBInfo(name(), name().toLowerCase(), fieldNames()), dataSource);
         }
+
+        if (elasticSearchImporter == null) {
+            elasticSearchImporter = new ElasticSearchImporter(store, new ESInfo(ApplicationConf.getString("es.url"), name().toLowerCase()));
+        }
+
         return store;
     }
 
