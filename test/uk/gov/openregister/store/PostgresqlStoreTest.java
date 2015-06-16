@@ -209,7 +209,7 @@ public class PostgresqlStoreTest {
         HashMap<String, String> q = new HashMap<>();
 
         q.put("store_tests", "aValue");
-        List<Record> records = store.search(q, 0, 100, false, false);
+        List<Record> records = store.search(q, 0, 100, false, false).getRight();
         assertThat(records.size()).isEqualTo(1);
         JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
         assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
@@ -226,7 +226,7 @@ public class PostgresqlStoreTest {
         HashMap<String, String> q = new HashMap<>();
 
         q.put("store_tests", "aValue");
-        List<Record> records = store.search(q, 0, 100, false, false);
+        List<Record> records = store.search(q, 0, 100, false, false).getRight();
         assertThat(records.size()).isEqualTo(1);
         JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
         assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
@@ -243,7 +243,7 @@ public class PostgresqlStoreTest {
         HashMap<String, String> q = new HashMap<>();
 
         q.put("store_tests", "avalue");
-        List<Record> records = store.search(q, 0, 100, false, false);
+        List<Record> records = store.search(q, 0, 100, false, false).getRight();
         assertThat(records.size()).isEqualTo(1);
         JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
         assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
@@ -261,7 +261,7 @@ public class PostgresqlStoreTest {
 
         q.put("store_tests", "avalue");
         q.put("anotherKey", "anotherValue");
-        List<Record> records = store.search(q, 0, 100, false, false);
+        List<Record> records = store.search(q, 0, 100, false, false).getRight();
         assertThat(records.size()).isEqualTo(1);
         JSONAssert.assertEquals(json1, records.get(0).getEntry().toString(), true);
         assertThat(records.get(0).getHash()).isEqualTo("0b5f9e93b101ba410da10279229b6e0aa1411b85");
@@ -277,7 +277,7 @@ public class PostgresqlStoreTest {
 
         HashMap<String, String> q = new HashMap<>();
 
-        List<Record> records = store.search(q, 0, 100, false, false);
+        List<Record> records = store.search(q, 0, 100, false, false).getRight();
         assertThat(records.size()).isEqualTo(2);
     }
 
@@ -289,7 +289,7 @@ public class PostgresqlStoreTest {
         store.save(new Record(json1));
         store.save(new Record(json2));
 
-        List<Record> records = store.search("avalue1", 0, 100, false);
+        List<Record> records = store.search("avalue1", 0, 100, false).getRight();
         assertThat(records.size()).isEqualTo(2);
     }
 

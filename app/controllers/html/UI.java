@@ -26,7 +26,7 @@ public class UI extends BaseController {
 
     public Result index() {
         long count = store.count();
-        Optional<DateTime> lastUpdated = store.search("", 0, 1, false)
+        Optional<DateTime> lastUpdated = store.search("", 0, 1, false).getRight()
                 .stream().findFirst().map(Record::getLastUpdated);
         String lastUpdatedUI = lastUpdated
                 .map(datetime -> datetime.toString("dd MMM yyyy"))

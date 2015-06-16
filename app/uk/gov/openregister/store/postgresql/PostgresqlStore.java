@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.postgresql.util.PGobject;
 import play.libs.Json;
@@ -161,7 +162,7 @@ public class PostgresqlStore implements Store {
 
     @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
     @Override
-    public List<Record> search(Map<String, String> map, int offset, int limit, boolean historic, boolean exact) {
+    public Pair<Long, List<Record>> search(Map<String, String> map, int offset, int limit, boolean historic, boolean exact) {
         final StringBuilder sqlBuilder = new StringBuilder("");
         if (!map.isEmpty()) {
             sqlBuilder.append(" WHERE ");
@@ -177,10 +178,10 @@ public class PostgresqlStore implements Store {
     }
 
     @Override
-    public List<Record> search(String query, int offset, int limit, boolean historic) {
+    public Pair<Long, List<Record>> search(String query, int offset, int limit, boolean historic) {
         String sql = "";
         if (!dbInfo.keys.isEmpty()) {
-            String where = query.replaceAll("[\\p{Blank}]+", " & ");
+            String where = query.replaceAll("\\p{Blank}+", " & ");
             if (!query.trim().isEmpty())
                 sql += " WHERE searchable @@ to_tsquery('" + where + "')";
         }
@@ -188,10 +189,16 @@ public class PostgresqlStore implements Store {
         return executeSearch(sql, offset, limit, historic);
     }
 
-    private List<Record> executeSearch(String where, int offset, int limit, boolean historic) {
+    private Pair<Long, List<Record>> executeSearch(String where, int offset, int limit, boolean historic) {
         String sql = "SELECT * FROM " + (historic ? dbInfo.historyTableName : dbInfo.tableName);
 
         sql += where;
+
+        //hack to solve the pagination issue
+        Long totalRecords = database.<Long>select(sql.replaceAll("^SELECT \\*", "SELECT count(*)")).andThen(rs -> {
+            rs.next();
+            return rs.getLong(1);
+        });
 
         if (historic) {
             sql += "  ORDER BY lastUpdated DESC";
@@ -199,7 +206,7 @@ public class PostgresqlStore implements Store {
         sql += " LIMIT " + limit;
         sql += " OFFSET " + offset;
 
-        return database.<List<Record>>select(sql).andThen(this::getRecords);
+        return Pair.of(totalRecords, database.<List<Record>>select(sql).andThen(this::getRecords));
     }
 
     @Override

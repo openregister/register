@@ -1,5 +1,6 @@
 package uk.gov.openregister.store;
 
+import org.apache.commons.lang3.tuple.Pair;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 
@@ -25,9 +26,9 @@ public interface Store {
 
     Optional<Record> findByHash(String hash);
 
-    List<Record> search(Map<String, String> map, int offset, int limit, boolean historic, boolean exact);
+    Pair<Long, List<Record>> search(Map<String, String> map, int offset, int limit, boolean historic, boolean exact);
 
-    List<Record> search(String query, int offset, int limit, boolean historic);
+    Pair<Long, List<Record>> search(String query, int offset, int limit, boolean historic);
 
     long count();
 

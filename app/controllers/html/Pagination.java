@@ -8,40 +8,36 @@ import java.util.Optional;
 
 public class Pagination {
     private URIBuilder uriBuilder;
-    int page;
-    int total;
-    int pageSize;
+    private int page;
+    private int pageSize;
+    private long total;
 
-    public Pagination(URIBuilder uriBuilder, int page, int total, int pageSize) {
-        this.uriBuilder = uriBuilder;
+    public Pagination(String uri, int page, int pageSize, long total) throws URISyntaxException {
+        this.uriBuilder = new URIBuilder(uri);
         this.page = page;
-        this.total = total;
         this.pageSize = pageSize;
+        this.total = total;
     }
 
     public Optional<String> linkToPreviousPage() throws URISyntaxException {
-        return Optional.ofNullable(page > 0 ? uriBuilder.setParameter(Pager.PAGE_PARAM, "" + (page - 1)).build().toString() : null);
+        return Optional.ofNullable(page > 1 ? uriBuilder.setParameter(Pager.PAGE_PARAM, "" + (page - 1)).build().toString() : null);
     }
 
     public Optional<String> linkToNextPage() throws URISyntaxException {
-        return Optional.ofNullable((total / pageSize) > page ? uriBuilder.setParameter(Pager.PAGE_PARAM, "" + (page + 1)).build().toString() : null);
+        return Optional.ofNullable(getTotalPages() > page ? uriBuilder.setParameter(Pager.PAGE_PARAM, "" + (page + 1)).build().toString() : null);
     }
 
-    public int getPage() {
+    public int currentPage() {
         return page;
     }
 
-    public int getTotal() {
-        return total;
-    }
-
-    public int getTotalPages() {
+    public long getTotalPages() {
         if (total % pageSize != 0) return (total / pageSize) + 1;
         else return total / pageSize;
     }
 
     public boolean pageDoesNotExist() {
-        return page >= getTotalPages();
+        return page > getTotalPages();
     }
 
 }

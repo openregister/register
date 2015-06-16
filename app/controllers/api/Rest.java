@@ -8,7 +8,7 @@ import controllers.api.representation.JsonRepresentation;
 import controllers.api.representation.Representation;
 import controllers.html.Pagination;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Result;
@@ -145,35 +145,36 @@ public class Rest extends BaseController {
     private F.Promise<Result> findByQuery(String format, Pager pager, boolean historic) throws Exception {
         Representation representation = representationFrom(format);
 
-        int effectiveOffset = representation.isPaginated() ? pager.page * pager.pageSize : 0;
+        int effectiveOffset = representation.isPaginated() ? (pager.page - 1) * pager.pageSize : Pager.FIRST_PAGE - 1;
         int effectiveLimit = representation.isPaginated() ? pager.pageSize : ALL_ENTRIES_LIMIT;
 
-        List<Record> records;
-        int total;
+        Pair<Long, List<Record>> searchResult = searchResult(effectiveOffset, effectiveLimit, historic);
+
+        Pagination pagination = new Pagination(
+                request.uri(),
+                pager.page,
+                pager.pageSize,
+                searchResult.getLeft()
+        );
+
+        return pagination.pageDoesNotExist() ?
+                F.Promise.promise(() -> new HtmlRepresentation(register).toResponse(404, "Page not found")) :
+                F.Promise.promise(() -> representation.toListOfRecords(
+                        searchResult.getRight(),
+                        request,
+                        pagination
+                ));
+
+    }
+
+    private Pair<Long, List<Record>> searchResult(int effectiveOffset, int effectiveLimit, boolean historic) {
         Map<String, String[]> queryParameters = request.queryString();
         if (queryParameters.containsKey("_query")) {
-            records = store.search(queryParameters.get("_query")[0], 0, ALL_ENTRIES_LIMIT, historic);
-            total = records.size();
+            return store.search(queryParameters.get("_query")[0], effectiveOffset, effectiveLimit, historic);
         } else {
             Map<String, String> searchParamsMap = queryParameters.keySet().stream().filter(k -> !k.startsWith("_")).collect(Collectors.toMap(key -> key, key -> queryParameters.get(key)[0]));
-
-            records = store.search(searchParamsMap, 0, ALL_ENTRIES_LIMIT, historic, queryParameters.containsKey("_exact") && queryParameters.get("_exact")[0].equals("true"));
-            total = records.size();
+            return store.search(searchParamsMap, effectiveOffset, effectiveLimit, historic, queryParameters.containsKey("_exact") && queryParameters.get("_exact")[0].equals("true"));
         }
-
-        URIBuilder uriBuilder = new URIBuilder(request.uri());
-
-        Pagination pagination = new Pagination(uriBuilder, pager.page, total, pager.pageSize);
-
-        return F.Promise.promise(() -> {
-            if (pagination.pageDoesNotExist())
-                return new HtmlRepresentation(register).toResponse(404, "Page not found");
-            else return representation.toListOfRecords(
-                    records.subList(effectiveOffset, (effectiveOffset + effectiveLimit < total ? effectiveOffset + effectiveLimit : total)),
-                    request,
-                    pagination
-            );
-        });
     }
 
     private Representation representationFrom(String format) {

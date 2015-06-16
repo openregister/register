@@ -1,9 +1,9 @@
 @(pagination: controllers.html.Pagination)
 <ul class="previous-next-navigation">
     @if(pagination.linkToPreviousPage().isPresent) {
-    <li class="previous"><a href=@pagination.linkToPreviousPage().get>Previous <span class="visuallyhidden">page</span><span class="page-numbers">@{pagination.getPage} of @pagination.getTotalPages</span></a></li>
+    <li class="previous"><a href=@pagination.linkToPreviousPage().get>Previous <span class="visuallyhidden">page</span><span class="page-numbers">@{pagination.currentPage - 1} of @pagination.getTotalPages</span></a></li>
     }
     @if(pagination.linkToNextPage().isPresent) {
-    <li class="next"><a href=@pagination.linkToNextPage().get>Next <span class="visuallyhidden">page</span><span class="page-numbers">@{pagination.getPage + 2} of @pagination.getTotalPages</span></a></li>
+    <li class="next"><a href=@pagination.linkToNextPage().get>Next <span class="visuallyhidden">page</span><span class="page-numbers">@{pagination.currentPage + 1} of @pagination.getTotalPages</span></a></li>
     }
 </ul>
