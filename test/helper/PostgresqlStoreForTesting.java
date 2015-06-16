@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.joda.time.DateTime;
-import uk.gov.openregister.domain.Record;
+import uk.gov.openregister.store.postgresql.DBInfo;
+import uk.gov.openregister.store.postgresql.Database;
+import uk.gov.openregister.store.postgresql.DatabaseSchema;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -35,23 +37,11 @@ public class PostgresqlStoreForTesting {
     }
 
     public static void createTables(String tableName) throws SQLException, ClassNotFoundException {
-
-        try (Connection conn = DriverManager.getConnection(POSTGRESQL_URI); Statement st = conn.createStatement()) {
-            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + " (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40))");
-            st.execute("CREATE TABLE IF NOT EXISTS " + normalized(tableName) + "_history (hash varchar(40) primary key,entry jsonb, lastUpdated timestamp without time zone, previousEntryHash varchar(40))");
-        }
-    }
-
-    private static String normalized(String tableName) {
-        return tableName.replaceAll("-", "_");
+        new DatabaseSchema(new Database(dataSource()), new DBInfo(normalized(tableName), normalized(tableName), null)).createIfNotExist();
     }
 
     public static void dropTables(String tableName) throws Exception {
-
-        try (Connection conn = DriverManager.getConnection(POSTGRESQL_URI); Statement st = conn.createStatement()) {
-            st.execute("DROP TABLE IF EXISTS " + normalized(tableName));
-            st.execute("DROP TABLE IF EXISTS " + normalized(tableName) + "_history");
-        }
+        new DatabaseSchema(new Database(dataSource()), new DBInfo(normalized(tableName), normalized(tableName), null)).drop();
     }
 
     public static List<DataRow> findAll(String tableName) {
@@ -81,5 +71,9 @@ public class PostgresqlStoreForTesting {
         }
 
         return result;
+    }
+
+    private static String normalized(String tableName) {
+        return tableName.replaceAll("-", "_");
     }
 }

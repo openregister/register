@@ -2,7 +2,6 @@ package uk.gov.openregister.store;
 
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
-import uk.gov.openregister.store.SearchSpec.SearchHelper;
 
 import java.util.List;
 import java.util.Map;
@@ -26,13 +25,11 @@ public interface Store {
 
     Optional<Record> findByHash(String hash);
 
-    List<Record> search(Map<String, String> map, int offset, int limit, Optional<SearchHelper> Key, boolean exact);
+    List<Record> search(Map<String, String> map, int offset, int limit, boolean historic, boolean exact);
 
-    List<Record> search(String query, int offset, int limit, Optional<SearchHelper> sortBy);
+    List<Record> search(String query, int offset, int limit, boolean historic);
 
     long count();
-
-    SearchSpec getSearchSpec();
 
     void update(String hash, Record record);
 }

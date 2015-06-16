@@ -15,7 +15,6 @@ import play.mvc.Result;
 import uk.gov.openregister.domain.Record;
 import uk.gov.openregister.domain.RecordVersionInfo;
 import uk.gov.openregister.store.DatabaseException;
-import uk.gov.openregister.store.SearchSpec;
 import uk.gov.openregister.validation.ValidationError;
 import uk.gov.openregister.validation.Validator;
 
@@ -104,7 +103,7 @@ public class Rest extends BaseController {
         return findByQuery(
                 format,
                 pager,
-                Optional.of(store.getSearchSpec().getDefault())
+                false
         );
     }
 
@@ -122,7 +121,7 @@ public class Rest extends BaseController {
         return findByQuery(
                 format,
                 pager,
-                Optional.of(store.getSearchSpec().getLastUpdate())
+                true
         );
     }
 
@@ -130,10 +129,11 @@ public class Rest extends BaseController {
         return findByQuery(
                 request.getQueryString(REPRESENTATION_QUERY_PARAM),
                 pager,
-                Optional.empty()
+                false
         );
     }
 
+    @SuppressWarnings("UnusedParameters")
     public F.Promise<Result> corsPreflight(String all) {
         response().setHeader("Access-Control-Allow-Origin", "*");
         response().setHeader("Allow", "*");
@@ -142,7 +142,7 @@ public class Rest extends BaseController {
         return F.Promise.pure(ok());
     }
 
-    private F.Promise<Result> findByQuery(String format, Pager pager, Optional<SearchSpec.SearchHelper> sortBy) throws Exception {
+    private F.Promise<Result> findByQuery(String format, Pager pager, boolean historic) throws Exception {
         Representation representation = representationFrom(format);
 
         int effectiveOffset = representation.isPaginated() ? pager.page * pager.pageSize : 0;
@@ -152,12 +152,12 @@ public class Rest extends BaseController {
         int total;
         Map<String, String[]> queryParameters = request.queryString();
         if (queryParameters.containsKey("_query")) {
-            records = store.search(queryParameters.get("_query")[0], 0, ALL_ENTRIES_LIMIT, sortBy);
+            records = store.search(queryParameters.get("_query")[0], 0, ALL_ENTRIES_LIMIT, historic);
             total = records.size();
         } else {
             Map<String, String> searchParamsMap = queryParameters.keySet().stream().filter(k -> !k.startsWith("_")).collect(Collectors.toMap(key -> key, key -> queryParameters.get(key)[0]));
 
-            records = store.search(searchParamsMap, 0, ALL_ENTRIES_LIMIT, sortBy, queryParameters.containsKey("_exact") && queryParameters.get("_exact")[0].equals("true"));
+            records = store.search(searchParamsMap, 0, ALL_ENTRIES_LIMIT, historic, queryParameters.containsKey("_exact") && queryParameters.get("_exact")[0].equals("true"));
             total = records.size();
         }
 
