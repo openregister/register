@@ -17,16 +17,15 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ImportData extends BaseController {
 
-    public static final int BATCH_SIZE = 20000;
+    public static final int BATCH_SIZE = 2000;
 
     public Result loadWithProgress() {
         return ok(views.html.load.render(register, "Data import"));
@@ -79,13 +78,14 @@ public class ImportData extends BaseController {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
-        CsvSchema schema = getSchema(url.endsWith(".tsv"));
-        MappingIterator<JsonNode> it = new CsvMapper().reader(JsonNode.class)
+        CsvSchema schema = getSchema(br.readLine(), url.endsWith(".tsv"));
+        MappingIterator<JsonNode> it = new CsvMapper()
+                .reader(JsonNode.class)
                 .with(schema)
                 .readValues(br);
         long counter = 0;
 
-        if(overwriteData) {
+        if (overwriteData) {
             notifyProgress("Dropping existing data", false, false, counter, out);
             store.deleteAll();
         }
@@ -103,22 +103,37 @@ public class ImportData extends BaseController {
         }
         store.fastImport(records);
         long timeTaken = System.currentTimeMillis() - startTime;
-        notifyProgress("Imported successfully " + (int) counter + " records, time taken: " + timeTaken + " millis" , true, true, counter, out);
+        notifyProgress("Imported successfully " + (int) counter + " records, time taken: " + timeTaken + " millis", true, true, counter, out);
     }
 
-    private CsvSchema getSchema(boolean isTsv) {
-        CsvSchema.Builder builder = CsvSchema.builder().setColumnSeparator(isTsv ? '\t' : ',').setUseHeader(true);
+    private CsvSchema getSchema(String header, boolean isTsv) {
+
+        char columnSeparator = isTsv ? '\t' : ',';
+
+        CsvSchema.Builder builder = CsvSchema.builder().setColumnSeparator(columnSeparator);
         if (isTsv) {
             builder = builder.disableQuoteChar();
         }
-        for (Field field : register.fields()) {
+
+        for (Field field : getRegisterFieldsInOrderWithFileHeader(header, columnSeparator)) {
             if (field.getCardinality() == Cardinality.MANY) {
                 builder = builder.addArrayColumn(field.getName(), ';');
             } else {
                 builder = builder.addColumn(field.getName());
             }
         }
+
         return builder.build();
+    }
+
+    private Set<Field> getRegisterFieldsInOrderWithFileHeader(String header, char columnSeparator) {
+        Set<Field> registerFieldsInOrderWithFileHeader = Stream.of(header.split(columnSeparator + ""))
+                .map(element -> register.fields().stream().filter(f -> f.getName().equals(element)).findFirst().get())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        registerFieldsInOrderWithFileHeader.addAll(register.fields());
+
+        return registerFieldsInOrderWithFileHeader;
     }
 
     private static void notifyProgress(String message, boolean done, boolean success, long count, WebSocket.Out<JsonNode> out) {
