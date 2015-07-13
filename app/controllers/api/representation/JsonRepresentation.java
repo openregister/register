@@ -48,7 +48,9 @@ public class JsonRepresentation implements Representation {
         data.add(meta);
         data.addAll(records);
 
-        String resultsString = asString(request.queryString(), data);
+
+        // for the moment just use records
+        String resultsString = asString(request.queryString(), records);
 
         Results.Status ok = ok(resultsString);
         return request.queryString().get("_callback") != null ? ok.as(JSONP_CONTENT_TYPE) : ok.as(JSON_CONTENT_TYPE);
