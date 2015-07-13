@@ -40,6 +40,10 @@ public class Pagination {
         else return total / pageSize;
     }
 
+    public int getPageSize() {
+        return pageSize;
+    }
+
     public boolean pageDoesNotExist() {
         return page >= getTotalPages();
     }
