@@ -44,7 +44,7 @@ public class RegisterRegister extends Register {
             WSResponse fr = WS.client().url(fieldsUrl).execute().get(TIMEOUT);
 
             if (fr.getStatus() == 200) {
-                fieldsField.setAllowedValues(Optional.of(StreamUtils.asStream(fr.asJson().elements()).skip(1).map(e -> e.get("entry").get("field").textValue()).collect(Collectors.toList())));
+                fieldsField.setAllowedValues(Optional.of(StreamUtils.asStream(fr.asJson().elements()).map(e -> e.get("entry").get("field").textValue()).collect(Collectors.toList())));
             }
         }
 

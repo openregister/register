@@ -44,13 +44,12 @@ public class JsonRepresentation implements Representation {
         meta.put( "page_size", pagination.getPageSize() );
         meta.put( "total_pages", pagination.getTotalPages());
         meta.put( "total_entries", pagination.getTotal());
-        List<Object> data = new ArrayList<Object>();
-        data.add(meta);
-        data.addAll(records);
 
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put( "meta", meta );
+        responseMap.put( "entries", records );
 
-        // for the moment just use records
-        String resultsString = asString(request.queryString(), records);
+        String resultsString = asString(request.queryString(), responseMap);
 
         Results.Status ok = ok(resultsString);
         return request.queryString().get("_callback") != null ? ok.as(JSONP_CONTENT_TYPE) : ok.as(JSON_CONTENT_TYPE);
