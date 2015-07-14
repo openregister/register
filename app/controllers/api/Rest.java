@@ -152,7 +152,8 @@ public class Rest extends BaseController {
         int total;
         Map<String, String[]> queryParameters = request.queryString();
         if (queryParameters.containsKey("_query")) {
-            records = store.search(queryParameters.get("_query")[0], 0, ALL_ENTRIES_LIMIT, historic);
+            String query = queryParameters.get("_query")[0];
+            records = store.search(query, 0, ALL_ENTRIES_LIMIT, historic);
             total = records.size();
         } else {
             Map<String, String> searchParamsMap = queryParameters.keySet().stream().filter(k -> !k.startsWith("_")).collect(Collectors.toMap(key -> key, key -> queryParameters.get(key)[0]));
