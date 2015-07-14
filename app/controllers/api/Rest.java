@@ -29,7 +29,7 @@ import static java.util.Collections.singletonList;
 public class Rest extends BaseController {
 
     private static final String REPRESENTATION_QUERY_PARAM = "_representation";
-    private static final int ALL_ENTRIES_LIMIT = 1000;
+    private static final int ALL_ENTRIES_LIMIT = 5000;
 
     @BodyParser.Of(BodyParser.Json.class)
     public Result create() throws JsonProcessingException {
