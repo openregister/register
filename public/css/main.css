@@ -16,6 +16,11 @@ p, dl, ul, label {
   font-size:1.2rem;
 }
 
+p.label-text,
+p.registry-label {
+  font-size:1.0rem;
+}
+
 .button {
   background:#2372B5;
   border-bottom:5px solid #255c8a;
