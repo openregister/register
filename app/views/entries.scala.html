@@ -7,20 +7,17 @@
 
     <div class="row">
         <div class="large-4 columns">
-
             @defining( if(pagination.getTotal() > 1) {"entries"} else {"entry"}) { entryMessage =>
 
                 @if(pagination.getTotal() > 0) {
-                    <h4>@pagination.getTotal() @entryMessage @if(request.getQueryString("_query")) {
+                    <h4 class="search">@pagination.getTotal() @entryMessage @if(request.getQueryString("_query")) {
                         <span>found for</span>
                     }</h4>
                 } else {
-                    <h4>Search register entries</h4>
+                    <h4 class="search">Search register entries</h4>
                 }
             }
-
-            <p>@play.Play.application().configuration().getString("register.searchtext")</p>
-            <form action="/search">
+            <form action="/search" id="search-form">
                 <div class="row collapse">
                     <div class="small-8 large-11 columns">
                         <input name="_query" type="text" placeholder="Enter search term"

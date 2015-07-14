@@ -489,15 +489,11 @@ span.tooltips-icon {
 }
 
 .search {
-  padding-bottom: 10px;
-  visibility: hidden;
+  margin-bottom: 10px;
 }
 
-#search-input {
-  margin-left: 5px;
-  font-family:monospace;
-  height: 1.2rem;
-  border-radius: 0.3rem;
+#search-form {
+  margin-bottom: 20px;
 }
 
 /* representations */
