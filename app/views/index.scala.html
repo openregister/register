@@ -22,7 +22,6 @@
             </div>
 
             <div class="meta-entries">
-
                 <p class="label-text">Total entries:</p>
                 <p class="big-number">
                     <a href=@controllers.api.routes.Rest.all("", controllers.api.Pager.DEFAULT_PAGER)>@count </a>
@@ -32,9 +31,6 @@
                 <p class="big-meta">
                     <a href=@controllers.api.routes.Rest.latest("", controllers.api.Pager.DEFAULT_PAGER)>@lastUpdated</a>
                 </p>
-
-                <p class="label-text">
-                    Fields in this register:</p><p class="homepage-field-labels">@Html(register.fields.map(f => controllers.html.Utils.toLink(f).body).mkString(", "))</p>
             </div>
 
             @copyright(register)
@@ -42,7 +38,6 @@
         </div>
 
         <div class="small-12 large-4 columns nav">
-
             <h4 class="search"">Search register entries</h4>
             <form action="/search">
                 <div class="row collapse">
@@ -54,14 +49,29 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
 
-            <ul class="side-nav">
-                <li><a href="http://www.openregister.org/">About registers</a></li>
-                <li><a href="http://www.openregister.org/developer">Developer documentation</a></li>
-                <li><a href="/download">Download all entries</a></li>
-            </ul>
-
-
+    <div class="row">
+        <div class="information">
+            <div class="row">
+                <div class="large-8 columns information-column">
+                    <h2>Information for developers</h2>
+                    <p class="information-copy">Registers are made up of entries containing fields of data. To build services on top
+                        of these registers you can access the data in a variety of formats. </p>
+                    <p class="label-text">Fields in this register:</p>
+                    <p class="homepage-field-labels">
+                    @Html(register.fields.map(f => controllers.html.Utils.toLink(f).body).mkString(", "))
+                    </p>
+                </div>
+                <div class="large-4 columns">
+                    <ul class="information-nav">
+                        <li><a href="http://www.openregister.org/">About registers</a></li>
+                        <li><a href="http://www.openregister.org/developer">Developer documentation</a></li>
+                        <li><a href="/download">Download all entries</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 

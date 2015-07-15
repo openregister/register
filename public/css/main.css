@@ -581,7 +581,7 @@ table.responsive  th  {
 /* history for an entry */
 
 .history h2 {
-  font-size: 1.5rem;
+  font-size: inherit;
 }
 
 .history h3 {
@@ -592,6 +592,39 @@ table.responsive  th  {
 
 .history p {
   font-size: 1rem;
+}
+
+.information h2 {
+  font-size: 1.5rem;
+  border-top: none;
+}
+
+.information {
+  margin: 35px 15px 15px 15px;
+  padding: 25px;
+  background-color: #F8F8F8;
+  border: 1px solid #BFC1C3;
+}
+
+p.information-copy {
+  line-height: 1.25rem;
+  font-size: 1rem;
+}
+
+.information-column {
+  border-right: 1px solid #BFC1C3;
+}
+
+.information-nav {
+  padding-top: 10px;
+  margin-left: 5px;
+}
+
+.information-nav li {
+  list-style: none;
+  line-height: 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
 }
 
 .previous-next-navigation {
@@ -719,6 +752,7 @@ span.load-option {
   /* not nice */
   border-top: none;
   line-height: 1.25em;
+  font-size: 1.5rem;
 }
 
 .section ul {
@@ -769,6 +803,18 @@ span.load-option {
     padding-right: 20px;
   }
 
+  .intro p {
+    margin-bottom: 4px;
+  }
+
+  .copyright img {
+    margin-top: 25px;
+  }
+
+  .information-column {
+    border-right: none;
+  }
+
 }
 
 /* end styles responsive entries table */
@@ -784,15 +830,3 @@ span.load-option {
   }
 
 }
-
-@media only screen and (max-width: 64em) {
-  .intro p {
-    margin-bottom: 4px;
-  }
-
-  .copyright img {
-    margin-top: 25px;
-  }
-
-}
-
