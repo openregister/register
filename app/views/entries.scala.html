@@ -5,29 +5,30 @@
 @header(register.friendlyName)
 
 
-    <div class="row">
+    <div class="row search-header">
         <div class="large-4 columns">
             @defining( if(pagination.getTotal() > 1) {"entries"} else {"entry"}) { entryMessage =>
 
                 @if(pagination.getTotal() > 0) {
-                    <h4 class="search">@pagination.getTotal() @entryMessage @if(request.getQueryString("_query")) {
+                    <h4>@pagination.getTotal() @entryMessage @if(request.getQueryString("_query")) {
                         <span>found for</span>
                     }</h4>
                 } else {
-                    <h4 class="search">Search register entries</h4>
+                    <h4>Search register entries</h4>
                 }
             }
+        </div>
+    </div>
+    <div class="row search-form">
+        <div class="large-4 columns">
             <form action="/search" id="search-form">
-                <div class="row collapse">
-                    <div class="small-8 large-11 columns">
-                        <input name="_query" type="text" placeholder="Enter search term"
-                            @if(request.getQueryString("_query")){value="@request.getQueryString("_query")"}>
-
-                            <!-- ./columns -->
-                        <input type="submit" value="Search" class="button postfix" />
-                    </div>
-                </div>
+                <input name="_query" type="text" placeholder="Enter search term"
+                    @if(request.getQueryString("_query")){value="@request.getQueryString("_query")"}>
+                <input type="submit" value="Search" class="button postfix" />
             </form>
+        </div>
+        <div class="large-4 columns large-offset-4">
+            <p class="download"><a href="/download">Download all entries</a></p>
         </div>
     </div>
 
@@ -73,12 +74,6 @@
     <div class="row">
         <div class="large-12 columns">
             @page_links(pagination)
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="small-12 columns">
-            @data_formats(request)
         </div>
     </div>
 

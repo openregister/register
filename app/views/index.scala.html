@@ -38,7 +38,7 @@
         </div>
 
         <div class="small-12 large-4 columns nav">
-            <h4 class="search"">Search register entries</h4>
+            <h4>Search register entries</h4>
             <form action="/search">
                 <div class="row collapse">
                     <div class="small-8 large-11 columns">
@@ -58,7 +58,7 @@
                 <div class="large-8 columns information-column">
                     <h2>Information for developers</h2>
                     <p class="information-copy">Registers are made up of entries containing fields of data. To build services on top
-                        of these registers you can access the data in a variety of formats. </p>
+                        of these registers you can access the data in a <a href="/download">variety of formats</a>.</p>
                     <p class="label-text">Fields in this register:</p>
                     <p class="homepage-field-labels">
                     @Html(register.fields.map(f => controllers.html.Utils.toLink(f).body).mkString(", "))
