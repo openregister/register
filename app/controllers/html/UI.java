@@ -29,7 +29,7 @@ public class UI extends BaseController {
         Optional<DateTime> lastUpdated = store.search("", 0, 1, false)
                 .stream().findFirst().map(Record::getLastUpdated);
         String lastUpdatedUI = lastUpdated
-                .map(datetime -> datetime.toString("dd MMM yyyy"))
+                .map(datetime -> datetime.toString("dd MMMM yyyy"))
                 .orElse("");
 
         return ok(views.html.index.render(register, count, lastUpdatedUI));
