@@ -42,7 +42,7 @@
                         @register.fields.map { field =>
                             @if(controllers.html.Utils.isDisplayField(field.getName, register.name)){
                                 <th>
-                                    <span class="field-value">@field.getName()</span>
+                                    <span class="field-value">@field.getName</span>
                                 </th>
                                 }
                             }
@@ -56,7 +56,7 @@
 
                         @register.fields.map { field =>
                             @if(controllers.html.Utils.isDisplayField(field.getName(), register.name)){
-                                <td class="@field.getName()"><span class="field-name">@controllers.html.Utils.toLink(field)</span><span class="field-value">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</span></td>
+                                <td class="@field.getName()"><span class="field-name">@field.getName</span><span class="field-value">@controllers.html.Utils.toValue(field, record.getEntry.get(field.getName()))</span></td>
                             }
                         }
                         <td class="view"><a href="/hash/@record.getHash">View entry</a></td>
