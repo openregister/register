@@ -667,6 +667,10 @@ span.load-option {
     .previous-next-navigation {
         width: 90%;
     }
+
+    p.download {
+      text-align: left;
+    }
 }
 
 .previous-next-navigation li {
