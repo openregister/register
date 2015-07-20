@@ -473,7 +473,7 @@ a.tooltips span.tooltips-text {
   margin-left: -65px;
   background: #000000;
   font-size: 0.8rem;
-  height: 90px;
+  height: 70px;
   line-height: 1.1rem;
   text-align: center;
   visibility: hidden;
@@ -491,7 +491,7 @@ a.tooltips span.tooltips-text {
   border-left: 8px solid transparent;
 }*/
 
-.no-touch a:hover.tooltips span.tooltips-text,
+a:hover.tooltips span.tooltips-text,
 a:focus.tooltips span.tooltips-text {
   visibility: visible;
   opacity: 0.8;
