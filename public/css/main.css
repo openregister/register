@@ -415,6 +415,10 @@ h1.entry-header {
   font-family: inherit;
 }
 
+.entry-table-container {
+  overflow-x: scroll;
+}
+
 
 span.field-name {
   display: none
