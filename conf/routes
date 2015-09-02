@@ -5,6 +5,7 @@
 
 
 GET         /                                                      @controllers.html.UI.index()
+GET         /robots.txt                                            @controllers.html.Robots.robots()
 GET         /ui/create                                             @controllers.html.UI.renderNewEntryForm()
 POST        /ui/create                                             @controllers.html.UI.create()
 GET         /ui/supersede/:hash                                    @controllers.html.UI.renderUpdateEntryForm(hash)
