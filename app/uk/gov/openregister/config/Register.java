@@ -120,7 +120,7 @@ public abstract class Register {
 
     private void getRegistryDetails() {
         CurieResolver curieResolver = new CurieResolver(ApplicationConf.getRegisterServiceTemplateUrl());
-        String rrUrl = curieResolver.resolve(new Curie("public-body", registry())) + "?_representation=json";
+        String rrUrl = curieResolver.resolve(new Curie("public-body", registry())) + ".json";
         WSResponse rr = WS.client().url(rrUrl).execute().get(TIMEOUT);
 
         if (rr.getStatus() == 200) {
